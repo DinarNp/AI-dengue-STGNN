@@ -1,0 +1,3 @@
+Year;Region;Source_File;Kecamatan;Puskesmas;Latitude;Longitude;Week;Cases;NDVI;Cloud_Cover;Humidity;Precipitation_Total;Temperature_Min;Temperature_Max;Temperature_Avg;Pressure;Wind_Speed;Wind_Direction
+2021;KAB BANTUL;Laporan-Analisa-SKDR_bambang-lipuro.xlsx;bambang lipuro;PKM. BAMBANG LIPURO;-7.9218427;110.3108869;1;13;0.0231;70.42857143;62;301.37;24.25;32.76;26.85214286;1006.857143;3.938571429;192.1428571
+2021;KAB BANTUL;Laporan-Analisa-SKDR_bambang-lipuro.xlsx;bambang lipuro;PKM. BAMBANG LIPURO;-7.9218427;110.3108869;2;7;;91.57142857;65.71428571;194.49;23.64;31.01;26.41964286;1007.571429;4.587142857;247.8571429
