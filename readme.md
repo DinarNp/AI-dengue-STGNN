@@ -298,13 +298,6 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
-
-- Yogyakarta Health Department for dengue surveillance data
-- PyTorch team for the deep learning framework
-- NetworkX developers for graph utilities
-- Open source community for inspiration and tools
-
 
 
 ---
