@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}ExplainDengue - AI-Powered Dengue Prediction System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="relative overflow-hidden">
+    <div class="gradient-bg rounded-3xl p-12 mb-12 relative">
+        <div class="relative z-10">
+            <div class="max-w-4xl mx-auto text-center text-white">
+                <div class="mb-8">
+                    <div class="inline-flex items-center bg-white bg-opacity-20 rounded-full px-6 py-2 mb-6">
+                        <i data-feather="zap" class="w-4 h-4 mr-2 text-yellow-300"></i>
+                        <span class="text-sm font-medium">Powered by Graph Neural Networks</span>
+                    </div>
+                </div>
+                
+                <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                    Welcome to 
+                    <span class="bg-gradient-to-r from-green-300 to-blue-300 bg-clip-text text-transparent">
+                        ExplainDengue
+                    </span>
+                </h1>
+                
+                <p class="text-xl md:text-2xl mb-8 text-gray-100 leading-relaxed max-w-3xl mx-auto">
+                    An advanced AI-powered disease outbreak prediction system that leverages 
+                    <span class="font-semibold text-green-300">neurosymbolic Graph Neural Networks</span> 
+                    to forecast dengue fever outbreaks with accurate predictions and explainable insights.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                    <a href="{{ url_for('data_management') }}" 
+                       class="btn-primary text-white px-8 py-4 rounded-full font-semibold text-lg inline-flex items-center">
+                        <i data-feather="play-circle" class="w-5 h-5 mr-2"></i>
+                        Get Started
+                    </a>
+                    <a href="{{ url_for('dashboard') }}" 
+                       class="bg-white bg-opacity-20 text-white border-2 border-white border-opacity-30 px-8 py-4 rounded-full font-semibold text-lg hover:bg-opacity-30 transition-all inline-flex items-center">
+                        <i data-feather="bar-chart-2" class="w-5 h-5 mr-2"></i>
+                        View Dashboard
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">GNN</div>
+                        <div class="text-sm text-gray-600">Graph Neural Network</div>
+                    </div>
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-green-600 mb-2">AI</div>
+                        <div class="text-sm text-gray-600">Explainable AI</div>
+                    </div>
+                    <div class="stat-card p-6 rounded-2xl text-center">
+                        <div class="text-3xl font-bold text-purple-600 mb-2">CCHAIN</div>
+                        <div class="text-sm text-gray-600">Project Dataset</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Background decorations -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10">
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white rounded-full animate-pulse"></div>
+            <div class="absolute top-32 right-20 w-16 h-16 bg-green-300 rounded-full animate-bounce"></div>
+            <div class="absolute bottom-20 left-32 w-12 h-12 bg-blue-300 rounded-full animate-pulse"></div>
+            <div class="absolute bottom-32 right-10 w-24 h-24 bg-purple-300 rounded-full animate-bounce" style="animation-delay: 1s;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- About Section -->
+<div class="mb-16">
+    <div class="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="inline-flex items-center bg-blue-100 rounded-full px-6 py-2 mb-4">
+                    <i data-feather="info" class="w-4 h-4 mr-2 text-blue-600"></i>
+                    <span class="text-sm font-medium text-blue-600">About the System</span>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-6">Intelligent Dengue Prediction</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        <strong>ExplainDengue</strong> utilizes cutting-edge machine learning technology to provide 
+                        accurate and explainable dengue outbreak predictions. Our system integrates the 
+                        <span class="font-semibold text-blue-600">Project CCHAIN dataset</span> that links 
+                        climatic impact drivers, socioeconomic vulnerability, and environmental conditions 
+                        to health impacts in dengue cases across Health Centers.
+                    </p>
+                    
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        The <span class="font-semibold text-purple-600">Graph Neural Networks (GNN)</span> 
+                        architecture, enhanced with <span class="italic">Gated Recurrent Units</span>, 
+                        captures spatial relationships and temporal patterns in dengue transmission, 
+                        providing insights into the influencing factors across space and time.
+                    </p>
+                    
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i data-feather="zap" class="w-6 h-6 text-yellow-500"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Key Innovation</h3>
+                                <p class="text-gray-700">
+                                    Our system contributes to improving the explainability of AI in infectious 
+                                    disease outbreak prediction, making complex predictions understandable 
+                                    for public health professionals.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl p-8 text-white">
+                        <div class="text-center">
+                            <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <i data-feather="activity" class="w-10 h-10"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-4">Advanced AI Technology</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <span>Graph Neural Networks</span>
+                                    <div class="w-24 bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-green-400 h-2 rounded-full w-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Spatial Analysis</span>
+                                    <div class="w-24 bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-blue-400 h-2 rounded-full w-5/6"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Temporal Modeling</span>
+                                    <div class="w-24 bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-purple-400 h-2 rounded-full w-4/5"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span>Explainability</span>
+                                    <div class="w-24 bg-white bg-opacity-20 rounded-full h-2">
+                                        <div class="bg-yellow-400 h-2 rounded-full w-11/12"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="mb-16">
+    <div class="text-center mb-12">
+        <div class="inline-flex items-center bg-green-100 rounded-full px-6 py-2 mb-4">
+            <i data-feather="star" class="w-4 h-4 mr-2 text-green-600"></i>
+            <span class="text-sm font-medium text-green-600">Key Features</span>
+        </div>
+        <h2 class="text-4xl font-bold text-gray-900 mb-6">Powerful Capabilities</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Explore the comprehensive features that make ExplainDengue a cutting-edge solution 
+            for dengue outbreak prediction and analysis.
+        </p>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+            <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+                <i data-feather="database" class="w-8 h-8 text-blue-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Data Integration</h3>
+            <p class="text-gray-600 mb-4">
+                Load and process dengue data from the comprehensive Project CCHAIN dataset 
+                with advanced preprocessing capabilities.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1">
+                <li>• Multi-format data support</li>
+                <li>• Automated preprocessing</li>
+                <li>• Data validation</li>
+            </ul>
+        </div>
+        
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+            <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
+                <i data-feather="cpu" class="w-8 h-8 text-purple-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">GNN Training</h3>
+            <p class="text-gray-600 mb-4">
+                Train sophisticated Graph Neural Networks models with customizable parameters 
+                and real-time performance monitoring.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1">
+                <li>• Spatial-temporal modeling</li>
+                <li>• Hyperparameter tuning</li>
+                <li>• Performance metrics</li>
+            </ul>
+        </div>
+        
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+            <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
+                <i data-feather="target" class="w-8 h-8 text-green-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Outbreak Prediction</h3>
+            <p class="text-gray-600 mb-4">
+                Generate accurate outbreak predictions for specific health centers with 
+                confidence intervals and risk assessments.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1">
+                <li>• Location-specific forecasts</li>
+                <li>• Risk level classification</li>
+                <li>• Confidence scoring</li>
+            </ul>
+        </div>
+        
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+            <div class="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mb-6">
+                <i data-feather="shield" class="w-8 h-8 text-orange-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Risk Monitoring</h3>
+            <p class="text-gray-600 mb-4">
+                Monitor risk levels across all health centers with comprehensive dashboards 
+                and detailed explanations for decision making.
+            </p>
+            <ul class="text-sm text-gray-500 space-y-1">
+                <li>• Real-time monitoring</li>
+                <li>• Interactive visualizations</li>
+                <li>• Explainable insights</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Getting Started Section -->
+<div class="mb-16">
+    <div class="bg-gradient-to-r from-blue-600 to-purple-700 rounded-3xl p-12 text-white relative overflow-hidden">
+        <div class="relative z-10 max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-6">Get Started in 4 Simple Steps</h2>
+                <p class="text-xl text-blue-100">
+                    Follow these steps to begin using ExplainDengue for dengue outbreak prediction
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold">1</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Load Data</h3>
+                    <p class="text-blue-100 text-sm">
+                        Navigate to Data Management and load the Project CCHAIN dengue dataset
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold">2</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Train Model</h3>
+                    <p class="text-blue-100 text-sm">
+                        Use Model Management to configure and train the Graph Neural Network
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold">3</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Make Predictions</h3>
+                    <p class="text-blue-100 text-sm">
+                        View the Dashboard to make predictions and analyze historical trends
+                    </p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold">4</span>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Monitor Risks</h3>
+                    <p class="text-blue-100 text-sm">
+                        Explore Risk Monitor for detailed explanations and risk assessments
+                    </p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="{{ url_for('data_management') }}" 
+                   class="bg-white text-blue-600 px-8 py-4 rounded-full font-semibold text-lg hover:bg-gray-100 transition-all inline-flex items-center">
+                    <i data-feather="arrow-right" class="w-5 h-5 mr-2"></i>
+                    Start Now
+                </a>
+            </div>
+        </div>
+        
+        <!-- Background decoration -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white bg-opacity-5 rounded-full -translate-y-32 translate-x-32"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-white bg-opacity-5 rounded-full translate-y-24 -translate-x-24"></div>
+    </div>
+</div>
+
+<!-- Technology Stack -->
+<div class="mb-16">
+    <div class="bg-white rounded-3xl shadow-xl p-8 md:p-12">
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center bg-purple-100 rounded-full px-6 py-2 mb-4">
+                <i data-feather="layers" class="w-4 h-4 mr-2 text-purple-600"></i>
+                <span class="text-sm font-medium text-purple-600">Technology Stack</span>
+            </div>
+            <h2 class="text-4xl font-bold text-gray-900 mb-6">Built with Modern AI</h2>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 items-center justify-center">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="cpu" class="w-8 h-8 text-blue-600"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">PyTorch</p>
+                <p class="text-xs text-gray-500">Deep Learning</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="share-2" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">GNN</p>
+                <p class="text-xs text-gray-500">Graph Networks</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="globe" class="w-8 h-8 text-purple-600"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">Flask</p>
+                <p class="text-xs text-gray-500">Web Framework</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="bar-chart-2" class="w-8 h-8 text-yellow-600"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">Pandas</p>
+                <p class="text-xs text-gray-500">Data Analysis</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="trending-up" class="w-8 h-8 text-red-600"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">NumPy</p>
+                <p class="text-xs text-gray-500">Computing</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                    <i data-feather="eye" class="w-8 h-8 text-indigo-600"></i>
+                </div>
+                <p class="text-sm font-semibold text-gray-700">Chart.js</p>
+                <p class="text-xs text-gray-500">Visualization</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

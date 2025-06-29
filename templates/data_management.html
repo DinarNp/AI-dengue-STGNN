@@ -1,0 +1,904 @@
+{% extends "base.html" %}
+
+{% block title %}ExplainDengue - Data Management{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Data Management</h1>
+            <p class="text-lg text-gray-600">Load, process, and manage your dengue outbreak data</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="bg-white rounded-lg px-4 py-2 shadow-sm border">
+                <div class="flex items-center text-sm">
+                    <div class="w-3 h-3 bg-green-500 rounded-full mr-2 {% if not data %}bg-gray-400{% endif %}"></div>
+                    <span class="text-gray-700">
+                        {% if data %}Data Loaded ({{ data|length }} records){% else %}No Data{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Loading Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+    <!-- Load Data Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="upload-cloud" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Load Dataset</h2>
+                <p class="text-gray-600">Import Project CCHAIN dengue data</p>
+            </div>
+        </div>
+        
+        <div class="space-y-6">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+                <div class="flex items-start">
+                    <i data-feather="info" class="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0"></i>
+                    <div>
+                        <h3 class="font-semibold text-blue-900 mb-2">About the Dataset</h3>
+                        <p class="text-blue-700 text-sm leading-relaxed">
+                            The Project CCHAIN dataset contains comprehensive information linking climatic impact drivers, 
+                            socioeconomic vulnerability, and environmental conditions to dengue cases across health centers.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button id="loadDataButton" 
+                        onclick="loadData()" 
+                        class="btn-primary text-white px-6 py-3 rounded-xl font-semibold flex-1 inline-flex items-center justify-center transition-all">
+                    <i data-feather="download" class="w-5 h-5 mr-2"></i>
+                    <span>Load Data</span>
+                </button>
+                <button id="resetDataButton" 
+                        onclick="resetData()" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold inline-flex items-center justify-center transition-all">
+                    <i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+            
+            <!-- Status Display -->
+            <div id="dataStatus" class="hidden">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <div class="flex items-center">
+                        <div class="loading-spinner mr-3"></div>
+                        <span class="text-gray-700 font-medium" id="statusText">Processing...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success/Error Messages -->
+            <div id="messageArea"></div>
+        </div>
+    </div>
+    
+    <!-- Data Statistics Card -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="bar-chart-2" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Dataset Statistics</h2>
+                <p class="text-gray-600">Overview of loaded data</p>
+            </div>
+        </div>
+        
+        <div class="space-y-6">
+            {% if data %}
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-blue-700 mb-1">{{ data|length }}</div>
+                        <div class="text-sm text-blue-600">Total Records</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 text-center">
+                        <div class="text-2xl font-bold text-green-700 mb-1">{{ puskesmas_list|length }}</div>
+                        <div class="text-sm text-green-600">Health Centers</div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-4">
+                    <h3 class="font-semibold text-purple-900 mb-3">Data Coverage</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-purple-700">Date Range:</span>
+                            <span class="font-medium text-purple-800">2021 - 2023</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-purple-700">Features:</span>
+                            <span class="font-medium text-purple-800">Climate, Environment, Cases</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-purple-700">Data Quality:</span>
+                            <span class="font-medium text-green-600">✓ Validated</span>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-feather="database" class="w-10 h-10 text-gray-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">No Data Loaded</h3>
+                    <p class="text-gray-500 text-sm">Load the dataset to see statistics and begin analysis</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Data Filtering Section -->
+{% if data %}
+<div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="filter" class="w-6 h-6 text-purple-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Filter & Search</h2>
+            <p class="text-gray-600">Refine your data view with advanced filters</p>
+        </div>
+    </div>
+    
+    <form id="filterForm" method="GET" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Puskesmas Filter -->
+            <div class="space-y-2">
+                <label for="puskesmas" class="block text-sm font-semibold text-gray-700">
+                    <i data-feather="map-pin" class="w-4 h-4 inline mr-1"></i>
+                    Health Center
+                </label>
+                <div class="relative">
+                    <select id="puskesmas" 
+                            name="puskesmas" 
+                            class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white appearance-none">
+                        <option value="">All Health Centers</option>
+                        {% for puskesmas in puskesmas_list %}
+                            <option value="{{ puskesmas }}" 
+                                    {% if puskesmas == request.args.get('puskesmas') %}selected{% endif %}>
+                                {{ puskesmas }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i data-feather="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Start Date Filter -->
+            <div class="space-y-2">
+                <label for="start_date" class="block text-sm font-semibold text-gray-700">
+                    <i data-feather="calendar" class="w-4 h-4 inline mr-2"></i>
+                    Start Date
+                </label>
+                <div class="relative">
+                    <input type="date" 
+                        id="start_date" 
+                        name="start_date" 
+                        value="{{ request.args.get('start_date', '') }}" 
+                        placeholder="Select start date"
+                        class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300 cursor-pointer">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i data-feather="calendar" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- End Date Filter -->
+            <div class="space-y-2">
+                <label for="end_date" class="block text-sm font-semibold text-gray-700">
+                    <i data-feather="calendar" class="w-4 h-4 inline mr-1"></i>
+                    End Date
+                </label>
+                <div class="relative">
+                    <input type="date" 
+                        id="end_date" 
+                        name="end_date" 
+                        value="{{ request.args.get('end_date', '') }}" 
+                        placeholder="Select end date"
+                        class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <i data-feather="calendar" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit" 
+                    class="btn-primary text-white px-6 py-3 rounded-xl font-semibold inline-flex items-center justify-center flex-1 sm:flex-none">
+                <i data-feather="search" class="w-5 h-5 mr-2"></i>
+                Apply Filters
+            </button>
+            <button type="button" 
+                    onclick="clearFilters()" 
+                    class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-xl font-semibold inline-flex items-center justify-center transition-all">
+                <i data-feather="x" class="w-5 h-5 mr-2"></i>
+                Clear Filters
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Data Table Section -->
+<div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div class="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Data Records</h2>
+                <p class="text-gray-600 mt-1">
+                    Showing {{ data|length }} records
+                    {% if request.args.get('puskesmas') or request.args.get('start_date') or request.args.get('end_date') %}
+                        (filtered)
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="bg-white rounded-lg px-4 py-2 shadow-sm border">
+                    <span class="text-sm text-gray-600">Page {{ pagination.page }} of {{ (pagination.total // pagination.per_page) + 1 }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full">
+            <thead class="bg-gray-800 text-white">
+                <tr>
+                    <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        <i data-feather="map-pin" class="w-4 h-4 inline mr-2"></i>
+                        Health Center
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        <i data-feather="calendar" class="w-4 h-4 inline mr-2"></i>
+                        Date
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        <i data-feather="thermometer" class="w-4 h-4 inline mr-2"></i>
+                        Temperature
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        <i data-feather="cloud-rain" class="w-4 h-4 inline mr-2"></i>
+                        Precipitation
+                    </th>
+                    <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
+                        <i data-feather="activity" class="w-4 h-4 inline mr-2"></i>
+                        Cases
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                {% for record in data %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="font-medium text-gray-900">{{ record.puskesmas }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                        {{ record.date }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-orange-400 rounded-full mr-2"></div>
+                            <span class="text-gray-900 font-medium">{{ "%.1f"|format(record.temperature_avg) }}°C</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-400 rounded-full mr-2"></div>
+                            <span class="text-gray-900 font-medium">{{ "%.1f"|format(record.precipitation_total) }} mm</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                   {% if record.cases > 5 %}bg-red-100 text-red-800{% elif record.cases > 2 %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                            {{ record.cases }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if pagination.total > pagination.per_page %}
+    <div class="px-8 py-6 bg-gray-50 border-t border-gray-200">
+        <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-700">
+                Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to 
+                {{ pagination.page * pagination.per_page if pagination.page * pagination.per_page < pagination.total else pagination.total }} 
+                of {{ pagination.total }} results
+            </div>
+            
+            <nav class="flex items-center space-x-2">
+                {% if pagination.has_prev %}
+                    <a href="{{ url_for('data_management', page=pagination.prev_num, 
+                                      puskesmas=request.args.get('puskesmas', ''), 
+                                      start_date=request.args.get('start_date', ''),
+                                      end_date=request.args.get('end_date', '')) }}" 
+                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i data-feather="chevron-left" class="w-4 h-4"></i>
+                    </a>
+                {% endif %}
+                
+                {% for page in pagination.pages %}
+                    {% if page <= ((pagination.total // pagination.per_page) + 1) %}
+                        {% if page != pagination.page %}
+                            <a href="{{ url_for('data_management', page=page, 
+                                              puskesmas=request.args.get('puskesmas', ''), 
+                                              start_date=request.args.get('start_date', ''),
+                                              end_date=request.args.get('end_date', '')) }}" 
+                               class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                {{ page }}
+                            </a>
+                        {% else %}
+                            <span class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg">
+                                {{ page }}
+                            </span>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagination.has_next %}
+                    <a href="{{ url_for('data_management', page=pagination.next_num, 
+                                      puskesmas=request.args.get('puskesmas', ''), 
+                                      start_date=request.args.get('start_date', ''),
+                                      end_date=request.args.get('end_date', '')) }}" 
+                       class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <i data-feather="chevron-right" class="w-4 h-4"></i>
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% else %}
+<!-- Empty State -->
+<div class="text-center py-16">
+    <div class="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-8">
+        <i data-feather="database" class="w-16 h-16 text-gray-400"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-900 mb-4">No Data Available</h3>
+    <p class="text-gray-600 mb-8 max-w-md mx-auto">
+        Load the Project CCHAIN dataset to begin exploring dengue outbreak data and training your predictive models.
+    </p>
+    <button onclick="loadData()" 
+            class="btn-primary text-white px-8 py-4 rounded-xl font-semibold inline-flex items-center">
+        <i data-feather="upload-cloud" class="w-5 h-5 mr-2"></i>
+        Load Dataset Now
+    </button>
+</div>
+{% endif %}
+
+<!-- Data Insights Section (Optional) -->
+{% if data and data|length > 0 %}
+<div class="mt-8 bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="trending-up" class="w-6 h-6 text-yellow-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Data Insights</h2>
+            <p class="text-gray-600">Quick overview of your dataset patterns</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Temperature Insight -->
+        <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border border-orange-100">
+            <div class="flex items-center mb-4">
+                <i data-feather="thermometer" class="w-8 h-8 text-orange-600 mr-3"></i>
+                <h3 class="text-lg font-semibold text-orange-900">Temperature Range</h3>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-orange-700">Average:</span>
+                    <span class="font-medium text-orange-800">
+                        {% if data %}
+                            {% set temps = [] %}
+                            {% for record in data %}
+                                {% if record.temperature_avg %}
+                                    {% set _ = temps.append(record.temperature_avg) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if temps %}
+                                {{ "%.1f"|format(temps|sum / temps|length) }}°C
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="text-xs text-orange-600">
+                    Optimal range for dengue: 25-30°C
+                </div>
+            </div>
+        </div>
+        
+        <!-- Precipitation Insight -->
+        <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100">
+            <div class="flex items-center mb-4">
+                <i data-feather="cloud-rain" class="w-8 h-8 text-blue-600 mr-3"></i>
+                <h3 class="text-lg font-semibold text-blue-900">Precipitation</h3>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-blue-700">Average:</span>
+                    <span class="font-medium text-blue-800">
+                        {% if data %}
+                            {% set precips = [] %}
+                            {% for record in data %}
+                                {% if record.precipitation_total %}
+                                    {% set _ = precips.append(record.precipitation_total) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if precips %}
+                                {{ "%.1f"|format(precips|sum / precips|length) }} mm
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="text-xs text-blue-600">
+                    High precipitation increases breeding sites
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cases Insight -->
+        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
+            <div class="flex items-center mb-4">
+                <i data-feather="activity" class="w-8 h-8 text-green-600 mr-3"></i>
+                <h3 class="text-lg font-semibold text-green-900">Dengue Cases</h3>
+            </div>
+            <div class="space-y-2">
+                <div class="flex justify-between text-sm">
+                    <span class="text-green-700">Total Cases:</span>
+                    <span class="font-medium text-green-800">
+                        {% if data %}
+                            {% set total_cases = [] %}
+                            {% for record in data %}
+                                {% if record.cases %}
+                                    {% set _ = total_cases.append(record.cases) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if total_cases %}
+                                {{ total_cases|sum }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="text-xs text-green-600">
+                    Across all health centers and time periods
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Next Steps -->
+<div class="mt-8 bg-gradient-to-r from-blue-600 to-purple-700 rounded-2xl p-8 text-white">
+    <div class="text-center">
+        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i data-feather="arrow-right" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-2xl font-bold mb-4">Ready for the Next Step?</h2>
+        <p class="text-blue-100 mb-8 max-w-2xl mx-auto">
+            Your data is loaded and ready for analysis. Train your Graph Neural Network model 
+            to start making dengue outbreak predictions.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="{{ url_for('model_management') }}" 
+               class="bg-white text-blue-600 px-8 py-3 rounded-xl font-semibold inline-flex items-center justify-center hover:bg-gray-100 transition-all">
+                <i data-feather="cpu" class="w-5 h-5 mr-2"></i>
+                Train Model
+            </a>
+            <a href="{{ url_for('dashboard') }}" 
+               class="bg-white bg-opacity-20 text-white border-2 border-white border-opacity-30 px-8 py-3 rounded-xl font-semibold inline-flex items-center justify-center hover:bg-opacity-30 transition-all">
+                <i data-feather="bar-chart-2" class="w-5 h-5 mr-2"></i>
+                View Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Feather Icons
+    feather.replace();
+    
+    // Date validation
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    function validateDates() {
+        if (startDate && endDate && startDate.value && endDate.value) {
+            if (new Date(endDate.value) < new Date(startDate.value)) {
+                showMessage('End date must be after start date', 'error');
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    if (startDate && endDate) {
+        startDate.addEventListener('change', validateDates);
+        endDate.addEventListener('change', validateDates);
+    }
+    
+    // Form validation
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(e) {
+            if (!validateDates()) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+
+async function loadData() {
+    const button = document.getElementById('loadDataButton');
+    const statusDiv = document.getElementById('dataStatus');
+    const statusText = document.getElementById('statusText');
+    const messageArea = document.getElementById('messageArea');
+    
+    if (!button || !statusDiv || !statusText) return;
+    
+    try {
+        // Show loading state
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<div class="loading-spinner mr-2"></div>Loading...';
+        button.disabled = true;
+        statusDiv.classList.remove('hidden');
+        statusText.textContent = 'Loading Project CCHAIN dataset...';
+        messageArea.innerHTML = '';
+        
+        const response = await fetch('/load-data', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showMessage(`${data.message}`, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            throw new Error(data.error || 'Failed to load data');
+        }
+        
+    } catch (error) {
+        console.error('Error loading data:', error);
+        showMessage(`❌ Error: ${error.message}`, 'error');
+    } finally {
+        // Reset button state
+        const button = document.getElementById('loadDataButton');
+        if (button) {
+            button.innerHTML = '<i data-feather="download" class="w-5 h-5 mr-2"></i><span>Load Data</span>';
+            button.disabled = false;
+            feather.replace();
+        }
+        
+        // Hide loading state
+        const statusDiv = document.getElementById('dataStatus');
+        if (statusDiv) {
+            statusDiv.classList.add('hidden');
+        }
+    }
+}
+
+async function resetData() {
+    if (!confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
+        return;
+    }
+    
+    const button = document.getElementById('resetDataButton');
+    const messageArea = document.getElementById('messageArea');
+    
+    if (!button) return;
+    
+    try {
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<div class="loading-spinner mr-2"></div>Resetting...';
+        button.disabled = true;
+        messageArea.innerHTML = '';
+        
+        const response = await fetch('/reset-data', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showMessage(`${data.message}`, 'success');
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            throw new Error(data.error || 'Failed to reset data');
+        }
+        
+    } catch (error) {
+        console.error('Error resetting data:', error);
+        showMessage(`❌ Error: ${error.message}`, 'error');
+    } finally {
+        const button = document.getElementById('resetDataButton');
+        if (button) {
+            button.innerHTML = '<i data-feather="refresh-cw" class="w-5 h-5 mr-2"></i><span>Reset</span>';
+            button.disabled = false;
+            feather.replace();
+        }
+    }
+}
+
+function clearFilters() {
+    const puskesmas = document.getElementById('puskesmas');
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+    
+    if (puskesmas) puskesmas.value = '';
+    if (startDate) startDate.value = '';
+    if (endDate) endDate.value = '';
+    
+    const filterForm = document.getElementById('filterForm');
+    if (filterForm) {
+        filterForm.submit();
+    }
+}
+
+function showMessage(message, type = 'info') {
+    const messageArea = document.getElementById('messageArea');
+    if (!messageArea) return;
+    
+    const alertClass = type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 
+                      type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 
+                      'bg-blue-50 border-blue-200 text-blue-800';
+    
+    const iconName = type === 'error' ? 'alert-circle' : 
+                     type === 'success' ? 'check-circle' : 'info';
+    
+    messageArea.innerHTML = `
+        <div class="rounded-xl border-2 p-4 ${alertClass} notification">
+            <div class="flex items-center">
+                <i data-feather="${iconName}" class="w-5 h-5 mr-3 flex-shrink-0"></i>
+                <div class="font-medium">${message}</div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="ml-auto text-current opacity-75 hover:opacity-100">
+                    <i data-feather="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    feather.replace();
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        const notification = messageArea.querySelector('.notification');
+        if (notification) {
+            notification.style.animation = 'slideOutTop 0.5s ease-in forwards';
+            setTimeout(() => notification.remove(), 500);
+        }
+    }, 5000);
+}
+
+// Additional utility functions
+function exportData() {
+    // Function to export current filtered data
+    const params = new URLSearchParams(window.location.search);
+    const exportUrl = '/export-data?' + params.toString();
+    
+    showMessage('Preparing data export...', 'info');
+    
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = exportUrl;
+    link.download = 'dengue_data_export.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setTimeout(() => {
+        showMessage('Data exported successfully!', 'success');
+    }, 1000);
+}
+
+function refreshData() {
+    // Function to refresh the current view
+    showMessage('Refreshing data...', 'info');
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl+R or F5 for refresh
+    if ((e.ctrlKey && e.key === 'r') || e.key === 'F5') {
+        e.preventDefault();
+        refreshData();
+    }
+    
+    // Ctrl+L for load data
+    if (e.ctrlKey && e.key === 'l') {
+        e.preventDefault();
+        loadData();
+    }
+    
+    // Escape to clear filters
+    if (e.key === 'Escape') {
+        clearFilters();
+    }
+});
+
+// Auto-save filter preferences
+function saveFilterPreferences() {
+    const puskesmas = document.getElementById('puskesmas')?.value || '';
+    const startDate = document.getElementById('start_date')?.value || '';
+    const endDate = document.getElementById('end_date')?.value || '';
+    
+    const preferences = {
+        puskesmas: puskesmas,
+        startDate: startDate,
+        endDate: endDate,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('dengue_filter_preferences', JSON.stringify(preferences));
+}
+
+function loadFilterPreferences() {
+    try {
+        const saved = localStorage.getItem('dengue_filter_preferences');
+        if (saved) {
+            const preferences = JSON.parse(saved);
+            
+            // Check if preferences are recent (within 24 hours)
+            const saveTime = new Date(preferences.timestamp);
+            const now = new Date();
+            const hoursDiff = (now - saveTime) / (1000 * 60 * 60);
+            
+            if (hoursDiff < 24) {
+                const puskesmas = document.getElementById('puskesmas');
+                const startDate = document.getElementById('start_date');
+                const endDate = document.getElementById('end_date');
+                
+                if (puskesmas && !puskesmas.value) puskesmas.value = preferences.puskesmas;
+                if (startDate && !startDate.value) startDate.value = preferences.startDate;
+                if (endDate && !endDate.value) endDate.value = preferences.endDate;
+            }
+        }
+    } catch (error) {
+        console.log('Could not load filter preferences:', error);
+    }
+}
+
+// Load preferences on page load
+window.addEventListener('load', function() {
+    loadFilterPreferences();
+});
+
+// Save preferences when filters change
+document.addEventListener('change', function(e) {
+    if (e.target.matches('#puskesmas, #start_date, #end_date')) {
+        saveFilterPreferences();
+    }
+});
+
+// Progress tracking for data operations
+function trackProgress(operation, duration = 3000) {
+    const progressBar = document.createElement('div');
+    progressBar.className = 'fixed top-0 left-0 w-full h-1 bg-blue-600 z-50';
+    progressBar.style.width = '0%';
+    progressBar.style.transition = `width ${duration}ms ease-out`;
+    
+    document.body.appendChild(progressBar);
+    
+    // Animate progress bar
+    setTimeout(() => {
+        progressBar.style.width = '100%';
+    }, 100);
+    
+    // Remove progress bar after completion
+    setTimeout(() => {
+        progressBar.remove();
+    }, duration + 500);
+}
+
+// Enhanced error handling with retry functionality
+function handleError(error, retryFunction = null) {
+    console.error('Error occurred:', error);
+    
+    let errorMessage = `❌ Error: ${error.message}`;
+    
+    if (retryFunction) {
+        errorMessage += `
+            <div class="mt-3">
+                <button onclick="${retryFunction.name}()" 
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium inline-flex items-center">
+                    <i data-feather="refresh-cw" class="w-4 h-4 mr-2"></i>
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+    
+    showMessage(errorMessage, 'error');
+}
+
+// Data validation functions
+function validateDataIntegrity(data) {
+    if (!data || !Array.isArray(data)) {
+        throw new Error('Invalid data format');
+    }
+    
+    if (data.length === 0) {
+        throw new Error('No data records found');
+    }
+    
+    // Check for required fields
+    const requiredFields = ['puskesmas', 'date'];
+    const firstRecord = data[0];
+    
+    for (const field of requiredFields) {
+        if (!(field in firstRecord)) {
+            throw new Error(`Missing required field: ${field}`);
+        }
+    }
+    
+    return true;
+}
+
+// Performance monitoring
+function measurePerformance(operation, startTime) {
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+    
+    console.log(`Operation "${operation}" completed in ${duration.toFixed(2)}ms`);
+    
+    if (duration > 5000) {
+        showMessage(`Operation completed in ${(duration/1000).toFixed(1)} seconds`, 'info');
+    }
+}
+flatpickr("#start_date", {
+    dateFormat: "Y-m-d", // format yang cocok dengan input HTML
+    defaultDate: "{{ request.args.get('start_date', '') }}"
+    });
+
+flatpickr("#end_date", {
+    dateFormat: "Y-m-d",
+    defaultDate: "{{ request.args.get('end_date', '') }}"
+  });
+feather.replace();
+</script>
+
+{% endblock %}

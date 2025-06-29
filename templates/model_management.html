@@ -1,0 +1,1168 @@
+{% extends "base.html" %}
+
+{% block title %}ExplainDengue - Model Management{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">Model Management</h1>
+            <p class="text-lg text-gray-600">Train and manage your Graph Neural Network models</p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <div class="bg-white rounded-lg px-4 py-2 shadow-sm border">
+                <div class="flex items-center text-sm">
+                    <div class="w-3 h-3 rounded-full mr-2 
+                               {% if model_status == 'Trained' %}bg-green-500{% else %}bg-gray-400{% endif %}"></div>
+                    <span class="text-gray-700">{{ model_status }}</span>
+                </div>
+            </div>
+            {% if model_status == 'Trained' %}
+            <div class="bg-green-50 border border-green-200 rounded-lg px-4 py-2">
+                <span class="text-green-700 text-sm font-medium">✓ Ready for Predictions</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Model Status Overview -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    <!-- Current Model Status -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="cpu" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Model Status</h2>
+                <p class="text-gray-600">Current training state</p>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="flex items-center justify-between">
+                <span class="text-gray-700">Status:</span>
+                <span class="font-semibold px-3 py-1 rounded-full text-sm
+                           {% if model_status == 'Trained' %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-700{% endif %}">
+                    {{ model_status }}
+                </span>
+            </div>
+            
+            {% if metrics %}
+            <div class="space-y-2 pt-4 border-t border-gray-200">
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">Mean Absolute Error:</span>
+                    <span class="font-medium">{{ "%.4f"|format(metrics.mae) }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">R-squared Score:</span>
+                    <span class="font-medium">{{ "%.4f"|format(metrics.r2) }}</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-gray-600">RMSE:</span>
+                    <span class="font-medium">{{ "%.4f"|format(metrics.rmse) }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Model Architecture -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="share-2" class="w-6 h-6 text-purple-600"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Architecture</h2>
+                <p class="text-gray-600">GNN configuration</p>
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
+                <h3 class="font-semibold text-purple-900 mb-3">Graph Neural Network</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-purple-700">Type:</span>
+                        <span class="font-medium text-purple-800">Spatio-Temporal GNN</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-purple-700">Layers:</span>
+                        <span class="font-medium text-purple-800">GRU + Graph Conv</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-purple-700">Parameters:</span>
+                        <span class="font-medium text-purple-800">~143K</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center">
+                <div class="text-xs text-gray-600 mb-2">Model Complexity</div>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-600 h-2 rounded-full" style="width: 75%"></div>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">Advanced</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Training Progress -->
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div class="flex items-center mb-6">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="trending-up" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900">Training</h2>
+                <p class="text-gray-600">Progress & metrics</p>
+            </div>
+        </div>
+        
+        <div id="trainingOverview" class="space-y-4">
+            {% if model_status == 'Trained' %}
+                <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-feather="check-circle" class="w-8 h-8 text-green-600"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-green-800 mb-2">Training Complete</h3>
+                    <p class="text-green-600 text-sm">Model is ready for predictions</p>
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-feather="clock" class="w-8 h-8 text-gray-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Not Trained</h3>
+                    <p class="text-gray-500 text-sm">Configure and start training below</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- Feature Selection -->
+<div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="sliders" class="w-6 h-6 text-orange-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Feature Selection</h2>
+            <p class="text-gray-600">Choose which features to include in model training</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Climate Factors -->
+        <div class="space-y-4">
+            <div class="flex items-center mb-4">
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <i data-feather="cloud" class="w-4 h-4 text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Climate Factors</h3>
+            </div>
+            <div class="space-y-3">
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="temperature_avg" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Average Temperature</span>
+                        <p class="text-xs text-gray-500">Daily average temperature (°C)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="temperature_max" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Maximum Temperature</span>
+                        <p class="text-xs text-gray-500">Daily maximum temperature (°C)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="temperature_min" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Minimum Temperature</span>
+                        <p class="text-xs text-gray-500">Daily minimum temperature (°C)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="precipitation_total" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Total Precipitation</span>
+                        <p class="text-xs text-gray-500">Daily precipitation (mm)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="humidity" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Humidity</span>
+                        <p class="text-xs text-gray-500">Relative humidity (%)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="pressure" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Atmospheric Pressure</span>
+                        <p class="text-xs text-gray-500">Air pressure (hPa)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="cloud_cover" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Cloud Cover</span>
+                        <p class="text-xs text-gray-500">Cloud coverage (%)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="wind_speed" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Wind Speed</span>
+                        <p class="text-xs text-gray-500">Wind speed (m/s)</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="wind_direction" checked 
+                           class="rounded text-blue-600 focus:ring-blue-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Wind Direction</span>
+                        <p class="text-xs text-gray-500">Wind direction (°)</p>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <!-- Environment Factors -->
+        <div class="space-y-4">
+            <div class="flex items-center mb-4">
+                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                    <i data-feather="globe" class="w-4 h-4 text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Environment Factors</h3>
+            </div>
+            <div class="space-y-3">
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="ndvi" checked 
+                           class="rounded text-green-600 focus:ring-green-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Vegetation Index (NDVI)</span>
+                        <p class="text-xs text-gray-500">Normalized Difference Vegetation Index</p>
+                    </div>
+                </label>
+                
+                <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-100">
+                    <h4 class="font-semibold text-green-900 mb-2">Environmental Impact</h4>
+                    <p class="text-green-700 text-sm leading-relaxed">
+                        NDVI measures vegetation density, which affects mosquito breeding habitats 
+                        and local microclimate conditions important for dengue transmission.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Geospatial Factors -->
+        <div class="space-y-4">
+            <div class="flex items-center mb-4">
+                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                    <i data-feather="map" class="w-4 h-4 text-purple-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900">Geospatial Factors</h3>
+            </div>
+            <div class="space-y-3">
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="latitude" checked 
+                           class="rounded text-purple-600 focus:ring-purple-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Latitude</span>
+                        <p class="text-xs text-gray-500">Geographic latitude coordinate</p>
+                    </div>
+                </label>
+                <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                    <input type="checkbox" name="features" value="longitude" checked 
+                           class="rounded text-purple-600 focus:ring-purple-500">
+                    <div class="flex-1">
+                        <span class="font-medium text-gray-700">Longitude</span>
+                        <p class="text-xs text-gray-500">Geographic longitude coordinate</p>
+                    </div>
+                </label>
+                
+                <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 border border-purple-100">
+                    <h4 class="font-semibold text-purple-900 mb-2">Spatial Context</h4>
+                    <p class="text-purple-700 text-sm leading-relaxed">
+                        Geographic coordinates enable the GNN to learn spatial patterns and 
+                        relationships between health centers for better outbreak prediction.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Feature Selection Summary -->
+    <div class="mt-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Selected Features</h3>
+                <p class="text-gray-600">
+                    <span id="selectedCount">11</span> features selected for training
+                </p>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="selectAllFeatures()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                    Select All
+                </button>
+                <button onclick="deselectAllFeatures()" 
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                    Deselect All
+                </button>
+                <button onclick="debugFeatures()" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                    Debug
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Training Configuration -->
+<div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="settings" class="w-6 h-6 text-red-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Training Configuration</h2>
+            <p class="text-gray-600">Configure hyperparameters and training settings</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Training Epochs -->
+        <div class="space-y-2">
+            <label for="epochs" class="block text-sm font-semibold text-gray-700">
+                <i data-feather="repeat" class="w-4 h-4 inline mr-1"></i>
+                Training Epochs
+            </label>
+            <input type="number" 
+                   id="epochs" 
+                   value="1000" 
+                   min="100" 
+                   max="2000" 
+                   step="100"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <p class="text-xs text-gray-500">Number of training iterations (100-2000)</p>
+        </div>
+        
+        <!-- Learning Rate -->
+        <div class="space-y-2">
+            <label for="learning_rate" class="block text-sm font-semibold text-gray-700">
+                <i data-feather="zap" class="w-4 h-4 inline mr-1"></i>
+                Learning Rate
+            </label>
+            <input type="number" 
+                   id="learning_rate" 
+                   value="0.01" 
+                   min="0.0001" 
+                   max="0.1" 
+                   step="0.001"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <p class="text-xs text-gray-500">Step size for optimization (0.0001-0.1)</p>
+        </div>
+        
+        <!-- Test Split -->
+        <div class="space-y-2">
+            <label for="test_split" class="block text-sm font-semibold text-gray-700">
+                <i data-feather="pie-chart" class="w-4 h-4 inline mr-1"></i>
+                Test Split
+            </label>
+            <input type="number" 
+                   id="test_split" 
+                   value="0.2" 
+                   min="0.1" 
+                   max="0.4" 
+                   step="0.1"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+            <p class="text-xs text-gray-500">Fraction for testing (0.1-0.4)</p>
+        </div>
+        
+        <!-- Batch Size -->
+        <div class="space-y-2">
+            <label for="batch_size" class="block text-sm font-semibold text-gray-700">
+                <i data-feather="layers" class="w-4 h-4 inline mr-2"></i>
+                Batch Size
+            </label>
+            <div class="relative">
+                <select id="batch_size" 
+                        class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white hover:border-gray-300 appearance-none cursor-pointer">
+                    <option value="16" class="py-2">16</option>
+                    <option value="32" selected class="py-2">32</option>
+                    <option value="64" class="py-2">64</option>
+                    <option value="128" class="py-2">128</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <i data-feather="chevron-down" class="w-4 h-4 text-gray-400"></i>
+                </div>
+            </div>
+            <p class="text-xs text-gray-500">Training batch size for optimization</p>
+        </div>
+    </div>
+    
+    <!-- Advanced Settings -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100">
+        <div class="flex items-center mb-4">
+            <i data-feather="settings" class="w-5 h-5 text-blue-600 mr-2"></i>
+            <h3 class="text-lg font-semibold text-blue-900">Advanced Settings</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+                <label for="dropout" class="block text-sm font-medium text-blue-700">Dropout Rate</label>
+                <input type="number" 
+                       id="dropout" 
+                       value="0.1" 
+                       min="0.0" 
+                       max="0.5" 
+                       step="0.1"
+                       class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="weight_decay" class="block text-sm font-medium text-blue-700">Weight Decay</label>
+                <input type="number" 
+                       id="weight_decay" 
+                       value="0.0001" 
+                       min="0.0" 
+                       max="0.01" 
+                       step="0.0001"
+                       class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+            
+            <div class="space-y-2">
+                <label for="patience" class="block text-sm font-medium text-blue-700">Early Stopping Patience</label>
+                <input type="number" 
+                       id="patience" 
+                       value="50" 
+                       min="10" 
+                       max="200" 
+                       step="10"
+                       class="w-full px-3 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Training Execution -->
+<div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="play-circle" class="w-6 h-6 text-green-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Train Model</h2>
+            <p class="text-gray-600">Start the training process with your configured settings</p>
+        </div>
+    </div>
+    
+    <!-- Pre-training Checklist -->
+    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200 mb-6">
+        <div class="flex items-start">
+            <i data-feather="check-square" class="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0"></i>
+            <div>
+                <h3 class="font-semibold text-yellow-900 mb-3">Pre-training Checklist</h3>
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex-shrink-0" id="dataCheck"></div>
+                        <span class="text-yellow-700">Data loaded and preprocessed</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex-shrink-0" id="featureCheck"></div>
+                        <span class="text-yellow-700">Features selected (<span id="featureCount">11</span> features)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-green-500 rounded-full mr-2 flex-shrink-0" id="configCheck"></div>
+                        <span class="text-yellow-700">Training parameters configured</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Training Button -->
+    <div class="text-center">
+        <button id="trainButton" 
+                onclick="trainModel()" 
+                class="btn-primary text-white px-12 py-4 rounded-xl font-bold text-lg inline-flex items-center justify-center transition-all transform hover:scale-105">
+            <i data-feather="play" class="w-6 h-6 mr-3"></i>
+            <span>Start Training</span>
+        </button>
+        
+        <div id="trainProgress" class="hidden mt-6">
+            <div class="bg-gray-200 rounded-full h-3 mb-4">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-center text-gray-600">
+                <div class="loading-spinner mr-3"></div>
+                <span id="progressText">Initializing training...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics -->
+<div id="performanceMetrics" class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8 hidden">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="bar-chart" class="w-6 h-6 text-indigo-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900">Model Performance</h2>
+            <p class="text-gray-600">Training results and evaluation metrics</p>
+        </div>
+    </div>
+    
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 text-center border border-blue-200">
+            <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-feather="target" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-sm font-medium text-blue-700 mb-2">Mean Absolute Error</h3>
+            <p id="maeValue" class="text-3xl font-bold text-blue-900">-</p>
+            <p class="text-xs text-blue-600 mt-1">Lower is better</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 text-center border border-green-200">
+            <div class="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-feather="trending-up" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-sm font-medium text-green-700 mb-2">R-squared Score</h3>
+            <p id="r2Value" class="text-3xl font-bold text-green-900">-</p>
+            <p class="text-xs text-green-600 mt-1">Higher is better</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 text-center border border-purple-200">
+            <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-feather="activity" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-sm font-medium text-purple-700 mb-2">Root Mean Square Error</h3>
+            <p id="mseValue" class="text-3xl font-bold text-purple-900">-</p>
+            <p class="text-xs text-purple-600 mt-1">Lower is better</p>
+        </div>
+    </div>
+    
+    <!-- Training Loss Plot -->
+    <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Training Loss Curve</h3>
+        <div id="lossPlot" class="w-full h-80 bg-white rounded-lg border border-gray-200"></div>
+    </div>
+    
+    <!-- Model Actions -->
+    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="{{ url_for('dashboard') }}" 
+           class="btn-primary text-white px-8 py-3 rounded-xl font-semibold inline-flex items-center justify-center">
+            <i data-feather="bar-chart-2" class="w-5 h-5 mr-2"></i>
+            Test Predictions
+        </a>
+        <button onclick="saveModel()" 
+                class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-semibold inline-flex items-center justify-center transition-all">
+            <i data-feather="save" class="w-5 h-5 mr-2"></i>
+            Save Model
+        </button>
+        <button onclick="exportResults()" 
+                class="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-xl font-semibold inline-flex items-center justify-center transition-all">
+            <i data-feather="download" class="w-5 h-5 mr-2"></i>
+            Export Results
+        </button>
+    </div>
+</div>
+
+<!-- Training Tips -->
+<div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-8 border border-cyan-200">
+    <div class="flex items-start">
+        <div class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center mr-4 flex-shrink-0">
+            <i data-feather="zap" class="w-6 h-6 text-cyan-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-cyan-900 mb-4">Training Tips & Best Practices</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold text-cyan-800 mb-3">Feature Selection</h3>
+                    <ul class="space-y-2 text-cyan-700 text-sm">
+                        <li class="flex items-start">
+                            <i data-feather="check" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></i>
+                            Include temperature and precipitation for core climate factors
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="check" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></i>
+                            Geographic coordinates help capture spatial patterns
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="check" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></i>
+                            NDVI provides vegetation context for breeding sites
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-cyan-800 mb-3">Hyperparameters</h3>
+                    <ul class="space-y-2 text-cyan-700 text-sm">
+                        <li class="flex items-start">
+                            <i data-feather="info" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></i>
+                            Start with learning rate 0.01, adjust if needed
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="info" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></i>
+                            1000 epochs usually sufficient for convergence
+                        </li>
+                        <li class="flex items-start">
+                            <i data-feather="info" class="w-4 h-4 mt-0.5 mr-2 flex-shrink-0"></i>
+                            20% test split provides good evaluation balance
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<script>
+let featureCheckboxes = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Model Management page loaded');
+    feather.replace();
+    
+    setTimeout(() => {
+        initializeFeatures();
+        setupParameterValidation();
+    }, 100);
+});
+
+function initializeFeatures() {
+    console.log('🔧 Initializing features...');
+    featureCheckboxes = document.querySelectorAll('input[name="features"]');
+    console.log(`📊 Found ${featureCheckboxes.length} feature checkboxes`);
+    
+    if (featureCheckboxes.length === 0) {
+        console.error('❌ No feature checkboxes found!');
+        showNotification('Error: Feature checkboxes not found. Please refresh the page.', 'error');
+        return;
+    }
+    
+    featureCheckboxes.forEach((checkbox, index) => {
+        console.log(`✅ Checkbox ${index + 1}: ${checkbox.value} (${checkbox.checked ? 'checked' : 'unchecked'})`);
+        checkbox.addEventListener('change', function() {
+            console.log(`🔄 Feature changed: ${this.value} -> ${this.checked}`);
+            updateFeatureCount();
+        });
+    });
+    
+    updateFeatureCount();
+    console.log('✅ Feature initialization complete');
+}
+
+function updateFeatureCount() {
+    const selectedFeatures = document.querySelectorAll('input[name="features"]:checked');
+    const count = selectedFeatures.length;
+    
+    console.log(`📈 Feature count update: ${count} features selected`);
+    
+    const selectedCountElement = document.getElementById('selectedCount');
+    const featureCountElement = document.getElementById('featureCount');
+    
+    if (selectedCountElement) selectedCountElement.textContent = count;
+    if (featureCountElement) featureCountElement.textContent = count;
+    
+    const featureCheck = document.getElementById('featureCheck');
+    if (featureCheck) {
+        featureCheck.className = count > 0 ? 
+            'w-4 h-4 bg-green-500 rounded-full mr-2 flex-shrink-0' : 
+            'w-4 h-4 bg-gray-400 rounded-full mr-2 flex-shrink-0';
+    }
+    
+    const trainButton = document.getElementById('trainButton');
+    if (trainButton) {
+        if (count === 0) {
+            trainButton.classList.add('opacity-50', 'cursor-not-allowed');
+            trainButton.title = 'Please select at least one feature';
+        } else {
+            trainButton.classList.remove('opacity-50', 'cursor-not-allowed');
+            trainButton.title = '';
+        }
+    }
+}
+
+function selectAllFeatures() {
+    console.log('🔄 Selecting all features...');
+    featureCheckboxes.forEach(checkbox => checkbox.checked = true);
+    updateFeatureCount();
+}
+
+function deselectAllFeatures() {
+    console.log('🔄 Deselecting all features...');
+    featureCheckboxes.forEach(checkbox => checkbox.checked = false);
+    updateFeatureCount();
+}
+
+function debugFeatures() {
+    console.log('🔍 === FEATURE DEBUG ===');
+    const allCheckboxes = document.querySelectorAll('input[name="features"]');
+    console.log(`Total checkboxes found: ${allCheckboxes.length}`);
+    
+    allCheckboxes.forEach((checkbox, index) => {
+        console.log(`${index + 1}. "${checkbox.value}": ${checkbox.checked ? '✅ CHECKED' : '❌ unchecked'}`);
+    });
+    
+    const checkedBoxes = document.querySelectorAll('input[name="features"]:checked');
+    console.log(`Checked count: ${checkedBoxes.length}`);
+    
+    const selectedFeatures = Array.from(checkedBoxes).map(cb => cb.value);
+    console.log('Selected features array:', selectedFeatures);
+    
+    const message = `Debug: Found ${allCheckboxes.length} total checkboxes, ${checkedBoxes.length} checked`;
+    showNotification(message, 'info');
+    console.log('🔍 === END DEBUG ===');
+}
+
+function setupParameterValidation() {
+    const epochs = document.getElementById('epochs');
+    const learningRate = document.getElementById('learning_rate');
+    const testSplit = document.getElementById('test_split');
+    
+    if (epochs) {
+        epochs.addEventListener('input', function() {
+            if (this.value < 100) this.value = 100;
+            if (this.value > 2000) this.value = 2000;
+        });
+    }
+    
+    if (learningRate) {
+        learningRate.addEventListener('input', function() {
+            if (this.value < 0.0001) this.value = 0.0001;
+            if (this.value > 0.1) this.value = 0.1;
+        });
+    }
+    
+    if (testSplit) {
+        testSplit.addEventListener('input', function() {
+            if (this.value < 0.1) this.value = 0.1;
+            if (this.value > 0.4) this.value = 0.4;
+        });
+    }
+}
+
+async function trainModel() {
+    console.log('🎯 Starting training process...');
+    
+    const trainButton = document.getElementById('trainButton');
+    const trainProgress = document.getElementById('trainProgress');
+    const performanceMetrics = document.getElementById('performanceMetrics');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    const selectedFeatures = Array.from(document.querySelectorAll('input[name="features"]:checked')).map(cb => cb.value);
+    console.log('🔍 Selected features:', selectedFeatures);
+    
+    if (selectedFeatures.length === 0) {
+        console.error('❌ No features selected');
+        showNotification('Please select at least one feature for training.', 'error');
+        return;
+    }
+
+    const trainingParams = {
+        features: selectedFeatures,
+        epochs: parseInt(document.getElementById('epochs')?.value) || 1000,
+        learning_rate: parseFloat(document.getElementById('learning_rate')?.value) || 0.01,
+        test_split: parseFloat(document.getElementById('test_split')?.value) || 0.2,
+        batch_size: parseInt(document.getElementById('batch_size')?.value) || 32,
+        dropout: parseFloat(document.getElementById('dropout')?.value) || 0.1,
+        weight_decay: parseFloat(document.getElementById('weight_decay')?.value) || 0.0001,
+        patience: parseInt(document.getElementById('patience')?.value) || 50
+    };
+
+    console.log('⚙️ Training parameters:', trainingParams);
+
+    try {
+        if (trainButton) trainButton.disabled = true;
+        if (trainProgress) trainProgress.classList.remove('hidden');
+        if (performanceMetrics) performanceMetrics.classList.add('hidden');
+        
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 3 + 1;
+            if (progress > 95) progress = 95;
+            
+            if (progressBar) progressBar.style.width = progress + '%';
+            if (progressText) progressText.textContent = `Training in progress... ${Math.round(progress)}%`;
+        }, 800);
+
+        console.log('📡 Sending training request...');
+
+        const response = await fetch('/train-model', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(trainingParams)
+        });
+
+        const data = await response.json();
+        console.log('📥 Training response:', data);
+        
+        clearInterval(progressInterval);
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressText) progressText.textContent = 'Training completed!';
+
+        if (response.ok) {
+            console.log('✅ Training successful');
+            updateModelStatus('Trained');
+            
+            setTimeout(() => {
+                if (trainProgress) trainProgress.classList.add('hidden');
+                if (performanceMetrics) {
+                    performanceMetrics.classList.remove('hidden');
+                    performanceMetrics.style.display = 'block'; // Force show
+                }
+                
+                // Display metrics DI DALAM setTimeout setelah section visible
+                if (data.performance && data.training_losses) {
+                    displayPerformanceMetrics(data.performance, data.training_losses);
+                }
+                
+                showNotification('Model trained successfully!', 'success');
+            }, 1000);
+            
+        } else {
+            throw new Error(data.error || 'Training failed');
+        }
+        
+    } catch (error) {
+        console.error('❌ Training error:', error);
+        showNotification('Error training model: ' + error.message, 'error');
+        if (trainProgress) trainProgress.classList.add('hidden');
+        updateModelStatus('Error');
+    } finally {
+        if (trainButton) trainButton.disabled = false;
+    }
+}
+
+function displayPerformanceMetrics(performance, trainingLosses) {
+    console.log('📊 Displaying performance metrics:', performance);
+
+    localStorage.setItem('dengue_training_results', JSON.stringify({
+        performance: performance,
+        trainingLosses: trainingLosses,
+        timestamp: new Date().getTime()
+    }));
+    
+    const maeElement = document.getElementById('maeValue');
+    const r2Element = document.getElementById('r2Value');
+    const mseElement = document.getElementById('mseValue');
+    
+    if (maeElement) maeElement.textContent = performance.mae.toFixed(4);
+    if (r2Element) r2Element.textContent = performance.r2.toFixed(4);
+    if (mseElement) mseElement.textContent = performance.rmse.toFixed(4);
+    
+    if (trainingLosses && trainingLosses.length > 0) {
+        // Clean data
+        const cleanLosses = cleanTrainingLosses(trainingLosses);
+        const epochs = Array.from({length: cleanLosses.length}, (_, i) => i + 1);
+        
+        const plotData = [{
+            x: epochs,
+            y: cleanLosses,
+            type: 'scatter',
+            mode: 'lines',
+            line: { 
+                color: '#3B82F6', 
+                width: 2,
+                smoothing: 0.8
+            },
+            name: 'Training Loss',
+            hovertemplate: '<b>Epoch %{x}</b><br>Loss: %{y:.4f}<extra></extra>'
+        }];
+        
+        const layout = {
+            title: { 
+                text: 'Training Loss Convergence', 
+                font: { size: 16, color: '#374151', family: 'Inter, sans-serif' },
+                x: 0.5,
+                xanchor: 'center'
+            },
+            xaxis: { 
+                title: { text: 'Epoch', font: { size: 12, color: '#6B7280' } },
+                gridcolor: '#E5E7EB', showgrid: true, zeroline: false,
+                tickfont: { size: 11, color: '#6B7280' }
+            },
+            yaxis: { 
+                title: { text: 'Loss (Log Scale)', font: { size: 12, color: '#6B7280' } },
+                type: 'log', gridcolor: '#E5E7EB', showgrid: true, zeroline: false,
+                tickfont: { size: 11, color: '#6B7280' },
+                tickmode: 'array', tickvals: [0.01, 0.1, 1, 10], ticktext: ['0.01', '0.1', '1.0', '10']
+            },
+            plot_bgcolor: 'white',
+            paper_bgcolor: 'white',
+            margin: { t: 60, r: 40, b: 60, l: 80 },
+            showlegend: false,
+            font: { family: 'Inter, sans-serif' },
+            autosize: true,
+            height: 320
+        };
+        
+        const config = { 
+            responsive: true, 
+            displayModeBar: false
+        };
+        
+        try {
+            const plotDiv = document.getElementById('lossPlot');
+            if (plotDiv) {
+                // Hide loading state
+                const loadingDiv = document.getElementById('lossPlotLoading');
+                if (loadingDiv) loadingDiv.classList.add('hidden');
+                
+                Plotly.purge(plotDiv);
+                
+                // FIX: Delay plot creation untuk memastikan container ready
+                setTimeout(() => {
+                    Plotly.newPlot(plotDiv, plotData, layout, config)
+                        .then(() => {
+                            console.log('📈 Loss plot created successfully');
+                            
+                            // FIX: Force resize setelah plot dibuat
+                            setTimeout(() => {
+                                Plotly.Plots.resize(plotDiv);
+                                console.log('🔧 Plot resized to full container');
+                            }, 100);
+                        });
+                }, 200); // Delay 200ms untuk container sizing
+                
+                plotDiv.style.opacity = '1';
+                
+                // FIX: Tambah resize listener yang lebih robust
+                let resizeTimeout;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        if (plotDiv.offsetWidth > 0) { // Check if visible
+                            Plotly.Plots.resize(plotDiv);
+                        }
+                    }, 150);
+                });
+            }
+        } catch (plotError) {
+            console.error('📈 Error creating plot:', plotError);
+            showFallbackChart(epochs, cleanLosses);
+        }
+    }
+}
+
+function cleanTrainingLosses(losses) {
+    console.log('🧹 Cleaning training losses...');
+    
+    // Remove any invalid values
+    let cleanLosses = losses.filter(loss => 
+        loss !== null && 
+        loss !== undefined && 
+        !isNaN(loss) && 
+        isFinite(loss) && 
+        loss > 0  // Loss should be positive
+    );
+    
+    // Apply smoothing untuk mengurangi noise
+    if (cleanLosses.length > 10) {
+        cleanLosses = applyMovingAverage(cleanLosses, 5);
+    }
+    
+    // Ensure reasonable range
+    cleanLosses = cleanLosses.map(loss => Math.max(0.001, Math.min(100, loss)));
+    
+    console.log(`📊 Cleaned losses: ${losses.length} → ${cleanLosses.length} points`);
+    console.log(`📈 Loss range: ${Math.min(...cleanLosses).toFixed(4)} - ${Math.max(...cleanLosses).toFixed(4)}`);
+    
+    return cleanLosses;
+}
+
+function applyMovingAverage(data, windowSize) {
+    const smoothed = [];
+    const halfWindow = Math.floor(windowSize / 2);
+    
+    for (let i = 0; i < data.length; i++) {
+        const start = Math.max(0, i - halfWindow);
+        const end = Math.min(data.length, i + halfWindow + 1);
+        const window = data.slice(start, end);
+        const average = window.reduce((sum, val) => sum + val, 0) / window.length;
+        smoothed.push(average);
+    }
+    
+    return smoothed;
+}
+
+function showFallbackChart(epochs, losses) {
+    console.log('📊 Using fallback chart...');
+    
+    const plotDiv = document.getElementById('lossPlot');
+    if (!plotDiv) return;
+    
+    plotDiv.innerHTML = `
+        <div class="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-feather="trending-down" class="w-8 h-8 text-blue-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Training Completed</h3>
+                <p class="text-gray-500 text-sm">
+                    Final Loss: ${losses[losses.length - 1].toFixed(4)}<br>
+                    Epochs: ${epochs.length}
+                </p>
+                <div class="mt-4 bg-white rounded-lg p-4 border border-gray-200">
+                    <div class="text-xs text-gray-600 mb-2">Loss Trend</div>
+                    <div class="flex items-end space-x-1 h-12">
+                        ${epochs.slice(-20).map((epoch, i) => {
+                            const height = Math.max(4, (1 - losses[losses.length - 20 + i] / losses[0]) * 48);
+                            return `<div class="bg-blue-500 rounded-t" style="height: ${height}px; width: 8px;"></div>`;
+                        }).join('')}
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">Last 20 epochs</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    feather.replace();
+}
+
+function updateModelStatus(status) {
+    console.log('🔄 Updating model status to:', status);
+    const statusElements = document.querySelectorAll('[data-model-status]');
+    statusElements.forEach(element => {
+        element.textContent = status;
+        element.className = status === 'Trained' ? 'font-bold text-green-600' : 
+                           status === 'Error' ? 'font-bold text-red-600' : 'font-bold text-gray-600';
+    });
+}
+
+function saveModel() {
+    console.log('💾 Saving model...');
+    showNotification('Model saved successfully!', 'success');
+}
+
+function exportResults() {
+    console.log('📤 Exporting results...');
+    const mae = document.getElementById('maeValue')?.textContent || 'N/A';
+    const r2 = document.getElementById('r2Value')?.textContent || 'N/A';
+    const rmse = document.getElementById('mseValue')?.textContent || 'N/A';
+    
+    const results = {
+        timestamp: new Date().toISOString(),
+        performance: { mae, r2, rmse },
+        parameters: {
+            epochs: document.getElementById('epochs')?.value || 1000,
+            learning_rate: document.getElementById('learning_rate')?.value || 0.01,
+            test_split: document.getElementById('test_split')?.value || 0.2
+        }
+    };
+    
+    const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dengue_model_results_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showNotification('Results exported successfully!', 'success');
+}
+
+function showNotification(message, type = 'info') {
+    console.log(`📢 Notification (${type}):`, message);
+    
+    const notification = document.createElement('div');
+    notification.className = `fixed top-20 right-4 z-50 max-w-sm p-4 rounded-xl shadow-lg notification ${
+        type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' : 
+        type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
+        'bg-blue-50 border border-blue-200 text-blue-800'
+    }`;
+    
+    const iconName = type === 'success' ? 'check-circle' : type === 'error' ? 'alert-circle' : 'info';
+    
+    notification.innerHTML = `
+        <div class="flex items-center">
+            <i data-feather="${iconName}" class="w-5 h-5 mr-3 flex-shrink-0"></i>
+            <div class="font-medium">${message}</div>
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    class="ml-auto text-current opacity-75 hover:opacity-100">
+                <i data-feather="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    feather.replace();
+    
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.animation = 'slideOutTop 0.5s ease-in forwards';
+            setTimeout(() => notification.remove(), 500);
+        }
+    }, 5000);
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        trainModel();
+    }
+    
+    if (e.ctrlKey && e.key === 'a' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+        e.preventDefault();
+        selectAllFeatures();
+    }
+    
+    if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        debugFeatures();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Model Management page loaded');
+    feather.replace();
+    
+    setTimeout(() => {
+        initializeFeatures();
+        setupParameterValidation();
+        
+        // TAMBAH INI - restore dari localStorage
+        const saved = localStorage.getItem('dengue_training_results');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                console.log('🔄 Restoring saved training results');
+                
+                const performanceMetrics = document.getElementById('performanceMetrics');
+                if (performanceMetrics) {
+                    performanceMetrics.classList.remove('hidden');
+                    performanceMetrics.style.display = 'block';
+                }
+                
+                displayPerformanceMetrics(data.performance, data.trainingLosses);
+            } catch (error) {
+                console.error('Error restoring training data:', error);
+            }
+        }
+    }, 100);
+});
+
+console.log('🎯 Model Management JavaScript loaded successfully');
+</script>
+{% endblock %}

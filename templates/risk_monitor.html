@@ -1,0 +1,652 @@
+{% extends "base.html" %}
+
+{% block title %}ExplainDengue - Risk Monitor Dashboard{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-center text-blue-600 mb-2">Risk Monitor Dashboard</h1>
+    <p class="text-center text-gray-600">Monitor dengue outbreak risks across all health centers</p>
+    <div class="text-center mt-4">
+        <div class="inline-flex items-center bg-green-100 rounded-full px-4 py-2 text-sm">
+            <i data-feather="database" class="w-4 h-4 mr-2 text-green-600"></i>
+            <span class="text-green-700 font-medium">Powered by Real Environmental Data & AI Models</span>
+        </div>
+    </div>
+</div>
+
+<!-- Error Message -->
+<div id="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl relative mb-4 hidden" role="alert">
+    <div class="flex items-center">
+        <i data-feather="alert-circle" class="w-5 h-5 mr-2"></i>
+        <span id="errorText" class="block sm:inline"></span>
+    </div>
+</div>
+
+<!-- Search and Filter Controls -->
+<div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 mb-8">
+    <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div class="flex-1 max-w-md">
+            <div class="relative">
+                <input type="text" 
+                       id="puskesmasSearch" 
+                       placeholder="Search for a health center..." 
+                       class="w-full px-4 py-3 pl-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                <i data-feather="search" class="w-5 h-5 text-gray-400 absolute left-3 top-3.5"></i>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <!-- Risk Filter -->
+            <select id="riskFilter" class="px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white pr-10 appearance-none">
+                <option value="">All Risk Levels</option>
+                <option value="high">High Risk</option>
+                <option value="moderate">Moderate Risk</option>
+                <option value="low">Low Risk</option>
+            </select>
+            
+            <!-- Refresh Button -->
+            <button onclick="refreshData()" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-medium transition-all inline-flex items-center">
+                <i data-feather="refresh-cw" class="w-4 h-4 mr-2"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="map-pin" class="w-6 h-6 text-blue-600"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Total Centers</p>
+                <p class="text-2xl font-bold text-blue-600" id="totalCenters">-</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="alert-triangle" class="w-6 h-6 text-red-600"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">High Risk</p>
+                <p class="text-2xl font-bold text-red-600" id="highRiskCount">-</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="alert-octagon" class="w-6 h-6 text-yellow-600"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Moderate Risk</p>
+                <p class="text-2xl font-bold text-yellow-600" id="moderateRiskCount">-</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                <i data-feather="check-circle" class="w-6 h-6 text-green-600"></i>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Low Risk</p>
+                <p class="text-2xl font-bold text-green-600" id="lowRiskCount">-</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading State -->
+<div id="loadingState" class="bg-white rounded-2xl shadow-xl p-12 border border-gray-100 text-center">
+    <div class="loading-spinner mx-auto mb-4"></div>
+    <h3 class="text-lg font-semibold text-gray-700 mb-2">Analyzing Risk Data</h3>
+    <p class="text-gray-500 mb-2">Processing real environmental data from Project CCHAIN dataset...</p>
+    <div class="flex items-center justify-center text-sm text-blue-600 mt-4">
+        <i data-feather="cpu" class="w-4 h-4 mr-2"></i>
+        <span>AI Model Integration Active</span>
+    </div>
+</div>
+
+<!-- Risk Cards Grid -->
+<div id="puskesmasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+    <!-- Risk cards will be dynamically inserted here -->
+</div>
+
+<!-- Empty State -->
+<div id="emptyState" class="bg-white rounded-2xl shadow-xl p-12 border border-gray-100 text-center hidden">
+    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <i data-feather="search" class="w-12 h-12 text-gray-400"></i>
+    </div>
+    <h3 class="text-xl font-bold text-gray-700 mb-2">No Results Found</h3>
+    <p class="text-gray-500 mb-6">Try adjusting your search terms or filters</p>
+    <button onclick="clearFilters()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all">
+        Clear Filters
+    </button>
+</div>
+
+<!-- Detailed Risk Modal -->
+<div id="riskModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-2/3 shadow-lg rounded-2xl bg-white max-h-[80vh] overflow-y-auto">
+        <div id="modalContent" class="space-y-6">
+            <!-- Modal content will be inserted here -->
+        </div>
+        <div class="text-center mt-8 pt-6 border-t border-gray-200">
+            <button id="closeModal" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold transition-all">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let allRiskData = [];
+let filteredData = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🛡️ Risk Monitor loaded');
+    feather.replace();
+    
+    // Load initial data
+    fetchRiskData();
+    
+    // Setup event listeners
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Search functionality
+    const searchInput = document.getElementById('puskesmasSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(filterData, 300));
+    }
+    
+    // Risk filter
+    const riskFilter = document.getElementById('riskFilter');
+    if (riskFilter) {
+        riskFilter.addEventListener('change', filterData);
+    }
+    
+    // Modal close functionality
+    const modal = document.getElementById('riskModal');
+    const closeModal = document.getElementById('closeModal');
+    
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    }
+    
+    // Close modal when clicking outside
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            modal.classList.add('hidden');
+        }
+        if (e.ctrlKey && e.key === 'r') {
+            e.preventDefault();
+            refreshData();
+        }
+    });
+}
+
+async function fetchRiskData() {
+    const loadingState = document.getElementById('loadingState');
+    const puskesmasGrid = document.getElementById('puskesmasGrid');
+    const errorMessage = document.getElementById('errorMessage');
+    
+    try {
+        console.log('📊 Fetching risk data...');
+        
+        // Show loading state
+        loadingState.classList.remove('hidden');
+        puskesmasGrid.classList.add('hidden');
+        errorMessage.classList.add('hidden');
+        
+        const response = await fetch('/get-risk-data');
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        allRiskData = data;
+        filteredData = [...data];
+        
+        console.log(`✅ Loaded ${data.length} risk assessments from real environmental data`);
+        
+        // Log data source info
+        if (data.length > 0) {
+            const sampleData = data[0];
+            console.log('📊 Data source: Real environmental measurements');
+            console.log(`🌡️ Temperature range: ${Math.min(...data.map(d => d.temperature_avg)).toFixed(1)}°C - ${Math.max(...data.map(d => d.temperature_avg)).toFixed(1)}°C`);
+            console.log(`🌧️ Precipitation range: ${Math.min(...data.map(d => d.precipitation_total)).toFixed(1)}mm - ${Math.max(...data.map(d => d.precipitation_total)).toFixed(1)}mm`);
+            console.log(`💧 Humidity range: ${Math.min(...data.map(d => d.humidity)).toFixed(1)}% - ${Math.max(...data.map(d => d.humidity)).toFixed(1)}%`);
+        }
+        
+        // Update summary cards
+        updateSummaryCards(data);
+        
+        // Display risk cards
+        displayRiskCards(data);
+        
+        // Hide loading, show grid
+        loadingState.classList.add('hidden');
+        puskesmasGrid.classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('❌ Error fetching risk data:', error);
+        
+        // Show error message
+        loadingState.classList.add('hidden');
+        errorMessage.classList.remove('hidden');
+        document.getElementById('errorText').textContent = 'Failed to load risk data. Please try again.';
+    }
+}
+
+function updateSummaryCards(data) {
+    const totalCenters = data.length;
+    const highRisk = data.filter(item => item.risk_level.toLowerCase() === 'high').length;
+    const moderateRisk = data.filter(item => item.risk_level.toLowerCase() === 'moderate').length;
+    const lowRisk = data.filter(item => item.risk_level.toLowerCase() === 'low').length;
+    
+    document.getElementById('totalCenters').textContent = totalCenters;
+    document.getElementById('highRiskCount').textContent = highRisk;
+    document.getElementById('moderateRiskCount').textContent = moderateRisk;
+    document.getElementById('lowRiskCount').textContent = lowRisk;
+    
+    console.log(`📈 Summary: ${totalCenters} total, ${highRisk} high, ${moderateRisk} moderate, ${lowRisk} low`);
+}
+
+function displayRiskCards(data) {
+    const puskesmasGrid = document.getElementById('puskesmasGrid');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (data.length === 0) {
+        puskesmasGrid.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+    }
+    
+    puskesmasGrid.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    
+    puskesmasGrid.innerHTML = data.map(puskesmas => createRiskCard(puskesmas)).join('');
+    feather.replace(); // Re-initialize feather icons
+}
+
+function createRiskCard(location) {
+    const riskLevel = location.risk_level.toLowerCase();
+    const riskStyles = {
+        'high': { 
+            bg: 'bg-red-50', 
+            border: 'border-red-200', 
+            text: 'text-red-800', 
+            badge: 'bg-red-100 text-red-800',
+            icon: 'alert-triangle'
+        },
+        'moderate': { 
+            bg: 'bg-yellow-50', 
+            border: 'border-yellow-200', 
+            text: 'text-yellow-800', 
+            badge: 'bg-yellow-100 text-yellow-800',
+            icon: 'alert-octagon'
+        },
+        'low': { 
+            bg: 'bg-green-50', 
+            border: 'border-green-200', 
+            text: 'text-green-800', 
+            badge: 'bg-green-100 text-green-800',
+            icon: 'check-circle'
+        }
+    };
+    
+    const style = riskStyles[riskLevel] || riskStyles['low'];
+    
+    // Extract region and coordinates from location name
+    const locationParts = location.puskesmas.split(' (');
+    const regionName = locationParts[0];
+    const coordinates = locationParts[1] ? locationParts[1].replace(')', '') : '';
+    
+    return `
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden card-hover cursor-pointer transition-all duration-300"
+             onclick="showRiskDetails('${location.puskesmas.replace(/'/g, "\\'")}')">
+            <!-- Risk Level Header -->
+            <div class="${style.bg} ${style.border} border-b-2 p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i data-feather="${style.icon}" class="w-5 h-5 ${style.text} mr-2"></i>
+                        <span class="font-semibold ${style.text} uppercase text-sm">${location.risk_level}</span>
+                    </div>
+                    <span class="${style.badge} px-2 py-1 rounded-full text-xs font-medium">
+                        ${location.prediction.toFixed(1)} cases
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Card Content -->
+            <div class="p-6">
+                <!-- Location Info -->
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">${regionName}</h3>
+                    <div class="flex items-center text-xs text-gray-500">
+                        <i data-feather="map-pin" class="w-3 h-3 mr-1"></i>
+                        <span>${coordinates}</span>
+                    </div>
+                </div>
+                
+                <!-- Environmental Indicators -->
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div class="text-center">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            ${getTemperatureIcon(location.temperature_avg)}
+                        </div>
+                        <p class="text-xs text-gray-600">Temperature</p>
+                        <p class="text-sm font-semibold text-gray-900">${location.temperature_avg.toFixed(1)}°C</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            ${getPrecipitationIcon(location.precipitation_total)}
+                        </div>
+                        <p class="text-xs text-gray-600">Precipitation</p>
+                        <p class="text-sm font-semibold text-gray-900">${location.precipitation_total.toFixed(1)}mm</p>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="w-8 h-8 bg-cyan-100 rounded-lg flex items-center justify-center mx-auto mb-2">
+                            ${getHumidityIcon(location.humidity)}
+                        </div>
+                        <p class="text-xs text-gray-600">Humidity</p>
+                        <p class="text-sm font-semibold text-gray-900">${location.humidity.toFixed(1)}%</p>
+                    </div>
+                </div>
+                
+                <!-- Environmental Summary -->
+                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                    <div class="text-xs text-gray-600 mb-1">Environmental Conditions</div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-700">NDVI:</span>
+                        <span class="font-medium">${location.ndvi ? location.ndvi.toFixed(3) : 'N/A'}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-gray-700">Pressure:</span>
+                        <span class="font-medium">${location.pressure ? location.pressure.toFixed(0) + ' hPa' : 'N/A'}</span>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Click for detailed analysis</span>
+                        <i data-feather="arrow-right" class="w-4 h-4 text-gray-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function getTemperatureIcon(temp) {
+    if (temp > 30) return '🌡️';
+    if (temp > 25) return '🌤️';
+    return '❄️';
+}
+
+function getPrecipitationIcon(precip) {
+    if (precip > 100) return '🌧️';
+    if (precip > 50) return '🌦️';
+    return '☀️';
+}
+
+function getHumidityIcon(humidity) {
+    if (humidity > 80) return '💧';
+    if (humidity > 60) return '💦';
+    return '🌬️';
+}
+
+// Update showRiskDetails function
+function showRiskDetails(locationName) {
+    const location = allRiskData.find(p => p.puskesmas === locationName);
+    if (!location) return;
+    
+    console.log(`🔍 Showing details for: ${locationName}`);
+    
+    const modal = document.getElementById('riskModal');
+    const modalContent = document.getElementById('modalContent');
+    
+    const riskLevel = location.risk_level.toLowerCase();
+    const riskStyles = {
+        'high': { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-800', icon: 'alert-triangle' },
+        'moderate': { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-800', icon: 'alert-octagon' },
+        'low': { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800', icon: 'check-circle' }
+    };
+    
+    const style = riskStyles[riskLevel] || riskStyles['low'];
+    
+    // Extract region and coordinates
+    const locationParts = locationName.split(' (');
+    const regionName = locationParts[0];
+    const coordinates = locationParts[1] ? locationParts[1].replace(')', '') : '';
+    
+    modalContent.innerHTML = `
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">${regionName}</h2>
+            <div class="text-sm text-gray-600 mb-4 flex items-center justify-center">
+                <i data-feather="map-pin" class="w-4 h-4 mr-1"></i>
+                <span>Coordinates: ${coordinates}</span>
+            </div>
+            <div class="${style.bg} ${style.border} border-2 rounded-xl p-4 inline-block">
+                <div class="flex items-center ${style.text}">
+                    <i data-feather="${style.icon}" class="w-6 h-6 mr-2"></i>
+                    <span class="text-xl font-bold uppercase">${location.risk_level} RISK</span>
+                </div>
+            </div>
+            ${location.model_used ? 
+                '<div class="mt-2 text-sm text-green-600">✓ AI Model Prediction</div>' : 
+                '<div class="mt-2 text-sm text-blue-600">📊 Environmental Analysis</div>'}
+        </div>
+        
+        <!-- Risk Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Prediction Gauge -->
+            <div class="bg-gray-50 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i data-feather="target" class="w-5 h-5 mr-2"></i>
+                    Predicted Cases
+                </h3>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-blue-600 mb-2">${location.prediction.toFixed(2)}</div>
+                    <p class="text-gray-600">Expected cases in next 2 weeks</p>
+                    <div class="mt-2 text-xs ${location.model_used ? 'text-green-600' : 'text-blue-600'}">
+                        ${location.model_used ? 'Graph Neural Network' : 'Environmental Factors'}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Environmental Conditions -->
+            <div class="bg-gray-50 rounded-xl p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <i data-feather="thermometer" class="w-5 h-5 mr-2"></i>
+                    Environmental Data
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 flex items-center">
+                            <span class="mr-2">🌡️</span>Temperature
+                        </span>
+                        <div class="text-right">
+                            <span class="font-semibold">${location.temperature_avg.toFixed(1)}°C</span>
+                            <div class="text-xs ${location.temperature_avg >= 25 && location.temperature_avg <= 30 ? 'text-red-600' : 'text-gray-500'}">
+                                ${location.temperature_avg >= 25 && location.temperature_avg <= 30 ? 'Optimal for dengue' : 'Moderate'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 flex items-center">
+                            <span class="mr-2">🌧️</span>Precipitation
+                        </span>
+                        <div class="text-right">
+                            <span class="font-semibold">${location.precipitation_total.toFixed(1)}mm</span>
+                            <div class="text-xs ${location.precipitation_total > 100 ? 'text-red-600' : location.precipitation_total > 50 ? 'text-yellow-600' : 'text-gray-500'}">
+                                ${location.precipitation_total > 100 ? 'High breeding risk' : location.precipitation_total > 50 ? 'Moderate' : 'Low'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 flex items-center">
+                            <span class="mr-2">💧</span>Humidity
+                        </span>
+                        <div class="text-right">
+                            <span class="font-semibold">${location.humidity.toFixed(1)}%</span>
+                            <div class="text-xs ${location.humidity > 80 ? 'text-red-600' : location.humidity > 60 ? 'text-yellow-600' : 'text-gray-500'}">
+                                ${location.humidity > 80 ? 'Ideal for mosquitos' : location.humidity > 60 ? 'Moderate' : 'Lower risk'}
+                            </div>
+                        </div>
+                    </div>
+                    ${location.ndvi ? `
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600 flex items-center">
+                            <span class="mr-2">🌿</span>NDVI
+                        </span>
+                        <div class="text-right">
+                            <span class="font-semibold">${location.ndvi.toFixed(3)}</span>
+                            <div class="text-xs text-gray-500">Vegetation index</div>
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Data Source Info -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-200">
+            <div class="flex items-center text-blue-800">
+                <i data-feather="database" class="w-5 h-5 mr-2"></i>
+                <span class="font-semibold">Data Source: </span>
+                <span class="ml-2">Real environmental data with coordinate-based location identification</span>
+            </div>
+        </div>
+        
+        <!-- Analysis Explanation -->
+        <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                <i data-feather="info" class="w-5 h-5 mr-2"></i>
+                Risk Analysis
+            </h3>
+            <p class="text-blue-800 leading-relaxed">${location.explanation}</p>
+        </div>
+        
+        <!-- Recommendations -->
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold text-purple-900 mb-3 flex items-center">
+                <i data-feather="list" class="w-5 h-5 mr-2"></i>
+                Recommended Actions
+            </h3>
+            <ul class="space-y-2">
+                ${location.recommendations.map(rec => `
+                    <li class="flex items-start text-purple-800">
+                        <i data-feather="check" class="w-4 h-4 mr-2 mt-0.5 text-purple-600 flex-shrink-0"></i>
+                        <span>${rec}</span>
+                    </li>
+                `).join('')}
+            </ul>
+        </div>
+        
+        <!-- Neighboring Information -->
+        <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-indigo-900 mb-3 flex items-center">
+                <i data-feather="map" class="w-5 h-5 mr-2"></i>
+                Regional Analysis
+            </h3>
+            <p class="text-indigo-800">${location.neighboring_info}</p>
+        </div>
+    `;
+    
+    modal.classList.remove('hidden');
+    feather.replace();
+}
+
+function filterData() {
+    const searchTerm = document.getElementById('puskesmasSearch').value.toLowerCase();
+    const riskFilter = document.getElementById('riskFilter').value;
+    
+    filteredData = allRiskData.filter(puskesmas => {
+        const matchesSearch = puskesmas.puskesmas.toLowerCase().includes(searchTerm);
+        const matchesRisk = !riskFilter || puskesmas.risk_level.toLowerCase() === riskFilter;
+        
+        return matchesSearch && matchesRisk;
+    });
+    
+    displayRiskCards(filteredData);
+    console.log(`🔍 Filtered to ${filteredData.length} results`);
+}
+
+function clearFilters() {
+    document.getElementById('puskesmasSearch').value = '';
+    document.getElementById('riskFilter').value = '';
+    filterData();
+}
+
+function refreshData() {
+    console.log('🔄 Refreshing risk data...');
+    
+    // Show loading state
+    const loadingState = document.getElementById('loadingState');
+    const puskesmasGrid = document.getElementById('puskesmasGrid');
+    
+    loadingState.classList.remove('hidden');
+    puskesmasGrid.classList.add('hidden');
+    
+    // Clear cache on server and reload
+    fetch('/refresh-risk-data', { method: 'POST' })
+        .then(() => {
+            // After clearing cache, fetch new data
+            setTimeout(() => {
+                fetchRiskData();
+            }, 500);
+        })
+        .catch(error => {
+            console.error('Error refreshing:', error);
+            fetchRiskData(); // Fallback to normal fetch
+        });
+}
+
+// Utility function for debouncing
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+console.log('🛡️ Risk Monitor JavaScript loaded successfully');
+</script>
+{% endblock %}
