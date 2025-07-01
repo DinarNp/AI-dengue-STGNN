@@ -33,7 +33,7 @@
             </div>
             <div>
                 <h2 class="text-2xl font-bold text-gray-900">Load Dataset</h2>
-                <p class="text-gray-600">Import Project CCHAIN dengue data</p>
+                <p class="text-gray-600">Import dengue data</p>
             </div>
         </div>
         
@@ -44,8 +44,9 @@
                     <div>
                         <h3 class="font-semibold text-blue-900 mb-2">About the Dataset</h3>
                         <p class="text-blue-700 text-sm leading-relaxed">
-                            The Project CCHAIN dataset contains comprehensive information linking climatic impact drivers, 
-                            socioeconomic vulnerability, and environmental conditions to dengue cases across health centers.
+                            The dengue dataset contains comprehensive information linking climatic impact drivers 
+                            and environmental conditions from Open Weather Data and NASA POWER to dengue suspect cases 
+                            from the Early Warning and Response System (EWARS) Indonesia across regencies.
                         </p>
                     </div>
                 </div>
@@ -97,12 +98,12 @@
             {% if data %}
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-4 text-center">
-                        <div class="text-2xl font-bold text-blue-700 mb-1">{{ data|length }}</div>
+                        <div class="text-2xl font-bold text-blue-700 mb-1">{{ pagination.total  }}</div>
                         <div class="text-sm text-blue-600">Total Records</div>
                     </div>
                     <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-4 text-center">
                         <div class="text-2xl font-bold text-green-700 mb-1">{{ puskesmas_list|length }}</div>
-                        <div class="text-sm text-green-600">Health Centers</div>
+                        <div class="text-sm text-green-600">Regencies</div>
                     </div>
                 </div>
                 
@@ -155,13 +156,13 @@
             <div class="space-y-2">
                 <label for="puskesmas" class="block text-sm font-semibold text-gray-700">
                     <i data-feather="map-pin" class="w-4 h-4 inline mr-1"></i>
-                    Health Center
+                    Regency
                 </label>
                 <div class="relative">
                     <select id="puskesmas" 
                             name="puskesmas" 
                             class="w-full px-4 py-3 pr-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white appearance-none">
-                        <option value="">All Health Centers</option>
+                        <option value="">All Regencies</option>
                         {% for puskesmas in puskesmas_list %}
                             <option value="{{ puskesmas }}" 
                                     {% if puskesmas == request.args.get('puskesmas') %}selected{% endif %}>
@@ -257,7 +258,7 @@
                 <tr>
                     <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         <i data-feather="map-pin" class="w-4 h-4 inline mr-2"></i>
-                        Health Center
+                        Regency
                     </th>
                     <th class="px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider">
                         <i data-feather="calendar" class="w-4 h-4 inline mr-2"></i>
@@ -371,7 +372,7 @@
     </div>
     <h3 class="text-2xl font-bold text-gray-900 mb-4">No Data Available</h3>
     <p class="text-gray-600 mb-8 max-w-md mx-auto">
-        Load the Project CCHAIN dataset to begin exploring dengue outbreak data and training your predictive models.
+        Load the dengue dataset to begin exploring dengue outbreak data and training your predictive models.
     </p>
     <button onclick="loadData()" 
             class="btn-primary text-white px-8 py-4 rounded-xl font-semibold inline-flex items-center">
@@ -489,7 +490,7 @@
                     </span>
                 </div>
                 <div class="text-xs text-green-600">
-                    Across all health centers and time periods
+                    Across all regencies and time periods
                 </div>
             </div>
         </div>
@@ -574,7 +575,7 @@ async function loadData() {
         button.innerHTML = '<div class="loading-spinner mr-2"></div>Loading...';
         button.disabled = true;
         statusDiv.classList.remove('hidden');
-        statusText.textContent = 'Loading Project CCHAIN dataset...';
+        statusText.textContent = 'Loading Dengue dataset...';
         messageArea.innerHTML = '';
         
         const response = await fetch('/load-data', {
