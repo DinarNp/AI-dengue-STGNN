@@ -205,35 +205,55 @@ class DenguePredictionSystem:
                 'node_ids': metadata.get('node_ids', [f'Location_{i+1}' for i in range(metadata.get('n_nodes', 5))]),
                 'location_coords': metadata.get('location_coords', np.random.uniform(-8, -7, (metadata.get('n_nodes', 5), 2))),
                 'location_source': metadata.get('location_source', 'Generated'),
-                'data_type': 'Real Data' if 'location_source' in metadata else 'Synthetic Data'
+                'data_type': 'Real Data' if 'location_source' in metadata else 'Synthetic Data',
+                'location_level': metadata.get('location_source', 'Region'),
+                'n_nodes': metadata.get('n_nodes', 5),
+                'display_names': metadata.get('node_ids', [f'Location_{i+1}' for i in range(metadata.get('n_nodes', 5))]),  # Add missing display_names
+                'feature_cols': metadata.get('feature_cols', []),
+                'target_stats': metadata.get('target_stats', {}),
+                'adaptive_config': metadata.get('adaptive_config', {})
             }
-            
-            # Create enhanced visualizations
-            self.visualizer.plot_training_history(history)
-            self.visualizer.plot_predictions_vs_actual_enhanced(
-                all_predictions, all_targets, viz_metadata
-            )
-            self.visualizer.plot_spatial_heatmap_enhanced(
-                all_predictions, viz_metadata
-            )
-            
-            print("   📈 Enhanced visualizations created successfully")
-            print(f"   📍 Location labels: {viz_metadata['data_type']}")
-            if viz_metadata['location_source'] != 'Generated':
-                print(f"   📋 Source column: {viz_metadata['location_source']}")
-                
-        except Exception as viz_error:
-            print(f"   ⚠️ Visualization error: {viz_error}")
-            # Fallback to original visualization
+
+            # Create enhanced visualizations with error handling
             try:
                 self.visualizer.plot_training_history(history)
-                self.visualizer.plot_predictions_vs_actual(all_predictions, all_targets, 
-                                                        metadata['node_ids'])
-                self.visualizer.plot_spatial_heatmap(all_predictions, metadata['location_coords'], 
-                                                metadata['node_ids'])
-                print("   📈 Fallback visualizations created")
-            except:
-                print("   ❌ All visualization methods failed")
+                print("   📈 Enhanced training history saved as 'training_history_enhanced.png'")
+            except Exception as e:
+                print(f"   ⚠️ Training history visualization error: {e}")
+            
+            try:
+                self.visualizer.plot_predictions_vs_actual_enhanced(
+                    all_predictions, all_targets, viz_metadata
+                )
+                print("   📊 Enhanced prediction analysis saved as 'predictions_analysis_enhanced.png'")
+            except Exception as e:
+                print(f"   ⚠️ Prediction analysis visualization error: {e}")
+            
+            try:
+                self.visualizer.plot_spatial_heatmap_enhanced(
+                    all_predictions, viz_metadata
+                )
+                print("   🗺️ Enhanced spatial analysis saved as 'spatial_analysis_enhanced.png'")
+            except Exception as e:
+                print(f"   ⚠️ Spatial heatmap visualization error: {e}")
+                
+        except Exception as viz_error:
+            print(f"   ⚠️ Visualization setup error: {viz_error}")
+            
+        # Always try fallback visualization
+        try:
+            print("   📈 Creating fallback visualizations...")
+            self.visualizer.plot_training_history(history)
+            self.visualizer.plot_predictions_vs_actual(all_predictions, all_targets, 
+                                                    metadata.get('node_ids', [f'Node_{i}' for i in range(len(all_predictions))]))
+            self.visualizer.plot_spatial_heatmap(all_predictions, 
+                                            metadata.get('location_coords', np.random.uniform(-8, -7, (metadata.get('n_nodes', 5), 2))), 
+                                            metadata.get('node_ids', [f'Node_{i}' for i in range(metadata.get('n_nodes', 5))]))
+            print("   📈 Fallback visualizations created")
+        except Exception as fallback_error:
+            print(f"   ❌ Fallback visualization failed: {fallback_error}")
+
+
         # Step 9: Save model with comprehensive metadata
         model_save_data = {
             'model_state_dict': trained_model.state_dict(),

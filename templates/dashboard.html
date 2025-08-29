@@ -18,7 +18,7 @@
             </div>
             <div>
                 <h2 class="text-lg font-semibold text-gray-700 mb-1">Total Regencies</h2>
-                <p class="text-3xl font-bold text-blue-600">{{ total_puskesmas }}</p>
+                <p class="text-3xl font-bold text-blue-600">{{ total_regency }}</p>
             </div>
         </div>
     </div>
@@ -76,11 +76,11 @@
         
         <div class="space-y-4 mb-6">
             <div class="relative">
-                <label for="puskesmasSelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                <label for="regencySelect" class="block text-sm font-semibold text-gray-700 mb-2">
                     <i data-feather="map-pin" class="w-4 h-4 inline mr-1"></i>
                     Select Regency
                 </label>
-                <select id="puskesmasSelect" 
+                <select id="regencySelect" 
                         class="w-full px-4 py-3 pr-10  border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white appearance-none">
                     <option value="">Choose a Regency..</option>
                 </select>
@@ -140,7 +140,7 @@
                     <i data-feather="bar-chart-2" class="w-8 h-8 text-gray-400"></i>
                 </div>
                 <p class="font-medium">Select a Regency to View Trends</p>
-                <p class="text-sm">Choose a Puskesmas from the dropdown to see historical dengue patterns</p>
+                <p class="text-sm">Choose a Regency from the dropdown to see historical dengue patterns</p>
             </div>
         </div>
     </div>
@@ -240,16 +240,16 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('🎯 Dashboard loaded');
     feather.replace();
     
-    // Load Puskesmas list
-    loadPuskesmasList();
+    // Load Regency list
+    loadRegencyList();
     
-    // Add event listener for Puskesmas selection
-    const puskesmasSelect = document.getElementById('puskesmasSelect');
-    if (puskesmasSelect) {
-        puskesmasSelect.addEventListener('change', function() {
-            const selectedPuskesmas = this.value;
-            if (selectedPuskesmas) {
-                updateHistoricalChart(selectedPuskesmas);
+    // Add event listener for Regency selection
+    const regencySelect = document.getElementById('regencySelect');
+    if (regencySelect) {
+        regencySelect.addEventListener('change', function() {
+            const selectedRegency = this.value;
+            if (selectedRegency) {
+                updateHistoricalChart(selectedRegency);
             } else {
                 clearChart();
             }
@@ -257,22 +257,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-async function loadPuskesmasList() {
+async function loadRegencyList() {
     try {
-        console.log('📊 Loading Puskesmas list...');
-        const response = await fetch('/get-puskesmas');
+        console.log('📊 Loading Regency list...');
+        const response = await fetch('/get-regency');
         const data = await response.json();
         
-        const select = document.getElementById('puskesmasSelect');
-        if (select && data.puskesmas) {
+        const select = document.getElementById('regencySelect');
+        if (select && data.regency) {
             select.innerHTML = '<option value="">Choose a Regency...</option>';
-            data.puskesmas.forEach(puskesmas => {
+            data.regency.forEach(regency => {
                 const option = document.createElement('option');
-                option.value = puskesmas;
-                option.textContent = puskesmas;
+                option.value = regency;
+                option.textContent = regency;
                 select.appendChild(option);
             });
-            console.log(`✅ Loaded ${data.puskesmas.length} Puskesmas options`);
+            console.log(`✅ Loaded ${data.regency.length} Regency options`);
         }
     } catch (error) {
         console.error('❌ Error loading Regencies list:', error);
@@ -281,19 +281,19 @@ async function loadPuskesmasList() {
 }
 
 async function makePrediction() {
-    const puskesmasSelect = document.getElementById('puskesmasSelect');
+    const regencySelect = document.getElementById('regencySelect');
     const predictButton = document.getElementById('predictButton');
     const predictionProgress = document.getElementById('predictionProgress');
     const predictionResult = document.getElementById('predictionResult');
     const progressBar = document.getElementById('predictionProgressBar');
     
-    const selectedPuskesmas = puskesmasSelect.value;
-    if (!selectedPuskesmas) {
+    const selectedRegency = regencySelect.value;
+    if (!selectedRegency) {
         showNotification('Please select a Regency first', 'error');
         return;
     }
     
-    console.log(`🎯 Making prediction for: ${selectedPuskesmas}`);
+    console.log(`🎯 Making prediction for: ${selectedRegency}`);
     
     try {
         // Show progress
@@ -311,7 +311,7 @@ async function makePrediction() {
         
         // Make prediction request
         const formData = new FormData();
-        formData.append('puskesmas_name', selectedPuskesmas);
+        formData.append('regency_name', selectedRegency);
         
         const response = await fetch('/predict', {
             method: 'POST',
@@ -327,7 +327,7 @@ async function makePrediction() {
         
         setTimeout(() => {
             predictionProgress.classList.add('hidden');
-            displayPredictionResult(data, selectedPuskesmas);
+            displayPredictionResult(data, selectedRegency);
         }, 500);
         
     } catch (error) {
@@ -339,7 +339,7 @@ async function makePrediction() {
     }
 }
 
-function displayPredictionResult(data, puskesmasName) {
+function displayPredictionResult(data, regencyName) {
     const predictionResult = document.getElementById('predictionResult');
     
     if (data.error) {
@@ -439,18 +439,18 @@ function displayPredictionResult(data, puskesmasName) {
     console.log('✅ Prediction result displayed');
 }
 
-async function updateHistoricalChart(puskesmasName) {
+async function updateHistoricalChart(regencyName) {
     const plotProgress = document.getElementById('plotProgress');
     const plotMessage = document.getElementById('plotMessage');
     
     try {
-        console.log(`📈 Loading chart for: ${puskesmasName}`);
+        console.log(`📈 Loading chart for: ${regencyName}`);
         
         // Show loading
         plotProgress.classList.remove('hidden');
         plotMessage.style.display = 'none';
         
-        const response = await fetch(`/plot/${encodeURIComponent(puskesmasName)}`);
+        const response = await fetch(`/plot/${encodeURIComponent(regencyName)}`);
         const data = await response.json();
         
         if (data.error) {
@@ -520,7 +520,7 @@ async function updateHistoricalChart(puskesmasName) {
                 plugins: {
                     title: {
                         display: true,
-                        text: `Historical Trends - ${puskesmasName}`,
+                        text: `Historical Trends - ${regencyName}`,
                         font: { size: 16, weight: 'bold' },
                         color: '#374151'
                     },

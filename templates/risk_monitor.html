@@ -29,7 +29,7 @@
         <div class="flex-1 max-w-md">
             <div class="relative">
                 <input type="text" 
-                       id="puskesmasSearch" 
+                       id="regencySearch" 
                        placeholder="Search for a regency..." 
                        class="w-full px-4 py-3 pl-10 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
                 <i data-feather="search" class="w-5 h-5 text-gray-400 absolute left-3 top-3.5"></i>
@@ -118,7 +118,7 @@
 </div>
 
 <!-- Risk Cards Grid -->
-<div id="puskesmasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+<div id="regencyGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
     <!-- Risk cards will be dynamically inserted here -->
 </div>
 
@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function setupEventListeners() {
     // Search functionality
-    const searchInput = document.getElementById('puskesmasSearch');
+    const searchInput = document.getElementById('regencySearch');
     if (searchInput) {
         searchInput.addEventListener('input', debounce(filterData, 300));
     }
@@ -213,7 +213,7 @@ function setupEventListeners() {
 
 async function fetchRiskData() {
     const loadingState = document.getElementById('loadingState');
-    const puskesmasGrid = document.getElementById('puskesmasGrid');
+    const regencyGrid = document.getElementById('regencyGrid');
     const errorMessage = document.getElementById('errorMessage');
     
     try {
@@ -221,7 +221,7 @@ async function fetchRiskData() {
         
         // Show loading state
         loadingState.classList.remove('hidden');
-        puskesmasGrid.classList.add('hidden');
+        regencyGrid.classList.add('hidden');
         errorMessage.classList.add('hidden');
         
         const response = await fetch('/get-risk-data');
@@ -253,7 +253,7 @@ async function fetchRiskData() {
         
         // Hide loading, show grid
         loadingState.classList.add('hidden');
-        puskesmasGrid.classList.remove('hidden');
+        regencyGrid.classList.remove('hidden');
         
     } catch (error) {
         console.error('❌ Error fetching risk data:', error);
@@ -280,19 +280,19 @@ function updateSummaryCards(data) {
 }
 
 function displayRiskCards(data) {
-    const puskesmasGrid = document.getElementById('puskesmasGrid');
+    const regencyGrid = document.getElementById('regencyGrid');
     const emptyState = document.getElementById('emptyState');
     
     if (data.length === 0) {
-        puskesmasGrid.classList.add('hidden');
+        regencyGrid.classList.add('hidden');
         emptyState.classList.remove('hidden');
         return;
     }
     
-    puskesmasGrid.classList.remove('hidden');
+    regencyGrid.classList.remove('hidden');
     emptyState.classList.add('hidden');
     
-    puskesmasGrid.innerHTML = data.map(puskesmas => createRiskCard(puskesmas)).join('');
+    regencyGrid.innerHTML = data.map(regency => createRiskCard(regency)).join('');
     feather.replace(); // Re-initialize feather icons
 }
 
@@ -325,13 +325,13 @@ function createRiskCard(location) {
     const style = riskStyles[riskLevel] || riskStyles['low'];
     
     // Extract region and coordinates from location name
-    const locationParts = location.puskesmas.split(' (');
+    const locationParts = location.regency.split(' (');
     const regionName = locationParts[0];
     const coordinates = locationParts[1] ? locationParts[1].replace(')', '') : '';
     
     return `
         <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden card-hover cursor-pointer transition-all duration-300"
-             onclick="showRiskDetails('${location.puskesmas.replace(/'/g, "\\'")}')">
+             onclick="showRiskDetails('${location.regency.replace(/'/g, "\\'")}')">
             <!-- Risk Level Header -->
             <div class="${style.bg} ${style.border} border-b-2 p-4">
                 <div class="flex items-center justify-between">
@@ -428,7 +428,7 @@ function getHumidityIcon(humidity) {
 
 // Update showRiskDetails function
 function showRiskDetails(locationName) {
-    const location = allRiskData.find(p => p.puskesmas === locationName);
+    const location = allRiskData.find(p => p.regency === locationName);
     if (!location) return;
     
     console.log(`🔍 Showing details for: ${locationName}`);
@@ -590,12 +590,12 @@ function showRiskDetails(locationName) {
 }
 
 function filterData() {
-    const searchTerm = document.getElementById('puskesmasSearch').value.toLowerCase();
+    const searchTerm = document.getElementById('regencySearch').value.toLowerCase();
     const riskFilter = document.getElementById('riskFilter').value;
     
-    filteredData = allRiskData.filter(puskesmas => {
-        const matchesSearch = puskesmas.puskesmas.toLowerCase().includes(searchTerm);
-        const matchesRisk = !riskFilter || puskesmas.risk_level.toLowerCase() === riskFilter;
+    filteredData = allRiskData.filter(regency => {
+        const matchesSearch = regency.regency.toLowerCase().includes(searchTerm);
+        const matchesRisk = !riskFilter || regency.risk_level.toLowerCase() === riskFilter;
         
         return matchesSearch && matchesRisk;
     });
@@ -605,7 +605,7 @@ function filterData() {
 }
 
 function clearFilters() {
-    document.getElementById('puskesmasSearch').value = '';
+    document.getElementById('regencySearch').value = '';
     document.getElementById('riskFilter').value = '';
     filterData();
 }
@@ -615,10 +615,10 @@ function refreshData() {
     
     // Show loading state
     const loadingState = document.getElementById('loadingState');
-    const puskesmasGrid = document.getElementById('puskesmasGrid');
+    const regencyGrid = document.getElementById('regencyGrid');
     
     loadingState.classList.remove('hidden');
-    puskesmasGrid.classList.add('hidden');
+    regencyGrid.classList.add('hidden');
     
     // Clear cache on server and reload
     fetch('/refresh-risk-data', { method: 'POST' })
