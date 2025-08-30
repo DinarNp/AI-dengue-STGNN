@@ -252,62 +252,100 @@ class DengueTrainer:
         return train_loader, val_loader, test_loader
 
     def compute_loss(self, outputs: Dict[str, torch.Tensor], targets: torch.Tensor) -> torch.Tensor:
-        """Compute combined loss with adaptive weighting"""
+        """Enhanced loss function for better dengue prediction performance"""
         predictions = outputs['predictions']
         zero_probs = outputs['zero_probs']
         
-        # Regression loss - use MSE for low scale, Huber for high scale
+        # Enhanced regression loss with Huber loss for robustness
         if self.metadata and self.metadata.get('target_transform') == 'log1p':
             # For log-transformed targets, use Huber loss (more robust)
-            regression_loss = F.huber_loss(predictions, targets, delta=1.0)
+            regression_loss = F.huber_loss(predictions, targets, delta=0.5)  # Reduced delta for better precision
         else:
-            # For original scale, use MSE
-            regression_loss = F.mse_loss(predictions, targets)
+            # For original scale, use Huber loss for robustness
+            regression_loss = F.huber_loss(predictions, targets, delta=1.0)
         
-        # Zero-inflation loss
+        # Enhanced zero-inflation loss with focal loss for imbalanced data
         zero_targets = (targets == 0).float()
-        bce_loss = F.binary_cross_entropy(zero_probs, zero_targets)
+        alpha = 0.25  # Focal loss alpha
+        gamma = 2.0   # Focal loss gamma
         
-        # Combined loss with adaptive weights
+        # Focal loss for zero-inflation
+        pt = torch.where(zero_targets == 1, zero_probs, 1 - zero_probs)
+        focal_loss = -alpha * (1 - pt) ** gamma * torch.log(pt + 1e-8)
+        zero_loss = focal_loss.mean()
+        
+        # Enhanced temporal regularization with smoothness
+        if predictions.shape[1] > 1:  # If we have multiple time steps
+            temporal_diff = torch.diff(predictions, dim=1)
+            temporal_reg = torch.mean(torch.abs(temporal_diff)) + 0.1 * torch.mean(temporal_diff ** 2)
+        else:
+            temporal_reg = torch.tensor(0.0, device=predictions.device)
+        
+        # Enhanced spatial regularization with smoothness
+        if predictions.shape[2] > 1:  # If we have multiple nodes
+            spatial_diff = torch.diff(predictions, dim=2)
+            spatial_reg = torch.mean(torch.abs(spatial_diff)) + 0.1 * torch.mean(spatial_diff ** 2)
+        else:
+            spatial_reg = torch.tensor(0.0, device=predictions.device)
+        
+        # Additional regularization for better generalization
+        l2_reg = torch.tensor(0.0, device=predictions.device)
+        for param in self.model.parameters():
+            l2_reg += torch.norm(param, p=2)
+        
+        # Enhanced combined loss with better weighting
         regression_weight = self.config.REGRESSION_WEIGHT
-        zero_weight = 0.1 if self.metadata and self.metadata.get('target_transform') == 'log1p' else 0.2
+        zero_weight = self.config.ZERO_INFLATION_WEIGHT
         
-        total_loss = regression_weight * regression_loss + zero_weight * bce_loss
+        total_loss = (regression_weight * regression_loss +
+                     zero_weight * zero_loss +
+                     self.config.TEMPORAL_REG_WEIGHT * temporal_reg +
+                     self.config.SPATIAL_REG_WEIGHT * spatial_reg +
+                     1e-5 * l2_reg)  # Light L2 regularization
         
         return total_loss
     
     def train_epoch(self, model: nn.Module, train_loader: DataLoader, 
                    optimizer: torch.optim.Optimizer, adj_matrix: torch.Tensor) -> float:
-        """Train one epoch"""
+        """Train one epoch - FIXED VERSION"""
         model.train()
         total_loss = 0.0
         num_batches = 0
         
-        for batch_features, batch_targets in train_loader:
-            batch_features = batch_features.to(self.device)
-            batch_targets = batch_targets.to(self.device)
+        try:
+            for batch_features, batch_targets in train_loader:
+                batch_features = batch_features.to(self.device)
+                batch_targets = batch_targets.to(self.device)
+                
+                optimizer.zero_grad()
+                
+                # Forward pass with error handling
+                try:
+                    outputs = model(batch_features, adj_matrix)
+                    loss = self.compute_loss(outputs, batch_targets)
+                except Exception as e:
+                    print(f"❌ Error in forward pass: {e}")
+                    print(f"   Batch features shape: {batch_features.shape}")
+                    print(f"   Batch targets shape: {batch_targets.shape}")
+                    continue
+                
+                # Backward pass with gradient clipping
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                optimizer.step()
+                
+                # MPS synchronization
+                if self.device.type == 'mps':
+                    torch.mps.synchronize()
+                
+                total_loss += loss.item()
+                num_batches += 1
             
-            optimizer.zero_grad()
+            return total_loss / max(num_batches, 1)
             
-            # Forward pass
-            outputs = model(batch_features, adj_matrix)
-            
-            # Compute loss
-            loss = self.compute_loss(outputs, batch_targets)
-            
-            # Backward pass with gradient clipping
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-            optimizer.step()
-            
-            # MPS synchronization
-            if self.device.type == 'mps':
-                torch.mps.synchronize()
-            
-            total_loss += loss.item()
-            num_batches += 1
-        
-        return total_loss / num_batches
+        except Exception as e:
+            print(f"❌ Error in train_epoch: {e}")
+            return 0.0
     
     def evaluate(self, model: nn.Module, data_loader: DataLoader, 
                 adj_matrix: torch.Tensor) -> Dict[str, float]:

@@ -23,6 +23,66 @@
     </div>
 </div>
 
+<!-- Enhanced Features Information -->
+<div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-xl p-8 border border-blue-200 mb-8">
+    <div class="flex items-center mb-6">
+        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+            <i data-feather="zap" class="w-6 h-6 text-blue-600"></i>
+        </div>
+        <div>
+            <h2 class="text-2xl font-bold text-blue-900">Enhanced Data Processing</h2>
+            <p class="text-blue-700">Advanced feature engineering for better predictions</p>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Temporal Features -->
+        <div class="bg-white rounded-xl p-6 border border-blue-200">
+            <div class="flex items-center mb-3">
+                <i data-feather="clock" class="w-5 h-5 text-blue-600 mr-2"></i>
+                <h3 class="font-semibold text-gray-900">Temporal Features</h3>
+            </div>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>• Proper date column from Year/Week</li>
+                <li>• Cyclical encoding (sin/cos)</li>
+                <li>• Seasonal patterns (Indonesia)</li>
+                <li>• Day of year features</li>
+                <li>• Week of year features</li>
+            </ul>
+        </div>
+        
+        <!-- Lag Features -->
+        <div class="bg-white rounded-xl p-6 border border-blue-200">
+            <div class="flex items-center mb-3">
+                <i data-feather="repeat" class="w-5 h-5 text-purple-600 mr-2"></i>
+                <h3 class="font-semibold text-gray-900">Lag Features</h3>
+            </div>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>• Cases lag (1-4 weeks)</li>
+                <li>• Environmental lags</li>
+                <li>• Rolling statistics</li>
+                <li>• Trend analysis</li>
+                <li>• Outbreak indicators</li>
+            </ul>
+        </div>
+        
+        <!-- Environmental Features -->
+        <div class="bg-white rounded-xl p-6 border border-blue-200">
+            <div class="flex items-center mb-3">
+                <i data-feather="cloud" class="w-5 h-5 text-green-600 mr-2"></i>
+                <h3 class="font-semibold text-gray-900">Environmental Features</h3>
+            </div>
+            <ul class="text-sm text-gray-600 space-y-1">
+                <li>• Temperature (min/max/avg)</li>
+                <li>• Precipitation patterns</li>
+                <li>• Humidity levels</li>
+                <li>• NDVI vegetation</li>
+                <li>• Wind & pressure data</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
 <!-- Data Loading Section -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
     <!-- Load Data Card -->
@@ -47,6 +107,9 @@
                             The dengue dataset contains comprehensive information linking climatic impact drivers 
                             and environmental conditions from Open Weather Data and NASA POWER to dengue suspect cases 
                             from the Early Warning and Response System (EWARS) Indonesia across regencies.
+                            <br><br>
+                            <strong>✅ Enhanced with:</strong> Proper date column, cyclical encoding, seasonal patterns, 
+                            lag features (1-4 weeks), rolling statistics, and environmental trend analysis.
                         </p>
                     </div>
                 </div>

@@ -15,7 +15,7 @@ class DengueDataPreprocessor:
         self.label_encoder = LabelEncoder()
         
     def load_data(self, file_path: str) -> pd.DataFrame:
-        """Load dengue dataset"""
+        """Load dengue dataset with enhanced temporal features"""
         try:
             # Coba beberapa separator yang mungkin
             separators = [';', ',', '\t']
@@ -44,6 +44,10 @@ class DengueDataPreprocessor:
                 print(f"Columns: {list(df.columns[:5])}...")
                 print("First row sample:")
                 print(df.iloc[0, :5].to_dict())
+                
+                # ENHANCED: Add proper date column
+                df = self._add_proper_date_column(df)
+                
                 return df
             else:
                 print("All parsing methods failed, generating synthetic data...")
@@ -52,6 +56,55 @@ class DengueDataPreprocessor:
         except Exception as e:
             print(f"Error loading data: {str(e)[:100]}")
             return self._generate_synthetic_data()
+    
+    def _add_proper_date_column(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Add proper date column from Year and Week"""
+        print("🕐 Adding proper date column from Year and Week...")
+        
+        try:
+            # Convert Year and Week to proper date
+            # Week 1 of each year starts on January 1st
+            df['date'] = df.apply(lambda row: 
+                pd.Timestamp(year=int(row['Year']), month=1, day=1) + 
+                pd.Timedelta(weeks=int(row['Week'])-1), axis=1)
+            
+            # Add more temporal features
+            df['day_of_year'] = df['date'].dt.dayofyear
+            df['month'] = df['date'].dt.month
+            df['quarter'] = df['date'].dt.quarter
+            df['week_of_year'] = df['date'].dt.isocalendar().week
+            
+            # Cyclical encoding for temporal features
+            df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+            df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+            df['day_of_year_sin'] = np.sin(2 * np.pi * df['day_of_year'] / 365)
+            df['day_of_year_cos'] = np.cos(2 * np.pi * df['day_of_year'] / 365)
+            df['week_of_year_sin'] = np.sin(2 * np.pi * df['week_of_year'] / 52)
+            df['week_of_year_cos'] = np.cos(2 * np.pi * df['week_of_year'] / 52)
+            
+            # Seasonal features for Indonesia
+            df['season'] = df['month'].map({
+                6: 0, 7: 0, 8: 0, 9: 0,      # June-Sept: Dry season
+                10: 1, 11: 1,                 # Oct-Nov: Transition
+                12: 2, 1: 2, 2: 2, 3: 2,     # Dec-March: Wet/Rainy season
+                4: 3, 5: 3,                   # April-May: Transition
+            })
+            
+            # One-hot encoding for seasons
+            season_dummies = pd.get_dummies(df['season'], prefix='season')
+            df = pd.concat([df, season_dummies], axis=1)
+            
+            print(f"✅ Added temporal features: date, month, season, cyclical encoding")
+            print(f"📅 Date range: {df['date'].min()} to {df['date'].max()}")
+            print(f"🌡️ Seasons: {df['season'].value_counts().to_dict()}")
+            
+            return df
+            
+        except Exception as e:
+            print(f"⚠️ Error adding date column: {e}")
+            # Fallback: create simple date
+            df['date'] = pd.to_datetime(df['Year'].astype(str) + '-01-01') + pd.to_timedelta((df['Week']-1)*7, unit='D')
+            return df
     
     def _manual_csv_parsing(self, file_path: str) -> pd.DataFrame:
         """Manual CSV parsing when pandas fails"""
@@ -190,31 +243,70 @@ class DengueDataPreprocessor:
         return df
     
     def create_lag_features(self, df: pd.DataFrame, n_lags: int = 4) -> pd.DataFrame:
-        """Create lag features for cases"""
+        """Create enhanced lag features for cases and environmental variables"""
         df = df.copy()
         
-        if 'Puskesmas' not in df.columns:
-            df['Puskesmas'] = 'PKM_DEFAULT'
+        # Use Region instead of Puskesmas if available
+        location_col = 'Region' if 'Region' in df.columns else 'Puskesmas'
+        if location_col not in df.columns:
+            df[location_col] = 'LOCATION_DEFAULT'
+        
         if 'Cases' not in df.columns:
             df['Cases'] = np.random.poisson(5, len(df))
         
         try:
-            df = df.sort_values(['Puskesmas', 'Date'])
+            df = df.sort_values([location_col, 'date'])
             
+            # Enhanced lag features for cases
             for lag in range(1, n_lags + 1):
-                df[f'Cases_lag_{lag}'] = (df.groupby('Puskesmas')['Cases']
+                df[f'Cases_lag_{lag}'] = (df.groupby(location_col)['Cases']
                                          .shift(lag).fillna(0))
                 df[f'Cases_binary_lag_{lag}'] = (df[f'Cases_lag_{lag}'] > 0).astype(int)
             
-            df['Cases_rolling_mean_4w'] = (df.groupby('Puskesmas')['Cases']
+            # Rolling statistics for cases
+            df['Cases_rolling_mean_4w'] = (df.groupby(location_col)['Cases']
                                           .rolling(window=4, min_periods=1)
                                           .mean().reset_index(0, drop=True))
+            df['Cases_rolling_std_4w'] = (df.groupby(location_col)['Cases']
+                                         .rolling(window=4, min_periods=1)
+                                         .std().reset_index(0, drop=True).fillna(0))
+            df['Cases_rolling_max_4w'] = (df.groupby(location_col)['Cases']
+                                         .rolling(window=4, min_periods=1)
+                                         .max().reset_index(0, drop=True))
+            
+            # Lag features for environmental variables
+            env_vars = ['Temperature_Avg', 'Precipitation_Total', 'Humidity', 'NDVI']
+            for var in env_vars:
+                if var in df.columns:
+                    for lag in range(1, 3):  # 1-2 week lags for environmental variables
+                        df[f'{var}_lag_{lag}'] = (df.groupby(location_col)[var]
+                                                 .shift(lag).fillna(df[var].median()))
+            
+            # Trend features
+            df['Cases_trend_4w'] = (df.groupby(location_col)['Cases']
+                                   .rolling(window=4, min_periods=2)
+                                   .apply(lambda x: np.polyfit(range(len(x)), x, 1)[0] if len(x) > 1 else 0)
+                                   .reset_index(0, drop=True))
+            
+            # Outbreak indicators
+            df['Cases_outbreak_indicator'] = (df['Cases'] > df.groupby(location_col)['Cases']
+                                             .rolling(window=8, min_periods=4)
+                                             .mean().reset_index(0, drop=True) * 2).astype(int)
+            
+            print(f"✅ Created enhanced lag features with {n_lags} lags")
+            print(f"📊 Added rolling statistics and trend features")
+            
         except Exception as e:
             print(f"Error creating lag features: {e}")
+            # Fallback: create basic lag features
             for lag in range(1, n_lags + 1):
                 df[f'Cases_lag_{lag}'] = 0
                 df[f'Cases_binary_lag_{lag}'] = 0
             df['Cases_rolling_mean_4w'] = df.get('Cases', 0)
+            df['Cases_rolling_std_4w'] = 0
+            df['Cases_rolling_max_4w'] = df.get('Cases', 0)
+            df['Cases_trend_4w'] = 0
+            df['Cases_outbreak_indicator'] = 0
         
         return df
     
@@ -390,22 +482,33 @@ class DengueDataPreprocessor:
         print(f"   Batch Size: {adaptive_config['BATCH_SIZE']}")
         
         # Get node information
-        if 'Puskesmas' in df.columns:
+        if 'Region' in df.columns:
+            unique_locations = df[['Region', 'Latitude', 'Longitude']].drop_duplicates()
+            print(f"✅ Found {len(unique_locations)} unique regions for graph construction")
+        elif 'Puskesmas' in df.columns:
             unique_locations = df[['Puskesmas', 'Latitude', 'Longitude']].drop_duplicates()
+            print(f"✅ Found {len(unique_locations)} unique puskesmas for graph construction")
         else:
             unique_locations = pd.DataFrame({
-                'Puskesmas': ['PKM_DEFAULT'],
+                'Region': ['DEFAULT_REGION'],
                 'Latitude': [-7.8],
                 'Longitude': [110.3]
             })
+            print("⚠️ No location column found, using default coordinates")
         
         location_coords = unique_locations[['Latitude', 'Longitude']].values
         
         # Prepare metadata
+        # Get node_ids based on available column
+        if 'Region' in unique_locations.columns:
+            node_ids = unique_locations['Region'].tolist()
+        else:
+            node_ids = unique_locations['Puskesmas'].tolist()
+        
         metadata = {
             'feature_cols': feature_cols,
             'n_nodes': len(unique_locations),
-            'node_ids': unique_locations['Puskesmas'].tolist(),
+            'node_ids': node_ids,
             'scaler': self.scaler,
             'label_encoder': self.label_encoder,
             'location_coords': location_coords,

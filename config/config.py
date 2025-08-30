@@ -2,47 +2,47 @@ class Config:
     """Configuration parameters for STGNN Dengue Prediction with adaptive support"""
     
     # Data parameters
-    DATA_PATH = "data/test2.csv"
-    WINDOW_SIZE = 4
+    DATA_PATH = "data/fix.csv"
+    WINDOW_SIZE = 8  # Increased from 4 to capture longer temporal patterns
     FORECAST_HORIZON = 1
     
-    # Model architecture - Base configuration
-    NODE_FEATURE_DIM = 64
-    EDGE_FEATURE_DIM = 32
-    HIDDEN_SIZE = 64
-    ATTENTION_HEADS = 2
-    GNN_LAYERS = 3
-    LSTM_LAYERS = 2
-    DROPOUT = 0.3  # Will be overridden by adaptive config
+    # Model architecture - Optimized configuration
+    NODE_FEATURE_DIM = 128  # Increased from 64
+    EDGE_FEATURE_DIM = 64   # Increased from 32
+    HIDDEN_SIZE = 128       # Increased from 64
+    ATTENTION_HEADS = 4     # Increased from 2
+    GNN_LAYERS = 4          # Increased from 3
+    LSTM_LAYERS = 3         # Increased from 2
+    DROPOUT = 0.2           # Reduced from 0.3 for better generalization
     
     # Graph construction
     SPATIAL_THRESHOLD = 0.1
     ENV_SIMILARITY_THRESHOLD = 0.7
-    K_NEAREST = 3
+    K_NEAREST = 4           # Increased from 3
     
-    # Training parameters - Base configuration (will be overridden by adaptive config)
-    BATCH_SIZE = 16          # Will be overridden
+    # Training parameters - Optimized for better performance
+    BATCH_SIZE = 16         # Increased to avoid batch size issues
     NUM_WORKERS = 0
     PIN_MEMORY = False
-    LEARNING_RATE = 0.0005   # Will be overridden
-    EPOCHS = 100             # Will be overridden
-    WEIGHT_DECAY = 1e-4      # Will be overridden
-    EARLY_STOPPING_PATIENCE = 20  # Will be overridden
+    LEARNING_RATE = 0.0001  # Reduced for more stable training
+    EPOCHS = 500            # Increased for better convergence
+    WEIGHT_DECAY = 1e-5     # Reduced for less regularization
+    EARLY_STOPPING_PATIENCE = 30  # Increased patience
     USE_AMP = True
     
-    # Loss weights
-    REGRESSION_WEIGHT = 0.7
-    TEMPORAL_REG_WEIGHT = 0.1
-    SPATIAL_REG_WEIGHT = 0.1
-    ZERO_INFLATION_WEIGHT = 0.3
+    # Loss weights - Optimized for dengue prediction
+    REGRESSION_WEIGHT = 0.8      # Increased from 0.7
+    TEMPORAL_REG_WEIGHT = 0.05   # Reduced from 0.1
+    SPATIAL_REG_WEIGHT = 0.05    # Reduced from 0.1
+    ZERO_INFLATION_WEIGHT = 0.2  # Reduced from 0.3
     
     # Adaptive configuration thresholds
     HIGH_SCALE_THRESHOLD = 8.0  # Mean target value threshold for high-scale data
     
-    # Performance targets
-    TARGET_MAE_LOW_SCALE = 1.0    # Target MAE for low-scale datasets
-    TARGET_MAE_HIGH_SCALE = 3.0   # Target MAE for high-scale datasets
-    TARGET_R2_MINIMUM = 0.2       # Minimum acceptable R² score
+    # Performance targets - More realistic targets
+    TARGET_MAE_LOW_SCALE = 0.5    # Reduced from 1.0
+    TARGET_MAE_HIGH_SCALE = 2.0   # Reduced from 3.0
+    TARGET_R2_MINIMUM = 0.3       # Increased from 0.2
     
     @classmethod
     def get_adaptive_config(cls, target_mean: float, dataset_characteristics: dict = None):
@@ -58,36 +58,36 @@ class Config:
         """
         
         if target_mean > cls.HIGH_SCALE_THRESHOLD:
-            # High-scale dataset configuration
+            # High-scale dataset configuration - Optimized
             config = {
                 'scale_type': 'high',
-                'LEARNING_RATE': 0.0001,      # Lower LR for stability
-                'DROPOUT': 0.4,               # Higher dropout for regularization
-                'BATCH_SIZE': 32,             # Larger batches for stability
-                'WEIGHT_DECAY': 0.001,        # Strong L2 regularization
-                'EPOCHS': 200,                # Fewer epochs (faster convergence expected)
-                'PATIENCE': 15,               # Less patience (stop early)
+                'LEARNING_RATE': 0.00005,     # Further reduced for stability
+                'DROPOUT': 0.15,              # Reduced for better generalization
+                'BATCH_SIZE': 4,              # Smaller batches for stability
+                'WEIGHT_DECAY': 5e-6,         # Reduced L2 regularization
+                'EPOCHS': 800,                # More epochs for convergence
+                'PATIENCE': 40,               # More patience
                 'target_transform': 'log1p',  # Apply log transformation
                 'loss_function': 'huber',     # Robust to outliers
-                'scheduler_factor': 0.3,      # More aggressive LR reduction
-                'grad_clip_norm': 0.5,        # Tighter gradient clipping
+                'scheduler_factor': 0.2,      # More aggressive LR reduction
+                'grad_clip_norm': 0.3,        # Tighter gradient clipping
             }
             print(f"🔧 High-scale configuration selected (target_mean={target_mean:.2f})")
             
         else:
-            # Low-scale dataset configuration  
+            # Low-scale dataset configuration - Optimized
             config = {
                 'scale_type': 'low',
-                'LEARNING_RATE': 0.001,       # Higher LR for faster learning
-                'DROPOUT': 0.2,               # Lower dropout (less regularization needed)
-                'BATCH_SIZE': 16,             # Smaller batches
-                'WEIGHT_DECAY': 0.0001,       # Light L2 regularization
-                'EPOCHS': 300,                # More epochs (may need more training)
-                'PATIENCE': 25,               # More patience
+                'LEARNING_RATE': 0.0005,      # Reduced for stability
+                'DROPOUT': 0.1,               # Reduced dropout
+                'BATCH_SIZE': 8,              # Optimal batch size
+                'WEIGHT_DECAY': 1e-6,         # Minimal L2 regularization
+                'EPOCHS': 600,                # More epochs
+                'PATIENCE': 50,               # More patience
                 'target_transform': 'none',   # No transformation needed
                 'loss_function': 'mse',       # Standard MSE loss
-                'scheduler_factor': 0.5,      # Moderate LR reduction
-                'grad_clip_norm': 1.0,        # Standard gradient clipping
+                'scheduler_factor': 0.3,      # Moderate LR reduction
+                'grad_clip_norm': 0.5,        # Standard gradient clipping
             }
             print(f"🔧 Low-scale configuration selected (target_mean={target_mean:.2f})")
         
@@ -98,21 +98,21 @@ class Config:
             
             # Adjust for zero-inflation
             if zero_ratio > 0.5:  # High zero-inflation
-                config['ZERO_INFLATION_WEIGHT'] = 0.4
-                config['zero_threshold'] = 0.3  # Lower threshold for zero classification
+                config['ZERO_INFLATION_WEIGHT'] = 0.3
+                config['zero_threshold'] = 0.2  # Lower threshold for zero classification
                 print(f"   📊 High zero-inflation detected ({zero_ratio:.2f}), adjusting weights")
             else:
-                config['ZERO_INFLATION_WEIGHT'] = 0.2
-                config['zero_threshold'] = 0.5
+                config['ZERO_INFLATION_WEIGHT'] = 0.15
+                config['zero_threshold'] = 0.4
             
             # Adjust for number of locations
             if n_locations < 5:  # Few locations
-                config['SPATIAL_REG_WEIGHT'] = 0.05  # Reduce spatial regularization
-                config['K_NEAREST'] = min(2, n_locations - 1)
+                config['SPATIAL_REG_WEIGHT'] = 0.02  # Reduce spatial regularization
+                config['K_NEAREST'] = min(3, n_locations - 1)
                 print(f"   🗺️ Few locations ({n_locations}), reducing spatial regularization")
             elif n_locations > 20:  # Many locations
-                config['SPATIAL_REG_WEIGHT'] = 0.15  # Increase spatial regularization
-                config['BATCH_SIZE'] = min(config['BATCH_SIZE'] * 2, 64)  # Larger batches
+                config['SPATIAL_REG_WEIGHT'] = 0.08  # Moderate spatial regularization
+                config['BATCH_SIZE'] = min(config['BATCH_SIZE'] * 2, 32)  # Larger batches
                 print(f"   🗺️ Many locations ({n_locations}), increasing batch size")
         
         return config

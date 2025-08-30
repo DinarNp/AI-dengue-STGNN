@@ -9,7 +9,13 @@ class DenguePredictor:
     """Interface for making predictions with trained model"""
 
     def __init__(self, model_path: str):
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # Device selection with MPS support for Apple Silicon
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        elif torch.backends.mps.is_available():
+            self.device = torch.device('mps')
+        else:
+            self.device = torch.device('cpu')
         
         # Load model with weights_only=False for older checkpoints
         try:
