@@ -1,136 +1,261 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Dashboard — DengueWatch{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Admin Dashboard</li>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
-    <hr>
-    
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body stat-card">
-                    <h3>{{ stats.total_regencies }}</h3>
-                    <p>Active Regencies</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div class="card-body stat-card">
-                    <h3>{{ stats.total_cases }}</h3>
-                    <p>Total Cases Recorded</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <div class="card-body stat-card">
-                    <h3>{{ stats.total_users }}</h3>
-                    <p>System Users</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <div class="card-body stat-card">
-                    <h3>
-                        {% if active_model %}
-                            Active
-                        {% else %}
-                            None
-                        {% endif %}
-                    </h3>
-                    <p>Model Status</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-md-3">
-                            <a href="{{ url_for('admin.data_management') }}" class="btn btn-primary w-100 btn-custom">
-                                <i class="fas fa-database"></i> Manage Data
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="#" class="btn btn-success w-100 btn-custom">
-                                <i class="fas fa-chart-line"></i> Generate Predictions
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="#" class="btn btn-info w-100 btn-custom">
-                                <i class="fas fa-upload"></i> Upload Model
-                            </a>
-                        </div>
-                        <div class="col-md-3">
-                            <a href="{{ url_for('admin.view_logs') }}" class="btn btn-secondary w-100 btn-custom">
-                                <i class="fas fa-file-alt"></i> View Logs
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Recent Processing Logs -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-history"></i> Recent Processing Logs</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Time</th>
-                                    <th>Process Type</th>
-                                    <th>Status</th>
-                                    <th>Records</th>
-                                    <th>User</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for log in recent_logs %}
-                                <tr>
-                                    <td>{{ log.started_at.strftime('%Y-%m-%d %H:%M') if log.started_at else 'N/A' }}</td>
-                                    <td>{{ log.process_type }}</td>
-                                    <td>
-                                        {% if log.status == 'completed' %}
-                                            <span class="badge bg-success">{{ log.status }}</span>
-                                        {% elif log.status == 'failed' %}
-                                            <span class="badge bg-danger">{{ log.status }}</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">{{ log.status }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ log.records_processed or 0 }}</td>
-                                    <td>{{ log.user.username if log.user else 'System' }}</td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No recent logs</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-tachometer-alt" style="color:var(--primary);margin-right:8px;"></i>Admin Dashboard</h1>
+  <p class="page-subtitle">System overview and quick actions</p>
 </div>
+
+<!-- ===== STAT CARDS ===== -->
+<div class="grid-4">
+
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-city"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ stats.total_regencies }}</div>
+      <div class="stat-label">Active Kabupaten</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-danger">
+    <div class="stat-icon icon-danger"><i class="fas fa-notes-medical"></i></div>
+    <div class="stat-content">
+      <div class="stat-value" data-counter="{{ stats.total_cases }}">{{ stats.total_cases }}</div>
+      <div class="stat-label">Total Cases Recorded</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-secondary">
+    <div class="stat-icon icon-secondary"><i class="fas fa-users"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ stats.total_users }}</div>
+      <div class="stat-label">System Users</div>
+    </div>
+  </div>
+
+  <div class="stat-card {% if active_model %}border-left-success{% else %}border-left-warning{% endif %}">
+    <div class="stat-icon {% if active_model %}icon-success{% else %}icon-warning{% endif %}">
+      <i class="fas fa-brain"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-value" style="font-size:17px;">
+        {% if active_model %}
+          <span style="color:var(--success);">Active</span>
+        {% else %}
+          <span style="color:var(--warning);">None</span>
+        {% endif %}
+      </div>
+      <div class="stat-label">
+        {% if active_model %}{{ active_model.version_name | truncate(18, True) }}{% else %}No model loaded{% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== QUICK ACTIONS ===== -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>Quick Actions</h5>
+  </div>
+  <div class="card-body">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+
+      <a href="{{ url_for('admin.data_management') }}" class="action-card">
+        <div class="action-icon" style="background:#e0f2fe;">
+          <i class="fas fa-database" style="color:var(--primary);font-size:22px;"></i>
+        </div>
+        <div>
+          <div class="action-title">Manage Data</div>
+          <div class="action-desc">Cases, Climate, NDVI</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('admin.training') }}" class="action-card">
+        <div class="action-icon" style="background:#d1fae5;">
+          <i class="fas fa-brain" style="color:var(--success);font-size:22px;"></i>
+        </div>
+        <div>
+          <div class="action-title">Train Model</div>
+          <div class="action-desc">Export data &amp; train STGNN</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('admin.predictions_manage') }}" class="action-card">
+        <div class="action-icon" style="background:#ede9fe;">
+          <i class="fas fa-chart-line" style="color:var(--secondary);font-size:22px;"></i>
+        </div>
+        <div>
+          <div class="action-title">Predictions</div>
+          <div class="action-desc">Generate &amp; manage</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('admin.view_logs') }}" class="action-card">
+        <div class="action-icon" style="background:#fef3c7;">
+          <i class="fas fa-file-alt" style="color:var(--warning);font-size:22px;"></i>
+        </div>
+        <div>
+          <div class="action-title">Activity Logs</div>
+          <div class="action-desc">View system operations</div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== DATA STATUS TABLE ===== -->
+{% if data_stats %}
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>Data Status by Kabupaten</h5>
+    <div class="card-header-actions">
+      <a href="{{ url_for('admin.data_management') }}" class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-external-link-alt"></i> Full View
+      </a>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Kabupaten</th>
+            <th>Cases Data</th>
+            <th>Climate Data</th>
+            <th>NDVI Data</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in data_stats %}
+          <tr>
+            <td>
+              <strong>{{ stat.regency }}</strong>
+            </td>
+            <td>
+              <div class="data-status-indicator">
+                {% if stat.latest_dengue and stat.latest_dengue != 'N/A' %}
+                  <span class="status-dot green"></span>
+                  <span>{{ stat.latest_dengue }}</span>
+                {% else %}
+                  <span class="status-dot red"></span>
+                  <span style="color:var(--text-muted);">No data</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <div class="data-status-indicator">
+                {% if stat.latest_climate and stat.latest_climate != 'N/A' %}
+                  <span class="status-dot green"></span>
+                  <span>{{ stat.latest_climate }}</span>
+                {% else %}
+                  <span class="status-dot yellow"></span>
+                  <span style="color:var(--text-muted);">No data</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <div class="data-status-indicator">
+                {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}
+                  <span class="status-dot green"></span>
+                  <span>{{ stat.latest_ndvi }}</span>
+                {% else %}
+                  <span class="status-dot red"></span>
+                  <span style="color:var(--text-muted);">No data</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <a href="{{ url_for('admin.data_management') }}" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-edit"></i> Update
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="table-empty">
+              <i class="fas fa-database"></i>No data statistics available
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ===== RECENT LOGS ===== -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-history" style="color:var(--text-muted);margin-right:8px;"></i>Recent Activity Logs</h5>
+    <div class="card-header-actions">
+      <a href="{{ url_for('admin.view_logs') }}" class="btn btn-outline-secondary btn-sm">View All</a>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Process</th>
+            <th>Status</th>
+            <th>Records</th>
+            <th>User</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_logs %}
+          <tr>
+            <td style="color:var(--text-muted);white-space:nowrap;">
+              {{ log.started_at.strftime('%Y-%m-%d %H:%M') if log.started_at else 'N/A' }}
+            </td>
+            <td>
+              <span class="badge badge-secondary">{{ log.process_type }}</span>
+            </td>
+            <td>
+              {% if log.status == 'completed' %}
+                <span class="badge badge-success"><i class="fas fa-check-circle"></i> Completed</span>
+              {% elif log.status == 'failed' %}
+                <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Failed</span>
+              {% else %}
+                <span class="badge badge-warning"><i class="fas fa-clock"></i> {{ log.status }}</span>
+              {% endif %}
+            </td>
+            <td>{{ log.records_processed or 0 }}</td>
+            <td>{{ log.user.username if log.user else 'System' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="table-empty">
+              <i class="fas fa-inbox"></i>No recent activity logs
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
+<style>
+@media (max-width: 900px) {
+  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2,1fr) !important; }
+}
+@media (max-width: 580px) {
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:repeat(2,1fr)"] { grid-template-columns: 1fr !important; }
+}
+</style>

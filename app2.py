@@ -932,11 +932,7 @@ def load_data():
         )
         
         # Use random split instead of time-based to avoid seasonal bias
-<<<<<<< Updated upstream
-        split_results = splitter.run_complete_split(create_sequences=True, sequence_length=12, split_method='random')
-=======
         split_results = splitter.run_complete_split(create_sequences=True, sequence_length=12, split_method='stratified')
->>>>>>> Stashed changes
         
         if split_results is None:
             return safe_jsonify({'error': 'Failed to process spatio-temporal data'})
@@ -1684,19 +1680,6 @@ def predict():
             {'name': 'Historical Avg', 'value': f'{avg_cases:.1f}', 'threshold': 'Location pattern'}
         ]
         
-<<<<<<< Updated upstream
-        if processed_data is not None:
-            # Add temporal factors
-            if 'month' in regency_data.columns:
-                current_month = int(regency_data['month'].iloc[-1]) if len(regency_data) > 0 else 1
-                factors.append({'name': 'Current Month', 'value': str(current_month), 'threshold': 'Peak: Jun-Aug'})
-            
-            if 'cases_lag_4w' in regency_data.columns:
-                lag_cases = float(regency_data['cases_lag_4w'].iloc[-1]) if len(regency_data) > 0 and not pd.isna(regency_data['cases_lag_4w'].iloc[-1]) else 0.0
-                factors.append({'name': 'Cases 4 weeks ago', 'value': f'{lag_cases:.0f}', 'threshold': 'Trend indicator'})
-        
-=======
->>>>>>> Stashed changes
         recommendations = generate_recommendations_for_risk(risk_level, regency_name)
         
         response_data = {

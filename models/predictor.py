@@ -8,17 +8,7 @@ class DenguePredictor:
     """Interface for making predictions with trained STGNNDenguePredictor model"""
 
     def __init__(self, model_path: str):
-<<<<<<< Updated upstream
-        # Device selection with MPS support for Apple Silicon
-        if torch.cuda.is_available():
-            self.device = torch.device('cuda')
-        elif torch.backends.mps.is_available():
-            self.device = torch.device('mps')
-        else:
-            self.device = torch.device('cpu')
-=======
         """Initialize predictor with trained model"""
->>>>>>> Stashed changes
         
         print(f"\n🔧 Initializing DenguePredictor from {model_path}...")
         

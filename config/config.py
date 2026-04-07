@@ -3,12 +3,8 @@ class Config:
     
     # Data parameters
     DATA_PATH = "data/fix.csv"
-<<<<<<< Updated upstream
-    WINDOW_SIZE = 8  # Increased from 4 to capture longer temporal patterns
-=======
     WINDOW_SIZE = 8  # For weekly data - Increased from 4 to capture longer temporal patterns
     WINDOW_SIZE_MONTHLY = 4  # For monthly data - Reduced to work with smaller datasets (4 months history)
->>>>>>> Stashed changes
     FORECAST_HORIZON = 1
     
     # Model architecture - Optimized configuration
@@ -18,11 +14,7 @@ class Config:
     ATTENTION_HEADS = 4     # Increased from 2
     GNN_LAYERS = 4          # Increased from 3
     LSTM_LAYERS = 3         # Increased from 2
-<<<<<<< Updated upstream
-    DROPOUT = 0.2           # Reduced from 0.3 for better generalization
-=======
     DROPOUT = 0.15           # Reduced from 0.3 for better generalization
->>>>>>> Stashed changes
     
     # Model architecture - ENSURE DIVISIBILITY
     NUM_HEADS = 4
@@ -32,27 +24,16 @@ class Config:
     # Graph construction
     SPATIAL_THRESHOLD = 0.1
     ENV_SIMILARITY_THRESHOLD = 0.7
-<<<<<<< Updated upstream
-    K_NEAREST = 4           # Increased from 3
-=======
     K_NEAREST = 3           # Increased from 3
->>>>>>> Stashed changes
     
     # Training parameters - Optimized for better performance
     BATCH_SIZE = 16         # Increased to avoid batch size issues
     NUM_WORKERS = 0
     PIN_MEMORY = False
-<<<<<<< Updated upstream
-    LEARNING_RATE = 0.0001  # Reduced for more stable training
-    EPOCHS = 500            # Increased for better convergence
-    WEIGHT_DECAY = 1e-5     # Reduced for less regularization
-    EARLY_STOPPING_PATIENCE = 30  # Increased patience
-=======
     LEARNING_RATE = 0.0005  # Reduced for more stable training
     EPOCHS = 1000            # Increased for better convergence
     WEIGHT_DECAY = 1e-5     # Reduced for less regularization
     EARLY_STOPPING_PATIENCE = 100  # Increased patience
->>>>>>> Stashed changes
     USE_AMP = True
     
     # Loss weights - Optimized for dengue prediction
@@ -68,12 +49,9 @@ class Config:
     TARGET_MAE_LOW_SCALE = 0.5    # Reduced from 1.0
     TARGET_MAE_HIGH_SCALE = 2.0   # Reduced from 3.0
     TARGET_R2_MINIMUM = 0.3       # Increased from 0.2
-<<<<<<< Updated upstream
-=======
-    
+
     # ADD THIS - Device configuration
     USE_ATTENTION = True  # Enable attention mechanism in STGNN
->>>>>>> Stashed changes
     
     @classmethod
     def get_adaptive_config(cls, target_mean: float, dataset_characteristics: dict = None):
@@ -92,14 +70,6 @@ class Config:
             # High-scale dataset configuration - Optimized
             config = {
                 'scale_type': 'high',
-<<<<<<< Updated upstream
-                'LEARNING_RATE': 0.00005,     # Further reduced for stability
-                'DROPOUT': 0.15,              # Reduced for better generalization
-                'BATCH_SIZE': 4,              # Smaller batches for stability
-                'WEIGHT_DECAY': 5e-6,         # Reduced L2 regularization
-                'EPOCHS': 800,                # More epochs for convergence
-                'PATIENCE': 40,               # More patience
-=======
                 'LEARNING_RATE': 0.0005,     # Further reduced for stability
                 'DROPOUT': 0.15,              # Reduced for better generalization
                 'BATCH_SIZE': 8,              # Smaller batches for stability
@@ -108,7 +78,6 @@ class Config:
                 'PATIENCE': 100,               # More patience
                 'HIDDEN_DIM': 128,            # ✅ ADD THIS
                 'NUM_LAYERS': 4,              # ✅ ADD THIS
->>>>>>> Stashed changes
                 'target_transform': 'log1p',  # Apply log transformation
                 'loss_function': 'huber',     # Robust to outliers
                 'scheduler_factor': 0.2,      # More aggressive LR reduction
@@ -126,11 +95,8 @@ class Config:
                 'WEIGHT_DECAY': 1e-6,         # Minimal L2 regularization
                 'EPOCHS': 600,                # More epochs
                 'PATIENCE': 50,               # More patience
-<<<<<<< Updated upstream
-=======
                 'HIDDEN_DIM': 128,            # ✅ ADD THIS
-                'NUM_LAYERS': 3,              # ✅ ADD THIS  
->>>>>>> Stashed changes
+                'NUM_LAYERS': 3,              # ✅ ADD THIS
                 'target_transform': 'none',   # No transformation needed
                 'loss_function': 'mse',       # Standard MSE loss
                 'scheduler_factor': 0.3,      # Moderate LR reduction

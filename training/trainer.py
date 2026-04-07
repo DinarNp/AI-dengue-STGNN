@@ -425,123 +425,64 @@ class DengueTrainer:
         
         return train_loader, val_loader, test_loader
 
-<<<<<<< Updated upstream
-    def compute_loss(self, outputs: Dict[str, torch.Tensor], targets: torch.Tensor) -> torch.Tensor:
-        """Enhanced loss function for better dengue prediction performance"""
-        predictions = outputs['predictions']
-        zero_probs = outputs['zero_probs']
-        
-        # Enhanced regression loss with Huber loss for robustness
-        if self.metadata and self.metadata.get('target_transform') == 'log1p':
-            # For log-transformed targets, use Huber loss (more robust)
-            regression_loss = F.huber_loss(predictions, targets, delta=0.5)  # Reduced delta for better precision
-        else:
-            # For original scale, use Huber loss for robustness
-            regression_loss = F.huber_loss(predictions, targets, delta=1.0)
-        
-        # Enhanced zero-inflation loss with focal loss for imbalanced data
-        zero_targets = (targets == 0).float()
-        alpha = 0.25  # Focal loss alpha
-        gamma = 2.0   # Focal loss gamma
-        
-        # Focal loss for zero-inflation
-        pt = torch.where(zero_targets == 1, zero_probs, 1 - zero_probs)
-        focal_loss = -alpha * (1 - pt) ** gamma * torch.log(pt + 1e-8)
-        zero_loss = focal_loss.mean()
-        
-        # Enhanced temporal regularization with smoothness
-        if predictions.shape[1] > 1:  # If we have multiple time steps
-            temporal_diff = torch.diff(predictions, dim=1)
-            temporal_reg = torch.mean(torch.abs(temporal_diff)) + 0.1 * torch.mean(temporal_diff ** 2)
-        else:
-            temporal_reg = torch.tensor(0.0, device=predictions.device)
-        
-        # Enhanced spatial regularization with smoothness
-        if predictions.shape[2] > 1:  # If we have multiple nodes
-            spatial_diff = torch.diff(predictions, dim=2)
-            spatial_reg = torch.mean(torch.abs(spatial_diff)) + 0.1 * torch.mean(spatial_diff ** 2)
-        else:
-            spatial_reg = torch.tensor(0.0, device=predictions.device)
-        
-        # Additional regularization for better generalization
-        l2_reg = torch.tensor(0.0, device=predictions.device)
-        for param in self.model.parameters():
-            l2_reg += torch.norm(param, p=2)
-        
-        # Enhanced combined loss with better weighting
-        regression_weight = self.config.REGRESSION_WEIGHT
-        zero_weight = self.config.ZERO_INFLATION_WEIGHT
-        
-        total_loss = (regression_weight * regression_loss +
-                     zero_weight * zero_loss +
-                     self.config.TEMPORAL_REG_WEIGHT * temporal_reg +
-                     self.config.SPATIAL_REG_WEIGHT * spatial_reg +
-                     1e-5 * l2_reg)  # Light L2 regularization
-        
-        return total_loss
-    
-    def train_epoch(self, model: nn.Module, train_loader: DataLoader, 
-                   optimizer: torch.optim.Optimizer, adj_matrix: torch.Tensor) -> float:
-        """Train one epoch - FIXED VERSION"""
-=======
-    def _create_location_aware_split(self, n_total: int, n_nodes: int, 
+    def _create_location_aware_split(self, n_total: int, n_nodes: int,
                                      samples_per_node: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
-        ✅ FIXED: Split data while keeping location groups intact
+        FIXED: Split data while keeping location groups intact
         Strategy:
         1. Split time indices for EACH location separately
         2. Combine the indices to maintain location structure
         """
-        
+
         print(f"\n🎲 Creating LOCATION-AWARE stratified split...")
-        
+
         train_indices = []
         val_indices = []
         test_indices = []
-        
+
         # For each location (node)
         for node_idx in range(n_nodes):
             # Get the index range for this location
             node_start = node_idx * samples_per_node
             node_end = node_start + samples_per_node
             node_indices = np.arange(node_start, node_end)
-            
+
             # Split this location's data: 70% train, 15% val, 15% test
             # Use random shuffle but keep location together
             np.random.seed(42 + node_idx)  # Different seed per location
             shuffled = node_indices.copy()
             np.random.shuffle(shuffled)
-            
+
             n_train = int(0.70 * samples_per_node)
             n_val = int(0.15 * samples_per_node)
-            
+
             train_indices.extend(shuffled[:n_train])
             val_indices.extend(shuffled[n_train:n_train + n_val])
             test_indices.extend(shuffled[n_train + n_val:])
-        
+
         # Convert to arrays
         train_idx = np.array(train_indices)
         val_idx = np.array(val_indices)
         test_idx = np.array(test_indices)
-        
+
         # Sort to maintain some temporal ordering within each location
         train_idx.sort()
         val_idx.sort()
         test_idx.sort()
-        
+
         print(f"   Split created:")
         print(f"      Train: {len(train_idx)} indices")
         print(f"      Val:   {len(val_idx)} indices")
         print(f"      Test:  {len(test_idx)} indices")
-        
+
         return train_idx, val_idx, test_idx
 
-    def _verify_split_quality(self, all_targets: np.ndarray, 
+    def _verify_split_quality(self, all_targets: np.ndarray,
                               train_targets: np.ndarray,
-                              val_targets: np.ndarray, 
+                              val_targets: np.ndarray,
                               test_targets: np.ndarray):
         """Verify split has no severe bias"""
-        
+
         # Apply inverse transform if needed
         if self.metadata and self.metadata.get('target_transform') == 'log1p':
             all_orig = np.expm1(all_targets)
@@ -553,76 +494,27 @@ class DengueTrainer:
             train_orig = train_targets
             val_orig = val_targets
             test_orig = test_targets
-        
+
         overall_mean = all_orig.mean()
-        
+
         print(f"\n   📊 Split quality check:")
         print(f"      Overall: mean={overall_mean:.2f}")
         print(f"      Train:   mean={train_orig.mean():.2f}")
         print(f"      Val:     mean={val_orig.mean():.2f}")
         print(f"      Test:    mean={test_orig.mean():.2f}")
-        
+
         test_bias = abs(test_orig.mean() - overall_mean) / overall_mean * 100
         print(f"      Test bias: {test_bias:.1f}% {'✅' if test_bias < 20 else '⚠️'}")
 
-    def train_epoch(self, model: nn.Module, train_loader: DataLoader, 
+    def train_epoch(self, model: nn.Module, train_loader: DataLoader,
                     optimizer: torch.optim.Optimizer, adj_matrix: torch.Tensor) -> float:
         """Train for one epoch"""
->>>>>>> Stashed changes
         model.train()
         total_loss = 0.0
         num_batches = 0
         
-<<<<<<< Updated upstream
-        try:
-            for batch_features, batch_targets in train_loader:
-                batch_features = batch_features.to(self.device)
-                batch_targets = batch_targets.to(self.device)
-                
-                optimizer.zero_grad()
-                
-                # Forward pass with error handling
-                try:
-                    outputs = model(batch_features, adj_matrix)
-                    loss = self.compute_loss(outputs, batch_targets)
-                except Exception as e:
-                    print(f"❌ Error in forward pass: {e}")
-                    print(f"   Batch features shape: {batch_features.shape}")
-                    print(f"   Batch targets shape: {batch_targets.shape}")
-                    continue
-                
-                # Backward pass with gradient clipping
-                loss.backward()
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                optimizer.step()
-                
-                # MPS synchronization
-                if self.device.type == 'mps':
-                    torch.mps.synchronize()
-                
-                total_loss += loss.item()
-                num_batches += 1
-            
-            return total_loss / max(num_batches, 1)
-            
-        except Exception as e:
-            print(f"❌ Error in train_epoch: {e}")
-            return 0.0
-    
-    def evaluate(self, model: nn.Module, data_loader: DataLoader, 
-                adj_matrix: torch.Tensor) -> Dict[str, float]:
-        """Evaluate model performance with enhanced inverse transform verification"""
-        model.eval()
-        total_loss = 0.0
-        all_predictions = []
-        all_targets = []
-        
-        with torch.no_grad():
-            for batch_features, batch_targets in data_loader:
-=======
         for batch_features, batch_targets in train_loader:
             try:
->>>>>>> Stashed changes
                 batch_features = batch_features.to(self.device)
                 batch_targets = batch_targets.to(self.device)
                 

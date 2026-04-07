@@ -53,12 +53,14 @@ except ImportError as e:
             }
 
 def safe_jsonify(data):
-    """Safe JSON serialization that handles numpy types"""
+    """Safe JSON serialization that handles numpy types, inf, and nan"""
+    import math
     def convert_numpy(obj):
         if isinstance(obj, np.integer):
             return int(obj)
         elif isinstance(obj, np.floating):
-            return float(obj)
+            v = float(obj)
+            return None if (math.isnan(v) or math.isinf(v)) else v
         elif isinstance(obj, np.bool_):
             return bool(obj)
         elif isinstance(obj, np.ndarray):
@@ -67,16 +69,18 @@ def safe_jsonify(data):
             return {str(k): convert_numpy(v) for k, v in obj.items()}
         elif isinstance(obj, (list, tuple)):
             return [convert_numpy(item) for item in obj]
+        elif isinstance(obj, float):
+            return None if (math.isnan(obj) or math.isinf(obj)) else obj
         elif hasattr(obj, 'item'):  # numpy scalar
             return convert_numpy(obj.item())
         elif hasattr(obj, 'tolist'):  # numpy array-like
             return convert_numpy(obj.tolist())
         else:
             return obj
-    
+
     # Convert the data
     converted_data = convert_numpy(data)
-    
+
     # Create JSON response manually
     json_str = json.dumps(converted_data, indent=2, ensure_ascii=False)
     response = Response(

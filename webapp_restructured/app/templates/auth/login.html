@@ -1,40 +1,159 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Dengue Prediction System{% endblock %}
+{% block title %}Login — DengueWatch{% endblock %}
+
+{% block extra_css %}
+<style>
+  body { overflow: hidden; }
+  .public-navbar, .public-footer, footer { display: none !important; }
+  main { padding: 0; }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header text-center">
-                    <h4><i class="fas fa-sign-in-alt"></i> Login</h4>
-                </div>
-                <div class="card-body">
-                    <form method="POST" action="{{ url_for('auth.login') }}">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" id="username" name="username" required autofocus>
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                            <label class="form-check-label" for="remember">Remember me</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 btn-custom">Login</button>
-                    </form>
-                </div>
-            </div>
-            
-            <div class="alert alert-info mt-3">
-                <strong>Demo Credentials:</strong><br>
-                Admin: <code>admin</code> / <code>admin123</code><br>
-                District Health: <code>bantul</code> / <code>health123</code>
-            </div>
-        </div>
+<div class="auth-wrapper">
+
+  <!-- LEFT: Branded panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="auth-brand-icon"><i class="fas fa-virus"></i></div>
+      <div>
+        <div class="auth-brand-name">DengueWatch</div>
+        <div class="auth-brand-sub">AI Prediction System</div>
+      </div>
     </div>
+
+    <h1 class="auth-headline">
+      Predict. Monitor.<br>
+      <span style="color:var(--primary);">Protect.</span>
+    </h1>
+
+    <p class="auth-desc">
+      AI-powered dengue prediction for Yogyakarta Special Region.
+      Supporting public health decisions across 5 kabupaten with
+      real-time outbreak risk monitoring.
+    </p>
+
+    <div class="auth-features">
+      <div class="auth-feature-item">
+        <i class="fas fa-brain"></i>
+        Spatio-Temporal Graph Neural Network model
+      </div>
+      <div class="auth-feature-item">
+        <i class="fas fa-map-marked-alt"></i>
+        Full coverage: 5 kabupaten in DIY
+      </div>
+      <div class="auth-feature-item">
+        <i class="fas fa-cloud-sun-rain"></i>
+        Climate &amp; NDVI satellite data integration
+      </div>
+      <div class="auth-feature-item">
+        <i class="fas fa-shield-alt"></i>
+        Role-based access for health officers &amp; admins
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Login form -->
+  <div class="auth-right">
+    <h2 class="auth-form-title">Welcome back</h2>
+    <p class="auth-form-subtitle">Sign in to your DengueWatch account</p>
+
+    <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm">
+      <div class="form-group">
+        <label class="form-label" for="username">Username</label>
+        <div class="input-icon-wrapper">
+          <i class="fas fa-user input-icon"></i>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            autocomplete="username"
+            required
+            autofocus>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">
+          Password
+        </label>
+        <div class="input-icon-wrapper" style="position:relative;">
+          <i class="fas fa-lock input-icon"></i>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+            required
+            style="padding-right:44px;">
+          <button type="button" id="togglePwd"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;"
+            tabindex="-1">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;">
+        <label class="form-check" style="margin:0;">
+          <input type="checkbox" class="form-check-input" id="remember" name="remember">
+          <span class="form-check-label">Remember me</span>
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-w" id="loginBtn" style="padding:12px;font-size:15px;border-radius:8px;margin-top:4px;">
+        <i class="fas fa-sign-in-alt"></i> Sign In
+      </button>
+    </form>
+
+    <!-- Demo credentials -->
+    <div class="demo-creds mt-16">
+      <div class="demo-creds-title"><i class="fas fa-info-circle"></i> Demo Credentials</div>
+      <div class="demo-cred-row">
+        <span>Admin</span>
+        <span><code>admin</code> / <code>admin123</code></span>
+      </div>
+      <div class="demo-cred-row">
+        <span>Bantul Officer</span>
+        <span><code>bantul</code> / <code>health123</code></span>
+      </div>
+      <div class="demo-cred-row">
+        <span>Sleman Officer</span>
+        <span><code>sleman</code> / <code>health123</code></span>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
+      &copy; 2026 DengueWatch — Yogyakarta Special Region
+    </p>
+  </div>
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle password visibility
+document.getElementById('togglePwd').addEventListener('click', function () {
+  const pwd = document.getElementById('password');
+  const icon = this.querySelector('i');
+  if (pwd.type === 'password') {
+    pwd.type = 'text';
+    icon.className = 'fas fa-eye-slash';
+  } else {
+    pwd.type = 'password';
+    icon.className = 'fas fa-eye';
+  }
+});
+
+// Loading state on submit
+document.getElementById('loginForm').addEventListener('submit', function () {
+  setButtonLoading(document.getElementById('loginBtn'), true, 'Signing in...');
+});
+</script>
 {% endblock %}

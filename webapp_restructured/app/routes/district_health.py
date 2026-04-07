@@ -131,7 +131,7 @@ def view_predictions():
     ).order_by(Prediction.year.desc(), Prediction.month.desc()).limit(12).all()
     
     # Get prediction service for recommendations
-    prediction_service = PredictionService(request.app.config)
+    from flask import current_app as _ca; prediction_service = PredictionService(_ca.config)
     
     # Attach recommendations to predictions
     predictions_with_recommendations = []
@@ -167,7 +167,7 @@ def request_prediction():
         month = int(data['month'])
         
         # Generate prediction
-        prediction_service = PredictionService(request.app.config)
+        from flask import current_app as _ca; prediction_service = PredictionService(_ca.config)
         result = prediction_service.predict_single_regency(regency.id, year, month)
         
         if result['success']:

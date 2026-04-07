@@ -1,243 +1,276 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Dengue Prediction System{% endblock %}
+{% block title %}Home — DengueWatch{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="bg-primary text-white py-5">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="display-4 fw-bold">Dengue Prediction System</h1>
-                <p class="lead">AI-Powered Spatio-Temporal Dengue Prediction for Yogyakarta Special Region</p>
-                <p class="fs-5">Leveraging advanced machine learning to predict dengue outbreaks and support public health decision-making.</p>
-                <div class="mt-4">
-                    <a href="{{ url_for('public.dashboard') }}" class="btn btn-light btn-lg me-3">
-                        <i class="fas fa-chart-line"></i> View Dashboard
-                    </a>
-                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-4 text-center">
-                <i class="fas fa-virus fa-10x opacity-25"></i>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Features Section -->
-<div class="container my-5">
-    <div class="row text-center mb-5">
-        <div class="col-12">
-            <h2 class="fw-bold">System Features</h2>
-            <p class="text-muted">Advanced AI prediction with user-friendly interface</p>
+<!-- ===================== HERO ===================== -->
+<section class="hero-section">
+  <div class="container" style="max-width:1200px;margin:0 auto;padding:0 32px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;" class="hero-content">
+      <!-- Left -->
+      <div>
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);border-radius:99px;padding:5px 14px;font-size:12px;color:#7dd3fc;font-weight:500;margin-bottom:20px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#0ea5e9;animation:pulse 2s infinite;"></span>
+          Live Monitoring — Yogyakarta Special Region
         </div>
-    </div>
-    
-    <div class="row g-4">
-        <!-- Feature 1 -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-brain fa-3x text-primary"></i>
-                    </div>
-                    <h5 class="card-title">AI-Powered Predictions</h5>
-                    <p class="card-text">
-                        Spatio-Temporal Graph Neural Network (STGNN) model analyzes 
-                        historical data, climate patterns, and vegetation indices to 
-                        predict dengue cases with high accuracy.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Feature 2 -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-chart-line fa-3x text-success"></i>
-                    </div>
-                    <h5 class="card-title">Real-Time Monitoring</h5>
-                    <p class="card-text">
-                        Track dengue cases across all 5 regencies in Yogyakarta 
-                        in real-time. View trends, statistics, and risk levels 
-                        through interactive dashboards.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Feature 3 -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-lightbulb fa-3x text-warning"></i>
-                    </div>
-                    <h5 class="card-title">Smart Recommendations</h5>
-                    <p class="card-text">
-                        Receive automated health recommendations based on 
-                        predicted risk levels. Help health offices take 
-                        proactive measures to prevent outbreaks.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Feature 4 -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-users fa-3x text-info"></i>
-                    </div>
-                    <h5 class="card-title">Multi-User Access</h5>
-                    <p class="card-text">
-                        Role-based access for administrators, district health 
-                        offices, and the public. Each user sees relevant 
-                        data and has appropriate permissions.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Feature 5 -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-cloud-sun-rain fa-3x text-primary"></i>
-                    </div>
-                    <h5 class="card-title">Climate Integration</h5>
-                    <p class="card-text">
-                        Automatically fetches climate data (temperature, 
-                        humidity, rainfall) and NDVI satellite data to 
-                        improve prediction accuracy.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Feature 6 -->
-        <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-database fa-3x text-success"></i>
-                    </div>
-                    <h5 class="card-title">Simplified Data Management</h5>
-                    <p class="card-text">
-                        One-click data updates replacing complex manual 
-                        processes. Upload data, fetch climate, and generate 
-                        predictions in minutes, not hours.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+        <h1 class="hero-title">
+          AI-Powered<br>
+          <span class="highlight">Dengue Outbreak</span><br>
+          Prediction
+        </h1>
+        <p class="hero-subtitle">
+          Leveraging Spatio-Temporal Graph Neural Networks to predict dengue fever outbreaks across 5 kabupaten — helping health officers act before epidemics begin.
+        </p>
 
-<!-- Coverage Section -->
-<div class="bg-light py-5">
-    <div class="container">
-        <div class="row text-center mb-4">
-            <div class="col-12">
-                <h2 class="fw-bold">Coverage Area</h2>
-                <p class="text-muted">Serving all 5 regencies in Yogyakarta Special Region</p>
-            </div>
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="hero-stat-item">
+            <span class="hero-stat-value" data-counter="5">5</span>
+            <span class="hero-stat-label">Kabupaten</span>
+          </div>
+          <div class="hero-stat-item">
+            <span class="hero-stat-value">AI</span>
+            <span class="hero-stat-label">STGNN Model</span>
+          </div>
+          <div class="hero-stat-item">
+            <span class="hero-stat-value">Real-Time</span>
+            <span class="hero-stat-label">Risk Monitor</span>
+          </div>
         </div>
-        
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-map-marker-alt text-danger"></i> KAB BANTUL</h5>
-                        <p class="small text-muted mb-0">Population: 1,053,971</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-map-marker-alt text-danger"></i> KAB GUNUNG KIDUL</h5>
-                        <p class="small text-muted mb-0">Population: 747,893</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-map-marker-alt text-danger"></i> KAB KULON PROGO</h5>
-                        <p class="small text-muted mb-0">Population: 436,395</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-map-marker-alt text-danger"></i> KAB SLEMAN</h5>
-                        <p class="small text-muted mb-0">Population: 1,197,128</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h5><i class="fas fa-map-marker-alt text-danger"></i> KOTA YOGYAKARTA</h5>
-                        <p class="small text-muted mb-0">Population: 422,732</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- CTA Section -->
-<div class="container my-5">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h2 class="fw-bold mb-4">Ready to Get Started?</h2>
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <a href="{{ url_for('public.dashboard') }}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-chart-bar"></i> View Public Dashboard
-                </a>
-                <a href="{{ url_for('public.statistics') }}" class="btn btn-outline-primary btn-lg">
-                    <i class="fas fa-chart-pie"></i> View Statistics
-                </a>
-                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-lg">
-                    <i class="fas fa-user"></i> Login
-                </a>
-            </div>
+        <!-- CTA -->
+        <div class="hero-cta">
+          <a href="{{ url_for('public.dashboard') }}" class="btn-hero-primary">
+            <i class="fas fa-chart-line"></i> View Dashboard
+          </a>
+          <a href="{{ url_for('auth.login') }}" class="btn-hero-outline">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </a>
         </div>
-    </div>
-</div>
+      </div>
 
-<!-- Info Section -->
-<div class="bg-primary text-white py-4">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-3">
-                <h3 class="fw-bold">5</h3>
-                <p class="mb-0">Regencies Covered</p>
-            </div>
-            <div class="col-md-3">
-                <h3 class="fw-bold">AI-Powered</h3>
-                <p class="mb-0">STGNN Model</p>
-            </div>
-            <div class="col-md-3">
-                <h3 class="fw-bold">Real-Time</h3>
-                <p class="mb-0">Predictions</p>
-            </div>
-            <div class="col-md-3">
-                <h3 class="fw-bold">Public</h3>
-                <p class="mb-0">Access Available</p>
-            </div>
+      <!-- Right: visual -->
+      <div class="hero-visual" style="min-height:300px;position:relative;">
+        <!-- Central icon -->
+        <div style="width:180px;height:180px;background:rgba(14,165,233,0.1);border:1px solid rgba(14,165,233,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;z-index:2;margin:0 auto;">
+          <div style="width:120px;height:120px;background:rgba(14,165,233,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-virus" style="font-size:50px;color:#7dd3fc;opacity:0.9;"></i>
+          </div>
         </div>
+        <!-- Floating badges -->
+        <div class="hero-badge-float" style="top:10px;right:10px;">
+          <i class="fas fa-shield-alt" style="color:#10b981;margin-right:6px;"></i>
+          Risk Level: <strong style="color:#10b981;">LOW</strong>
+        </div>
+        <div class="hero-badge-float" style="bottom:20px;left:10px;">
+          <i class="fas fa-brain" style="color:#0ea5e9;margin-right:6px;"></i>
+          STGNN Model Active
+        </div>
+        <div class="hero-badge-float" style="bottom:80px;right:0px;">
+          <i class="fas fa-chart-line" style="color:#f59e0b;margin-right:6px;"></i>
+          5 Predictions Ready
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+</section>
 
+<!-- ===================== FEATURES ===================== -->
+<section style="padding:72px 32px;background:white;">
+  <div class="container" style="max-width:1200px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 class="section-heading">System Features</h2>
+      <p class="section-subheading" style="margin-bottom:0;">Advanced AI prediction with a user-friendly interface for health officers and the public</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+
+      <div class="feature-card fade-in">
+        <div class="feature-icon-wrap" style="background:#e0f2fe;">
+          <i class="fas fa-brain" style="color:#0ea5e9;"></i>
+        </div>
+        <h5 class="feature-title">AI-Powered Predictions</h5>
+        <p class="feature-desc">STGNN model analyzes historical case data, climate patterns, and NDVI satellite vegetation indices to predict dengue outbreaks with high accuracy.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <div class="feature-icon-wrap" style="background:#d1fae5;">
+          <i class="fas fa-chart-line" style="color:#10b981;"></i>
+        </div>
+        <h5 class="feature-title">Real-Time Monitoring</h5>
+        <p class="feature-desc">Track dengue cases across all 5 kabupaten in real-time. View interactive trends, statistics, and color-coded risk levels at a glance.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <div class="feature-icon-wrap" style="background:#fef3c7;">
+          <i class="fas fa-lightbulb" style="color:#f59e0b;"></i>
+        </div>
+        <h5 class="feature-title">Smart Recommendations</h5>
+        <p class="feature-desc">Automated health recommendations based on predicted risk levels, helping health offices take proactive measures to prevent outbreaks.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <div class="feature-icon-wrap" style="background:#ede9fe;">
+          <i class="fas fa-users" style="color:#8b5cf6;"></i>
+        </div>
+        <h5 class="feature-title">Multi-Role Access</h5>
+        <p class="feature-desc">Role-based access for system administrators, district health officers (per kabupaten), and the general public — each with tailored views.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <div class="feature-icon-wrap" style="background:#e0f2fe;">
+          <i class="fas fa-cloud-sun-rain" style="color:#0ea5e9;"></i>
+        </div>
+        <h5 class="feature-title">Climate Integration</h5>
+        <p class="feature-desc">Automatically fetches NASA climate data (temperature, humidity, rainfall) and NDVI satellite imagery monthly to continuously improve model accuracy.</p>
+      </div>
+
+      <div class="feature-card fade-in">
+        <div class="feature-icon-wrap" style="background:#d1fae5;">
+          <i class="fas fa-database" style="color:#10b981;"></i>
+        </div>
+        <h5 class="feature-title">Simplified Data Management</h5>
+        <p class="feature-desc">One-click data updates replacing complex manual workflows. Upload, process, and generate predictions in minutes — not hours.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COVERAGE ===================== -->
+<section style="padding:72px 32px;background:var(--body-bg);">
+  <div class="container" style="max-width:1200px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <h2 class="section-heading">Coverage Area</h2>
+      <p class="section-subheading" style="margin-bottom:0;">All 5 kabupaten / kota in Daerah Istimewa Yogyakarta</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+      {% set kabupaten = [
+        {'name': 'KAB BANTUL', 'pop': '1,053,971', 'icon': 'fa-map-marker-alt', 'color': '#0ea5e9'},
+        {'name': 'KAB GUNUNG KIDUL', 'pop': '747,893', 'icon': 'fa-mountain', 'color': '#8b5cf6'},
+        {'name': 'KAB KULON PROGO', 'pop': '436,395', 'icon': 'fa-water', 'color': '#10b981'},
+        {'name': 'KAB SLEMAN', 'pop': '1,197,128', 'icon': 'fa-city', 'color': '#f59e0b'},
+        {'name': 'KOTA YOGYAKARTA', 'pop': '422,732', 'icon': 'fa-landmark', 'color': '#ef4444'}
+      ] %}
+
+      {% for k in kabupaten %}
+      <div class="regency-card" {% if loop.index == 4 %}style="grid-column:1/span 2;"{% elif loop.index == 5 %}{% endif %}>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:40px;height:40px;border-radius:8px;background:{{ k.color }}18;display:flex;align-items:center;justify-content:center;">
+            <i class="fas {{ k.icon }}" style="color:{{ k.color }};font-size:17px;"></i>
+          </div>
+          <div>
+            <div class="regency-name">{{ k.name }}</div>
+            <div class="regency-meta"><i class="fas fa-users" style="margin-right:4px;"></i>Pop. {{ k.pop }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW IT WORKS ===================== -->
+<section style="padding:72px 32px;background:white;">
+  <div class="container" style="max-width:1100px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;">
+      <div>
+        <h2 class="section-heading">How It Works</h2>
+        <p class="section-subheading">A four-step pipeline from raw data to actionable predictions</p>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <div class="step-title">Data Collection</div>
+              <div class="step-desc">Case data entered by district health officers. Climate and NDVI satellite data fetched automatically via NASA APIs.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <div class="step-title">Data Processing</div>
+              <div class="step-desc">Raw data cleaned, imputed, and normalized. Spatio-temporal features constructed across all 5 kabupaten.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <div class="step-title">AI Model Prediction</div>
+              <div class="step-desc">STGNN model analyzes spatial correlations and temporal trends to generate next-month dengue case predictions.</div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <div class="step-title">Risk Communication</div>
+              <div class="step-desc">Predictions displayed as risk-coded dashboard cards with actionable health recommendations for officers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- Info cards column -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="stat-card border-left-primary">
+            <div class="stat-icon icon-primary"><i class="fas fa-satellite"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">NASA</div>
+              <div class="stat-label">Climate &amp; NDVI Data Source</div>
+            </div>
+          </div>
+          <div class="stat-card border-left-success">
+            <div class="stat-icon icon-success"><i class="fas fa-project-diagram"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">STGNN</div>
+              <div class="stat-label">Spatio-Temporal Graph Neural Network</div>
+            </div>
+          </div>
+          <div class="stat-card border-left-warning">
+            <div class="stat-icon icon-warning"><i class="fas fa-calendar-check"></i></div>
+            <div class="stat-content">
+              <div class="stat-value">Monthly</div>
+              <div class="stat-label">Prediction cadence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA BOTTOM ===================== -->
+<section style="padding:72px 32px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0369a1 100%);text-align:center;">
+  <div class="container" style="max-width:600px;margin:0 auto;">
+    <h2 style="color:white;font-size:32px;font-weight:800;margin-bottom:16px;">Ready to Get Started?</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:16px;margin-bottom:36px;">Access real-time dengue predictions and risk monitoring for Yogyakarta.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="{{ url_for('public.dashboard') }}" class="btn-hero-primary">
+        <i class="fas fa-chart-bar"></i> Public Dashboard
+      </a>
+      <a href="{{ url_for('public.statistics') }}" class="btn-hero-outline">
+        <i class="fas fa-chart-pie"></i> View Statistics
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@media (max-width: 768px) {
+  .hero-content, [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="grid-template-columns:repeat(3,1fr)"] { grid-template-columns: 1fr 1fr !important; }
+  .hero-visual { display: none !important; }
+}
+</style>
 {% endblock %}

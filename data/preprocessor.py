@@ -58,66 +58,41 @@ class DengueDataPreprocessor:
             return self._generate_synthetic_data()
     
     def _add_proper_date_column(self, df: pd.DataFrame) -> pd.DataFrame:
-<<<<<<< Updated upstream
-        """Add proper date column from Year and Week"""
-        print("🕐 Adding proper date column from Year and Week...")
-        
-        try:
-            # Convert Year and Week to proper date
-            # Week 1 of each year starts on January 1st
-            df['date'] = df.apply(lambda row: 
-                pd.Timestamp(year=int(row['Year']), month=1, day=1) + 
-                pd.Timedelta(weeks=int(row['Week'])-1), axis=1)
-            
-            # Add more temporal features
-            df['day_of_year'] = df['date'].dt.dayofyear
-            df['month'] = df['date'].dt.month
-            df['quarter'] = df['date'].dt.quarter
-            df['week_of_year'] = df['date'].dt.isocalendar().week
-            
-            # Cyclical encoding for temporal features
-            df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
-            df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
-            df['day_of_year_sin'] = np.sin(2 * np.pi * df['day_of_year'] / 365)
-            df['day_of_year_cos'] = np.cos(2 * np.pi * df['day_of_year'] / 365)
-            df['week_of_year_sin'] = np.sin(2 * np.pi * df['week_of_year'] / 52)
-            df['week_of_year_cos'] = np.cos(2 * np.pi * df['week_of_year'] / 52)
-=======
         """Add proper date column from Year and Week/Month"""
-        
+
         try:
             # Check if we have Week or Month column to determine data type
             if 'Month' in df.columns:
                 print("🕐 Adding proper date column from Year and Month (MONTHLY DATA)...")
                 # Convert Year and Month to proper date (first day of month)
                 df['date'] = pd.to_datetime(
-                    df['Year'].astype(str) + '-' + 
+                    df['Year'].astype(str) + '-' +
                     df['Month'].astype(str).str.zfill(2) + '-01'
                 )
-                
+
                 # Add temporal features for monthly data
                 df['month'] = df['date'].dt.month
                 df['quarter'] = df['date'].dt.quarter
-                
+
                 # Cyclical encoding for temporal features (monthly focus)
                 df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
                 df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
                 df['quarter_sin'] = np.sin(2 * np.pi * df['quarter'] / 4)
                 df['quarter_cos'] = np.cos(2 * np.pi * df['quarter'] / 4)
-                
+
             elif 'Week' in df.columns:
                 print("🕐 Adding proper date column from Year and Week (WEEKLY DATA)...")
                 # Convert Year and Week to proper date
-                df['date'] = df.apply(lambda row: 
-                    pd.Timestamp(year=int(row['Year']), month=1, day=1) + 
+                df['date'] = df.apply(lambda row:
+                    pd.Timestamp(year=int(row['Year']), month=1, day=1) +
                     pd.Timedelta(weeks=int(row['Week'])-1), axis=1)
-                
+
                 # Add more temporal features for weekly data
                 df['day_of_year'] = df['date'].dt.dayofyear
                 df['month'] = df['date'].dt.month
                 df['quarter'] = df['date'].dt.quarter
                 df['week_of_year'] = df['date'].dt.isocalendar().week
-                
+
                 # Cyclical encoding for temporal features
                 df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
                 df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
@@ -127,7 +102,6 @@ class DengueDataPreprocessor:
                 df['week_of_year_cos'] = np.cos(2 * np.pi * df['week_of_year'] / 52)
             else:
                 raise ValueError("Data must have either 'Week' or 'Month' column")
->>>>>>> Stashed changes
             
             # Seasonal features for Indonesia
             df['season'] = df['month'].map({
@@ -149,15 +123,11 @@ class DengueDataPreprocessor:
             
         except Exception as e:
             print(f"⚠️ Error adding date column: {e}")
-<<<<<<< Updated upstream
-            # Fallback: create simple date
-            df['date'] = pd.to_datetime(df['Year'].astype(str) + '-01-01') + pd.to_timedelta((df['Week']-1)*7, unit='D')
-=======
             # Fallback: create simple date based on what's available
             if 'Month' in df.columns:
                 # For monthly data
                 df['date'] = pd.to_datetime(
-                    df['Year'].astype(str) + '-' + 
+                    df['Year'].astype(str) + '-' +
                     df['Month'].astype(str).str.zfill(2) + '-01'
                 )
                 df['month'] = df['Month']
@@ -172,7 +142,7 @@ class DengueDataPreprocessor:
                 df['date'] = pd.to_datetime(df['Year'].astype(str) + '-01-01')
                 df['month'] = 1
                 df['quarter'] = 1
-            
+
             # Add basic seasonal features
             df['season'] = df['month'].map({
                 6: 0, 7: 0, 8: 0, 9: 0,
@@ -180,8 +150,8 @@ class DengueDataPreprocessor:
                 12: 2, 1: 2, 2: 2, 3: 2,
                 4: 3, 5: 3,
             })
-            
->>>>>>> Stashed changes
+
+
             return df
     
     def _manual_csv_parsing(self, file_path: str) -> pd.DataFrame:
@@ -389,9 +359,6 @@ class DengueDataPreprocessor:
             df['Cases'] = np.random.poisson(5, len(df))
         
         try:
-<<<<<<< Updated upstream
-            df = df.sort_values([location_col, 'date'])
-=======
             # Sort by date if available, otherwise by Year and Week/Month
             if 'date' in df.columns:
                 df = df.sort_values([location_col, 'date'])
@@ -401,7 +368,6 @@ class DengueDataPreprocessor:
                 df = df.sort_values([location_col, 'Year', 'Week'])
             else:
                 df = df.sort_values([location_col, 'Year'])
->>>>>>> Stashed changes
             
             # Enhanced lag features for cases
             for lag in range(1, n_lags + 1):

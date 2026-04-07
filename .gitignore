@@ -9,3 +9,8 @@ __pycache__/
 .env
 get_climate_data_v2.py
 get_climate_data_v3.py
+
+# Model weights
+*.pth
+*.pt
+*.db
