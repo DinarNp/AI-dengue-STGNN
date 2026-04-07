@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Predictions - {{ regency.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-chart-line"></i> Predictions - {{ regency.name }}</h2>
+    <p class="text-muted">View dengue case predictions and health recommendations for your regency</p>
+    <hr>
+    
+    <!-- Predictions List -->
+    <div class="row">
+        {% for item in predictions %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>
+                        {{ item.prediction.year }}-{{ "%02d"|format(item.prediction.month) }}
+                        <span class="float-end risk-badge risk-{{ item.prediction.risk_level.replace('_', '-') }}">
+                            {{ item.prediction.risk_level.replace('_', ' ').upper() }}
+                        </span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Predicted Cases</p>
+                            <h3>{{ "%.0f"|format(item.prediction.predicted_cases) }}</h3>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Confidence Range</p>
+                            <p class="mb-0">
+                                {{ "%.0f"|format(item.prediction.confidence_lower) }} - 
+                                {{ "%.0f"|format(item.prediction.confidence_upper) }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if item.prediction.actual_cases %}
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Actual Cases</p>
+                        <h4>{{ item.prediction.actual_cases }}</h4>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#recommendationModal{{ loop.index }}">
+                            <i class="fas fa-lightbulb"></i> View Recommendations
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendation Modal -->
+            <div class="modal fade" id="recommendationModal{{ loop.index }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-{{ item.prediction.risk_level.replace('_', '-') == 'risk-low' and 'success' or (item.prediction.risk_level.replace('_', '-') == 'risk-medium' and 'warning' or (item.prediction.risk_level.replace('_', '-') == 'risk-high' and 'orange' or 'danger')) }} text-white">
+                            <h5 class="modal-title">
+                                Health Recommendations - {{ item.prediction.year }}-{{ "%02d"|format(item.prediction.month) }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <strong>Predicted Cases:</strong> {{ "%.0f"|format(item.prediction.predicted_cases) }}<br>
+                                <strong>Risk Level:</strong> {{ item.prediction.risk_level.replace('_', ' ').upper() }}
+                            </div>
+                            
+                            <h6>Recommended Actions:</h6>
+                            <pre class="bg-light p-3 rounded">{{ item.recommendation }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No predictions available yet. 
+                Request a prediction to see health recommendations.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

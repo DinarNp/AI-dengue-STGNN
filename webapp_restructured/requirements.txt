@@ -1,0 +1,48 @@
+# Flask and extensions
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-Migrate==4.0.5
+Werkzeug==3.0.1
+
+# Database
+SQLAlchemy==2.0.23
+
+# Data processing
+pandas==2.1.4
+numpy==1.26.2
+
+# Machine Learning (PyTorch)
+torch==2.1.0
+torchvision==0.16.0
+
+# Scientific computing
+scikit-learn==1.3.2
+
+# Visualization
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# Geospatial data
+rasterio==1.3.9
+
+# API requests
+requests==2.31.0
+
+# Date/time utilities
+epiweeks==2.3.0
+python-dateutil==2.8.2
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Forms (optional, if you want WTForms)
+Flask-WTF==1.2.1
+WTForms==3.1.1
+
+# Production server (optional)
+gunicorn==21.2.0
+
+# Development tools (optional)
+pytest==7.4.3
+pytest-flask==1.3.0

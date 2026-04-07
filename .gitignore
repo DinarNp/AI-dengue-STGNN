@@ -1,8 +1,11 @@
 dengue_env/
 venv/
 env/
+experiment_results/
 __pycache__/
 *.pyc
 *.pyo
 .DS_Store
 .env
+get_climate_data_v2.py
+get_climate_data_v3.py

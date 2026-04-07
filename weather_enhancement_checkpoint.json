@@ -1,0 +1,64 @@
+{
+  "weather_cache": {
+    "2025_1_-7.902328_110.2862991": {
+      "Temperature_Min": 26.25,
+      "Temperature_Max": 28.63,
+      "Temperature_Avg": 27.28,
+      "Humidity": 83.87,
+      "Precipitation_Total": 9.04,
+      "Pressure": 1003.3,
+      "Wind_Speed": 3.46,
+      "Wind_Direction": null,
+      "Cloud_Cover": null,
+      "NDVI": 0.6567000902510054
+    },
+    "2025_2_-7.902328_110.2862991": {
+      "Temperature_Min": 26.2,
+      "Temperature_Max": 28.72,
+      "Temperature_Avg": 27.37,
+      "Humidity": 83.96,
+      "Precipitation_Total": 8.83,
+      "Pressure": 1003.19,
+      "Wind_Speed": 2.43,
+      "Wind_Direction": null,
+      "Cloud_Cover": null,
+      "NDVI": 0.6884237161685083
+    },
+    "2025_3_-7.902328_110.2862991": {
+      "Temperature_Min": 26.59,
+      "Temperature_Max": 28.72,
+      "Temperature_Avg": 27.49,
+      "Humidity": 86.05,
+      "Precipitation_Total": 16.31,
+      "Pressure": 1002.26,
+      "Wind_Speed": 3.84,
+      "Wind_Direction": null,
+      "Cloud_Cover": null,
+      "NDVI": 0.6588818484079403
+    },
+    "2025_4_-7.902328_110.2862991": {
+      "Temperature_Min": 26.48,
+      "Temperature_Max": 28.71,
+      "Temperature_Avg": 27.45,
+      "Humidity": 84.58,
+      "Precipitation_Total": 20.84,
+      "Pressure": 1001.79,
+      "Wind_Speed": 3.04,
+      "Wind_Direction": null,
+      "Cloud_Cover": null,
+      "NDVI": 0.5931801943602237
+    }
+  },
+  "processed_keys": [
+    "2025_3_-7.902328_110.2862991",
+    "2025_1_-7.902328_110.2862991",
+    "2025_2_-7.902328_110.2862991",
+    "2025_4_-7.902328_110.2862991"
+  ],
+  "api_calls_made": 4,
+  "successful_requests": 4,
+  "processed_combinations": 4,
+  "failed_requests": [],
+  "timestamp": "2026-03-09T16:14:16.988304",
+  "runtime_minutes": 0.2054324
+}

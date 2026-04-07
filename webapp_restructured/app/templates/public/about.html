@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}About - Dengue Prediction System{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h2><i class="fas fa-info-circle"></i> About the System</h2>
+    <hr>
+    
+    <!-- Overview -->
+    <div class="row mb-5">
+        <div class="col-md-8">
+            <h3>Dengue Prediction System</h3>
+            <p class="lead">
+                An AI-powered spatio-temporal prediction system for dengue fever cases 
+                in Yogyakarta Special Region, Indonesia.
+            </p>
+            <p>
+                This system leverages advanced machine learning techniques, specifically 
+                Spatio-Temporal Graph Neural Networks (STGNN), to predict dengue outbreaks 
+                by analyzing historical case data, climate variables, and environmental factors.
+            </p>
+        </div>
+        <div class="col-md-4 text-center">
+            <i class="fas fa-virus fa-10x text-primary opacity-25"></i>
+        </div>
+    </div>
+    
+    <!-- How It Works -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3><i class="fas fa-cogs"></i> How It Works</h3>
+            <div class="card">
+                <div class="card-body">
+                    <ol class="fs-5">
+                        <li class="mb-3">
+                            <strong>Data Collection:</strong> Historical dengue cases, climate data 
+                            (temperature, humidity, rainfall), and NDVI satellite vegetation indices
+                        </li>
+                        <li class="mb-3">
+                            <strong>Spatial Analysis:</strong> Graph neural networks model relationships 
+                            between different regencies based on proximity and environmental similarity
+                        </li>
+                        <li class="mb-3">
+                            <strong>Temporal Analysis:</strong> LSTM layers capture time-series patterns 
+                            and seasonal trends in dengue transmission
+                        </li>
+                        <li class="mb-3">
+                            <strong>Prediction:</strong> The model generates monthly predictions with 
+                            confidence intervals and risk classifications
+                        </li>
+                        <li>
+                            <strong>Recommendations:</strong> Automated health recommendations based on 
+                            predicted risk levels to support decision-making
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Data Sources -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3><i class="fas fa-database"></i> Data Sources</h3>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5><i class="fas fa-hospital text-danger"></i> Dengue Cases</h5>
+                            <p>
+                                Monthly dengue case counts from health offices 
+                                across 5 regencies in Yogyakarta
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5><i class="fas fa-cloud-sun-rain text-primary"></i> Climate Data</h5>
+                            <p>
+                                Temperature, humidity, precipitation, and other 
+                                weather variables from NASA POWER and OpenWeather APIs
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5><i class="fas fa-satellite text-success"></i> NDVI Data</h5>
+                            <p>
+                                Normalized Difference Vegetation Index from 
+                                MODIS satellite imagery (NASA NEO)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Coverage -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3><i class="fas fa-map-marked-alt"></i> Coverage Area</h3>
+            <p>The system monitors dengue cases across all 5 regencies in Yogyakarta Special Region:</p>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Regency</th>
+                            <th>Population</th>
+                            <th>Area (km²)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>KAB BANTUL</td>
+                            <td>1,053,971</td>
+                            <td>506.85</td>
+                        </tr>
+                        <tr>
+                            <td>KAB GUNUNG KIDUL</td>
+                            <td>747,893</td>
+                            <td>1,485.36</td>
+                        </tr>
+                        <tr>
+                            <td>KAB KULON PROGO</td>
+                            <td>436,395</td>
+                            <td>586.27</td>
+                        </tr>
+                        <tr>
+                            <td>KAB SLEMAN</td>
+                            <td>1,197,128</td>
+                            <td>574.82</td>
+                        </tr>
+                        <tr>
+                            <td>KOTA YOGYAKARTA</td>
+                            <td>422,732</td>
+                            <td>32.50</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Technology -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3><i class="fas fa-laptop-code"></i> Technology Stack</h3>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <strong>Backend</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Flask 3.0 - Web framework</li>
+                                <li>PyTorch 2.1 - Deep learning</li>
+                                <li>SQLAlchemy - Database ORM</li>
+                                <li>Pandas & NumPy - Data processing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-dark text-white">
+                            <strong>Frontend</strong>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>Bootstrap 5 - UI framework</li>
+                                <li>Chart.js - Data visualization</li>
+                                <li>Font Awesome - Icons</li>
+                                <li>Responsive design</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3><i class="fas fa-star"></i> Key Features</h3>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Real-time dengue monitoring
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> AI-powered predictions
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Risk level classification
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Interactive dashboards
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Multi-user access control
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Automated data collection
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Health recommendations
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check text-success"></i> Public transparency
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Contact -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h4>For More Information</h4>
+                    <p class="mb-0">
+                        This system is developed to support public health decision-making 
+                        in dengue prevention and control across Yogyakarta Special Region.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

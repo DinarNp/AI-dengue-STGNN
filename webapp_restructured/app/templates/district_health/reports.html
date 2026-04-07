@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - {{ regency.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-file-alt"></i> Reports - {{ regency.name }}</h2>
+    <p class="text-muted">Statistical reports and analysis for your regency</p>
+    <hr>
+    
+    <!-- Yearly Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt"></i> Yearly Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="yearlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monthly Breakdown -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Monthly Breakdown - {{ current_year }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Cases</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in monthly_breakdown %}
+                                <tr>
+                                    <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
+                                    <td>{{ case.cases }}</td>
+                                    <td>
+                                        {% if case.cases < 30 %}
+                                            <span class="badge bg-success">Low</span>
+                                        {% elif case.cases < 60 %}
+                                            <span class="badge bg-warning">Medium</span>
+                                        {% elif case.cases < 100 %}
+                                            <span class="badge bg-orange">High</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Very High</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('yearlyChart');
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ yearly_stats | map(attribute='year') | list | tojson }},
+        datasets: [{
+            label: 'Total Cases',
+            data: {{ yearly_stats | map(attribute='total_cases') | list | tojson }},
+            backgroundColor: 'rgba(54, 162, 235, 0.5)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %}

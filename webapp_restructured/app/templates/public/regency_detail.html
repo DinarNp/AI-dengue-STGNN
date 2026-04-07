@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ regency.name }} - Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{{ url_for('public.dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <h2><i class="fas fa-map-marker-alt"></i> {{ regency.name }}</h2>
+    <hr>
+    
+    <!-- Regency Info -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Information</h5>
+                    <p><strong>Population:</strong> {{ "{:,}".format(regency.population) if regency.population else 'N/A' }}</p>
+                    <p><strong>Area:</strong> {{ regency.area_km2 }} km²</p>
+                    <p><strong>Coordinates:</strong> {{ "%.4f"|format(regency.latitude) }}, {{ "%.4f"|format(regency.longitude) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5>Monthly Trend</h5>
+                    <canvas id="monthlyTrendChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Yearly Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Yearly Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Total Cases</th>
+                                <th>Average per Month</th>
+                                <th>Peak Cases</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in yearly_stats %}
+                            <tr>
+                                <td><strong>{{ stat.year }}</strong></td>
+                                <td>{{ stat.total_cases }}</td>
+                                <td>{{ "%.1f"|format(stat.avg_cases) }}</td>
+                                <td>{{ stat.max_cases }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Data -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Recent Dengue Cases</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Cases</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for case in all_cases[:12] %}
+                            <tr>
+                                <td>{{ case.year }}-{{ "%02d"|format(case.month) }}</td>
+                                <td><strong>{{ case.cases }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Predictions</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Predicted</th>
+                                <th>Risk</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in all_predictions[:12] %}
+                            <tr>
+                                <td>{{ pred.year }}-{{ "%02d"|format(pred.month) }}</td>
+                                <td><strong>{{ "%.0f"|format(pred.predicted_cases) }}</strong></td>
+                                <td>
+                                    <span class="risk-badge risk-{{ pred.risk_level.replace('_', '-') }}">
+                                        {{ pred.risk_level.replace('_', ' ').upper() }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No predictions available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('monthlyTrendChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ monthly_trend | map(attribute='month') | list | tojson }},
+        datasets: [{
+            label: 'Cases',
+            data: {{ monthly_trend | map(attribute='cases') | list | tojson }},
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %}

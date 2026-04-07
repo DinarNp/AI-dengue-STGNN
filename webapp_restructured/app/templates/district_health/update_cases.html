@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Update Cases - {{ regency.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-edit"></i> Update Dengue Cases - {{ regency.name }}</h2>
+    <p class="text-muted">Enter or update monthly dengue case data for your regency</p>
+    <hr>
+    
+    <!-- Update Form -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-plus"></i> Add/Update Case Data</h5>
+                </div>
+                <div class="card-body">
+                    <form id="caseForm">
+                        <div class="mb-3">
+                            <label for="year" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="year" value="{{ current_year }}" min="2020" max="2030" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="month" class="form-label">Month</label>
+                            <select class="form-select" id="month" required>
+                                <option value="">Select month...</option>
+                                <option value="1">January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cases" class="form-label">Number of Cases</label>
+                            <input type="number" class="form-control" id="cases" min="0" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" rows="3" placeholder="Any additional information..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-custom w-100">
+                            <i class="fas fa-save"></i> Save Data
+                        </button>
+                    </form>
+                    
+                    <div id="message" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Current Year Data -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-calendar"></i> {{ current_year }} Data</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Cases</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in existing_cases %}
+                                <tr>
+                                    <td>{{ case.year }}-{{ "%02d"|format(case.month) }}</td>
+                                    <td><strong>{{ case.cases }}</strong></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editCase({{ case.year }}, {{ case.month }}, {{ case.cases }})">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">No data for {{ current_year }} yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('caseForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const year = document.getElementById('year').value;
+    const month = document.getElementById('month').value;
+    const cases = document.getElementById('cases').value;
+    const notes = document.getElementById('notes').value;
+    
+    if (!year || !month || !cases) {
+        showMessage('Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    fetch('/district/cases/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            year: parseInt(year),
+            month: parseInt(month),
+            cases: parseInt(cases),
+            notes: notes
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage('Data saved successfully!', 'success');
+            // Reset form
+            document.getElementById('cases').value = '';
+            document.getElementById('notes').value = '';
+            // Reload after 2 seconds
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            showMessage('Error: ' + data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        showMessage('Error: ' + error, 'danger');
+    });
+});
+
+function showMessage(msg, type) {
+    const messageDiv = document.getElementById('message');
+    messageDiv.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+function editCase(year, month, cases) {
+    document.getElementById('year').value = year;
+    document.getElementById('month').value = month;
+    document.getElementById('cases').value = cases;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+{% endblock %}

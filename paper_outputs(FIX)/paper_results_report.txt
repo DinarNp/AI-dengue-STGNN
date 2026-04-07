@@ -1,0 +1,53 @@
+DENGUE PREDICTION MODEL - PAPER RESULTS
+================================================================================
+
+OVERALL TEST PERFORMANCE:
+  MAE: 7.312 cases/week
+  RMSE: 11.283 cases/week
+  R²: 0.430
+  Zero Accuracy: 0.0%
+
+LOCATION-SPECIFIC PERFORMANCE:
+
+  KAB BANTUL:
+    MAE: 5.730, RMSE: 8.268, R²: -0.274
+    Mean Pred: 5.60, Mean Actual: 9.54
+
+  KAB GUNUNG KIDUL:
+    MAE: 4.705, RMSE: 7.293, R²: 0.177
+    Mean Pred: 7.59, Mean Actual: 7.50
+
+  KAB KULON PROGO:
+    MAE: 4.467, RMSE: 6.371, R²: -0.537
+    Mean Pred: 6.19, Mean Actual: 5.58
+
+  KAB SLEMAN:
+    MAE: 9.892, RMSE: 14.501, R²: 0.191
+    Mean Pred: 11.12, Mean Actual: 19.96
+
+  KOTA YOGYAKARTA:
+    MAE: 11.767, RMSE: 16.252, R²: 0.286
+    Mean Pred: 27.05, Mean Actual: 27.17
+
+
+TOP 20 FEATURES:
+   1. Temperature_Max                    : 0.065190
+   2. Pressure                           : 0.051787
+   3. Temperature_Min                    : 0.047982
+   4. Precipitation_Total                : 0.047678
+   5. Cases_rolling_mean_4w              : 0.044506
+   6. Cases_binary_lag_2                 : 0.043885
+   7. Cases_lag_1                        : 0.040365
+   8. Wind_Direction                     : 0.040203
+   9. Cases_binary_lag_3                 : 0.039621
+  10. Cloud_Cover                        : 0.039561
+  11. Wind_Speed                         : 0.036311
+  12. Month_sin                          : 0.035344
+  13. Humidity                           : 0.035211
+  14. Cases_lag_2                        : 0.033061
+  15. NDVI                               : 0.032975
+  16. Cases_binary_lag_1                 : 0.032479
+  17. Cases_binary_lag_4                 : 0.031423
+  18. Cases_lag_4                        : 0.031179
+  19. Week_cos                           : 0.030745
+  20. Cases_lag_3                        : 0.026861

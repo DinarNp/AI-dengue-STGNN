@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-database"></i> Data Management</h2>
+    <hr>
+    
+    <!-- Data Completeness Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Data Completeness Overview</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Regency</th>
+                                <th>Latest Dengue Data</th>
+                                <th>Latest Climate Data</th>
+                                <th>Latest NDVI Data</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in data_stats %}
+                            <tr>
+                                <td>{{ stat.regency }}</td>
+                                <td>{{ stat.latest_dengue }}</td>
+                                <td>{{ stat.latest_climate }}</td>
+                                <td>{{ stat.latest_ndvi }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">Update</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Data Update Tools -->
+    <div class="row">
+        <!-- Dengue Cases -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-virus"></i> Dengue Cases</h5>
+                </div>
+                <div class="card-body">
+                    <p>Manage dengue case data</p>
+                    <a href="{{ url_for('admin.view_data', data_type='dengue') }}" class="btn btn-primary btn-custom w-100 mb-2">
+                        <i class="fas fa-table"></i> View/Edit Data
+                    </a>
+                    <a href="{{ url_for('admin.export_csv', data_type='dengue') }}" class="btn btn-success btn-custom w-100">
+                        <i class="fas fa-download"></i> Export CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Climate Data -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-cloud-sun-rain"></i> Climate Data</h5>
+                </div>
+                <div class="card-body">
+                    <p>Fetch climate data from APIs (ONE-CLICK)</p>
+                    <button class="btn btn-info btn-custom" onclick="fetchClimateData()">
+                        <i class="fas fa-download"></i> Fetch for Month
+                    </button>
+                    <div class="mt-2">
+                        <input type="number" id="climateYear" class="form-control mb-2" placeholder="Year" value="2024">
+                        <input type="number" id="climateMonth" class="form-control" placeholder="Month" value="1" min="1" max="12">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- NDVI Data -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-leaf"></i> NDVI Data</h5>
+                </div>
+                <div class="card-body">
+                    <p>Upload and process NDVI satellite data</p>
+                    <button class="btn btn-success btn-custom" data-bs-toggle="modal" data-bs-target="#uploadNDVIModal">
+                        <i class="fas fa-satellite"></i> Upload GeoTIFF
+                    </button>
+                    <button class="btn btn-secondary btn-custom mt-2" onclick="imputeNDVI()">
+                        <i class="fas fa-magic"></i> Impute Missing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Data -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5><i class="fas fa-file-export"></i> Export Data</h5>
+                </div>
+                <div class="card-body">
+                    <p>Export all data to CSV format (creates data_monthly_5kab_YYYY_YYYY_ndvi.csv)</p>
+                    <div class="row">
+                        <div class="col-md-2">
+                            <input type="number" id="exportYearStart" class="form-control" placeholder="Start Year" value="2021">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" id="exportYearEnd" class="form-control" placeholder="End Year" value="2024">
+                        </div>
+                        <div class="col-md-8">
+                            <button class="btn btn-warning btn-custom" onclick="exportData()">
+                                <i class="fas fa-download"></i> Export to CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals and JavaScript would go here -->
+<script>
+function fetchClimateData() {
+    const year = document.getElementById('climateYear').value;
+    const month = document.getElementById('climateMonth').value;
+    
+    if (!year || !month) {
+        alert('Please enter year and month');
+        return;
+    }
+    
+    // Show loading
+    alert('Fetching climate data... This may take a few minutes.');
+    
+    fetch('/admin/data/climate/fetch', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({year: parseInt(year), month: parseInt(month)})
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(`Success: ${data.success} regencies, Failed: ${data.failed}`);
+        location.reload();
+    })
+    .catch(error => alert('Error: ' + error));
+}
+
+function exportData() {
+    const yearStart = document.getElementById('exportYearStart').value;
+    const yearEnd = document.getElementById('exportYearEnd').value;
+    
+    window.location.href = `/admin/data/export?year_start=${yearStart}&year_end=${yearEnd}`;
+}
+</script>
+
+{% endblock %}

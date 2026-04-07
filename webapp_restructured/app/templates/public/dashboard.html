@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Dengue Prediction System{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-chart-line"></i> Public Dashboard</h2>
+            <p class="text-muted">Real-time dengue situation across Yogyakarta Special Region</p>
+        </div>
+    </div>
+    
+    <!-- Provincial Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-white stat-card">
+                    <p>Total Cases This Year</p>
+                    <h3>{{ provincial_total }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body text-white stat-card">
+                    <p>Active Regencies</p>
+                    <h3>5</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Provincial Trend (Last 12 Months)</h6>
+                    <canvas id="provincialTrendChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Regency Cards -->
+    <div class="row">
+        {% for data in regency_data %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt"></i> {{ data.regency.name }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Latest Data -->
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Latest Cases</p>
+                            <h4 class="mb-0">
+                                {% if data.latest_case %}
+                                    {{ data.latest_case.cases }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </h4>
+                            <small class="text-muted">
+                                {% if data.latest_case %}
+                                    {{ data.latest_case.year }}-{{ "%02d"|format(data.latest_case.month) }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted small mb-1">Prediction</p>
+                            <h4 class="mb-0">
+                                {% if data.latest_prediction %}
+                                    {{ "%.0f"|format(data.latest_prediction.predicted_cases) }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </h4>
+                            {% if data.latest_prediction %}
+                                <span class="risk-badge risk-{{ data.latest_prediction.risk_level.replace('_', '-') }}">
+                                    {{ data.latest_prediction.risk_level.replace('_', ' ').upper() }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Year Total -->
+                    <div class="mb-3">
+                        <p class="text-muted small mb-1">Total This Year ({{ current_year }})</p>
+                        <h5>{{ data.year_total }} cases</h5>
+                    </div>
+                    
+                    <!-- Mini Trend Chart -->
+                    <div>
+                        <p class="text-muted small mb-2">6-Month Trend</p>
+                        <canvas id="trendChart{{ loop.index }}" height="100"></canvas>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ url_for('public.regency_detail', regency_id=data.regency.id) }}" class="btn btn-sm btn-primary w-100">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Provincial Trend Chart
+const provincialCtx = document.getElementById('provincialTrendChart');
+if (provincialCtx) {
+    new Chart(provincialCtx, {
+        type: 'line',
+        data: {
+            labels: {{ overall_trend | map(attribute='month') | list | tojson }},
+            datasets: [{
+                label: 'Total Cases',
+                data: {{ overall_trend | map(attribute='cases') | list | tojson }},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// Individual Regency Trend Charts
+{% for data in regency_data %}
+const ctx{{ loop.index }} = document.getElementById('trendChart{{ loop.index }}');
+if (ctx{{ loop.index }}) {
+    new Chart(ctx{{ loop.index }}, {
+        type: 'line',
+        data: {
+            labels: {{ data.trend | map(attribute='month') | list | tojson }},
+            datasets: [{
+                label: 'Cases',
+                data: {{ data.trend | map(attribute='cases') | list | tojson }},
+                borderColor: 'rgb(54, 162, 235)',
+                backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+{% endfor %}
+</script>
+{% endblock %}

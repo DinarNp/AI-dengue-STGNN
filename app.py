@@ -185,7 +185,7 @@ def calculate_environmental_risk(temp, precip, humidity, puskesmas_name):
 def get_risk_level(prediction_value):
     """Determine risk level with CONSISTENT thresholds"""
     # KONSISTEN dengan dashboard.html - gunakan threshold yang sama
-    if prediction_value > 2.0:  # Ubah dari 2.5 ke 2.0
+    if prediction_value > 3.0:  # Ubah dari 2.5 ke 2.0
         return 'high'
     elif prediction_value > 1.0:  # Ubah dari 1.5 ke 1.0  
         return 'moderate'

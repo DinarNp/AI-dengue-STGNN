@@ -8,6 +8,7 @@ import traceback
 from werkzeug.utils import secure_filename
 import pickle
 import hashlib
+import torch
 
 # Fix matplotlib backend for Flask/threading
 import matplotlib
@@ -129,13 +130,7 @@ class SpatioTemporalDataSplitter:
             12: 2, 1: 2, 2: 2, 3: 2,    # Des-March: Wet/Rainy season
             4: 3, 5: 3,                 # April-May: Transition
         })
-        # self.data['season'] = self.data['month'].map({
-        #     12: 0, 1: 0, 2: 0,  # Dec-Feb: Dry season
-        #     3: 1, 4: 1, 5: 1,   # Mar-May: Transition
-        #     6: 2, 7: 2, 8: 2,   # Jun-Aug: Wet season
-        #     9: 3, 10: 3, 11: 3  # Sep-Nov: Transition
-        # })
-        
+
         # Cyclical encoding for temporal features (important for neural networks)
         for col, max_val in [('month', 12), ('week_of_year', 52), ('day_of_year', 365)]:
             self.data[f'{col}_sin'] = np.sin(2 * np.pi * self.data[col] / max_val)
@@ -720,9 +715,9 @@ def calculate_environmental_risk(temp, precip, humidity, location_name):
 def get_risk_level(prediction_value):
     """Determine risk level with CONSISTENT thresholds"""
     # KONSISTEN dengan dashboard.html - gunakan threshold yang sama
-    if prediction_value > 2.0:
+    if prediction_value > 10.0:
         return 'high'
-    elif prediction_value > 1.0:
+    elif prediction_value > 3.0:
         return 'moderate'
     else:
         return 'low'
@@ -937,7 +932,11 @@ def load_data():
         )
         
         # Use random split instead of time-based to avoid seasonal bias
+<<<<<<< Updated upstream
         split_results = splitter.run_complete_split(create_sequences=True, sequence_length=12, split_method='random')
+=======
+        split_results = splitter.run_complete_split(create_sequences=True, sequence_length=12, split_method='stratified')
+>>>>>>> Stashed changes
         
         if split_results is None:
             return safe_jsonify({'error': 'Failed to process spatio-temporal data'})
@@ -1110,7 +1109,7 @@ def train_model():
                     print(f"Training with sequences: {split_results['train']['X'].shape}")
                     
                 # For now, we'll use the file path approach until the AI modules are updated
-                model_instance, metrics, metadata = system.run_complete_pipeline("data/fix.csv")
+                model_instance, metrics, metadata, history = system.run_complete_pipeline("data/fix.csv", generate_paper_analysis=True )
                 
                 # Extract and convert metrics to native Python types
                 raw_metrics = {
@@ -1131,7 +1130,7 @@ def train_model():
                         training_metrics[key] = float(value)
                 
                 # Get actual training losses if available
-                actual_losses = metadata.get('training_losses', [])
+                actual_losses = history.get('train_loss', [])
                 if not actual_losses:
                     print("⚠️ No actual training losses found, generating realistic ones...")
                     actual_losses = generate_training_losses(params.get('epochs', 1000))
@@ -1181,110 +1180,511 @@ def train_model():
         print(traceback.format_exc())
         return safe_jsonify({'error': error_msg}), 500
 
+#@app.route('/predict', methods=['POST'])
+# def predict():
+#     """Make prediction using spatio-temporal features"""
+#     global predictor, current_data, processed_data, model_trained
+    
+#     try:
+#         if current_data is None:
+#             return safe_jsonify({'error': 'No data loaded. Please load data first.'})
+        
+#         regency_name = request.form.get('regency_name')
+#         if not regency_name:
+#             return safe_jsonify({'error': 'Regency name is required'})
+        
+#         print(f"🎯 Making prediction for: {regency_name}")
+        
+#         # Use processed data if available, otherwise fall back to original
+#         data_to_use = processed_data if processed_data is not None else current_data
+#         regency_data = data_to_use[data_to_use['Regency'] == regency_name]
+        
+#         if regency_data.empty:
+#             return safe_jsonify({'error': f'No data found for {regency_name}'})
+        
+#         # Get environmental data (with temporal features if available) - ensure native Python floats
+#         avg_temp = float(regency_data['temperature_avg'].mean())
+#         avg_precip = float(regency_data['precipitation_total'].mean())
+#         avg_humidity = float(regency_data['humidity'].mean())
+
+#         print(f"📊 Environmental data for {regency_name}: T={avg_temp:.1f}°C, P={avg_precip:.1f}mm, H={avg_humidity:.1f}%")
+        
+#         # Try to use trained AI model first
+#         if model_trained and AI_MODULES_AVAILABLE:
+#            try:
+#                # Initialize predictor if not already done
+#                if predictor is None and os.path.exists('dengue_stgnn_model.pth'):
+#                    predictor = DenguePredictor('dengue_stgnn_model.pth')
+               
+#                if predictor is not None:
+#                    # Get latest data for additional features
+#                    latest_data = regency_data.iloc[-1]
+                   
+#                    # Prepare input for model - include all available features
+#                    model_input = np.array([[
+#                        avg_temp, 
+#                        avg_precip, 
+#                        avg_humidity,
+#                        latest_data.get('pressure', 1013),
+#                        latest_data.get('cloud_cover', 50),
+#                        latest_data.get('wind_speed', 5),
+#                        latest_data.get('wind_direction', 180),
+#                        latest_data.get('ndvi', 0.5),
+#                        latest_data.get('latitude', -7.8),
+#                        latest_data.get('longitude', 110.4)
+#                    ]])
+                   
+#                    # Get prediction from trained model
+#                    prediction_result = predictor.predict(model_input)
+#                    prediction_value = float(prediction_result['predictions'][0][0])
+                   
+#                    print(f"AI Model prediction: {prediction_value:.2f}")
+                   
+#                else:
+#                    raise Exception("Model predictor not available")
+                   
+#            except Exception as model_error:
+#                print(f"AI model prediction failed: {model_error}")
+#                # Fallback to environmental calculation
+#                prediction_value = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency_name)
+#                print(f"Environmental fallback prediction: {prediction_value:.2f}")
+#         else:
+#            # Use environmental data when model not trained
+#            prediction_value = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency_name)
+#            print(f"Environmental prediction: {prediction_value:.2f}")
+        
+#         # If we have temporal features, adjust prediction
+#         if processed_data is not None and 'month_sin' in processed_data.columns:
+#             # Use seasonal information to adjust prediction
+#             recent_data = regency_data.tail(10)  # Last 10 records
+#             if 'season' in recent_data.columns:
+#                 season_mode = recent_data['season'].mode()
+#                 if len(season_mode) > 0:
+#                     season = season_mode.iloc[0]
+#                     # Adjust based on season (wet season = higher risk)
+#                     if season == 2:  # Wet season
+#                         prediction_value *= 1.2
+#                     elif season in [1, 3]:  # Transition seasons
+#                         prediction_value *= 1.1
+            
+#             print(f"Enhanced prediction with temporal features: {prediction_value:.2f}")
+        
+#         risk_level = get_risk_level(prediction_value)
+        
+#          # Generate explanation based on real data
+#         explanation = create_risk_explanation(regency_name, prediction_value, risk_level, avg_temp, avg_precip, avg_humidity, model_trained)
+        
+#         # Get neighboring info
+#         neighboring_info = get_neighboring_info(regency_name, current_data['Regency'].unique(), current_data)
+        
+#         # Enhanced factors with temporal information - ensure all values are native Python types
+#         factors = [
+#             {'name': 'Temperature', 'value': f'{avg_temp:.1f}°C', 'threshold': '25-30°C optimal'},
+#             {'name': 'Precipitation', 'value': f'{avg_precip:.1f}mm', 'threshold': '>100mm high risk'},
+#             {'name': 'Humidity', 'value': f'{avg_humidity:.1f}%', 'threshold': '>80% favorable'}
+#         ]
+        
+#         if processed_data is not None:
+#             # Add temporal factors
+#             if 'month' in regency_data.columns:
+#                 current_month = int(regency_data['month'].iloc[-1]) if len(regency_data) > 0 else 1
+#                 factors.append({'name': 'Current Month', 'value': str(current_month), 'threshold': 'Peak: Jun-Aug'})
+            
+#             if 'cases_lag_4w' in regency_data.columns:
+#                 lag_cases = float(regency_data['cases_lag_4w'].iloc[-1]) if len(regency_data) > 0 and not pd.isna(regency_data['cases_lag_4w'].iloc[-1]) else 0.0
+#                 factors.append({'name': 'Cases 4 weeks ago', 'value': f'{lag_cases:.0f}', 'threshold': 'Trend indicator'})
+        
+#         recommendations = generate_recommendations_for_risk(risk_level, regency_name)
+        
+#         response_data = {
+#             'prediction': float(prediction_value),
+#             'risk_level': risk_level,
+#             'explanation': explanation,
+#             'recommendations': recommendations,
+#             'neighboring_info': neighboring_info,
+#             'factors': factors,
+#             'model_used': model_trained,
+#             'spatio_temporal_features': processed_data is not None,
+#             'data_source': 'enhanced_spatio_temporal_data'
+#         }
+        
+#         return safe_jsonify(response_data)
+        
+#     except Exception as e:
+#         error_msg = f'Error making prediction: {str(e)}'
+#         print(f"❌ Prediction error: {error_msg}")
+#         print(traceback.format_exc())
+#         return safe_jsonify({'error': error_msg}), 500
+
+# @app.route('/predict', methods=['POST'])
+# def predict():
+#     """Make prediction using trained STGNN model"""
+#     global predictor, current_data, processed_data, model_trained, model_instance
+    
+#     try:
+#         if current_data is None:
+#             return safe_jsonify({'error': 'No data loaded. Please load data first.'})
+        
+#         regency_name = request.form.get('regency_name')
+#         if not regency_name:
+#             return safe_jsonify({'error': 'Regency name is required'})
+        
+#         print(f"🎯 Making prediction for: {regency_name}")
+        
+#         # Use processed data if available
+#         data_to_use = processed_data if processed_data is not None else current_data
+#         regency_data = data_to_use[data_to_use['Regency'] == regency_name]
+        
+#         if regency_data.empty:
+#             return safe_jsonify({'error': f'No data found for {regency_name}'})
+        
+#         # Get environmental data
+#         avg_temp = float(regency_data['temperature_avg'].mean())
+#         avg_precip = float(regency_data['precipitation_total'].mean())
+#         avg_humidity = float(regency_data['humidity'].mean())
+        
+#         print(f"📊 Environmental data: T={avg_temp:.1f}°C, P={avg_precip:.1f}mm, H={avg_humidity:.1f}%")
+        
+#         # ✅ FIX: Try to use trained AI model
+#         prediction_value = None
+#         model_used = False
+        
+#         # if model_trained and AI_MODULES_AVAILABLE and os.path.exists('dengue_stgnn_model.pth'):
+#         #     try:
+#         #         print("🤖 Attempting to use trained AI model...")
+                
+#         #         # ✅ CRITICAL FIX: Use the DenguePredictor correctly
+#         #         from models.predictor import DenguePredictor
+                
+#         #         # Initialize predictor if needed
+#         #         if predictor is None:
+#         #             print("   Initializing DenguePredictor...")
+#         #             predictor = DenguePredictor('dengue_stgnn_model.pth')
+                
+#         #         # Get model info
+#         #         model_info = predictor.get_model_info()
+#         #         feature_cols = model_info.get('feature_cols', [])
+
+#         #         # Get latest complete data row
+#         #         latest_data = regency_data.iloc[-1]
+                
+#         #         # Prepare input features
+#         #         if feature_cols:
+#         #             # Use exact features the model expects
+#         #             model_input = []
+#         #             for feat in feature_cols:
+#         #                 if feat in latest_data.index:
+#         #                     model_input.append(float(latest_data[feat]))
+#         #                 else:
+#         #                     model_input.append(0.0)
+#         #             model_input = np.array(model_input, dtype=np.float32)
+#         #         else:
+#         #             # Fallback: use all numeric features
+#         #             numeric_cols = regency_data.select_dtypes(include=[np.number]).columns
+#         #             exclude_cols = ['Year', 'Week', 'cases']
+#         #             feature_cols_auto = [c for c in numeric_cols if c not in exclude_cols]
+#         #             model_input = latest_data[feature_cols_auto].values.astype(np.float32)
+                
+#         #         print(f"   Input features: {len(model_input)}")
+                
+#         #         # ✅ Get prediction for specific node
+#         #         result = predictor.predict_for_location(model_input, regency_name)
+
+#         #         # Extract prediction
+#         #         prediction_value = float(result['predictions'][0][0])
+#         #         model_used = True
+
+#         #         print(f"   ✅ AI prediction: {prediction_value:.2f}")
+                   
+#         #     except Exception as model_error:
+#         #         print(f"   ⚠️ AI model prediction failed: {model_error}")
+#         #         import traceback
+#         #         traceback.print_exc()
+#         #         prediction_value = None
+#         #         model_used = False
+        
+#         if model_trained and AI_MODULES_AVAILABLE and os.path.exists('dengue_stgnn_model.pth'):
+#             try:
+#                 print("🤖 Using trained AI model with all locations...")
+                
+#                 if predictor is None:
+#                     from models.predictor import DenguePredictor
+#                     predictor = DenguePredictor('dengue_stgnn_model.pth')
+                
+#                 model_info = predictor.get_model_info()
+#                 feature_cols = model_info.get('feature_cols', [])
+#                 node_ids = model_info.get('node_ids', [])
+                
+#                 # ✅ Get features for ALL locations, not just one
+#                 all_location_features = []
+                
+#                 for node_id in node_ids:
+#                     # Find data for this location
+#                     node_data = data_to_use[data_to_use['Regency'].str.contains(node_id, case=False, na=False)]
+                    
+#                     if not node_data.empty:
+#                         latest = node_data.iloc[-1]
+#                     else:
+#                         # Use current regency data as fallback
+#                         latest = regency_data.iloc[-1]
+                    
+#                     # Extract features
+#                     if feature_cols:
+#                         node_features = []
+#                         for feat in feature_cols:
+#                             if feat in latest.index:
+#                                 node_features.append(float(latest[feat]))
+#                             else:
+#                                 node_features.append(0.0)
+#                         all_location_features.append(node_features)
+#                     else:
+#                         numeric_cols = data_to_use.select_dtypes(include=[np.number]).columns
+#                         exclude_cols = ['Year', 'Week', 'cases']
+#                         feature_cols_auto = [c for c in numeric_cols if c not in exclude_cols]
+#                         all_location_features.append(latest[feature_cols_auto].values.astype(np.float32))
+                
+#                 # Stack features: (n_nodes, n_features)
+#                 all_features = np.array(all_location_features, dtype=np.float32)
+                
+#                 print(f"   Collected features for {len(all_features)} locations")
+#                 print(f"   Features shape: {all_features.shape}")
+                
+#                 # ✅ Use new method that handles all locations
+#                 result = predictor.predict_with_all_locations(all_features, regency_name)
+                
+#                 prediction_value = float(result['predictions'][0][0])
+#                 model_used = True
+                
+#                 print(f"   ✅ AI prediction: {prediction_value:.2f}")
+                
+#             except Exception as e:
+#                 print(f"   ⚠️ AI model failed: {e}")
+#                 traceback.print_exc()
+#                 prediction_value = None
+#                 model_used = False
+
+#         # Fallback to environmental calculation
+#         if prediction_value is None:
+#             print("   Using environmental fallback...")
+#             prediction_value = calculate_environmental_risk(
+#                 avg_temp, avg_precip, avg_humidity, regency_name
+#             )
+#             model_used = False
+        
+#         # Enhance with temporal features
+#         if processed_data is not None and 'month_sin' in regency_data.columns:
+#             recent_data = regency_data.tail(10)
+#             if 'season' in recent_data.columns:
+#                 season_mode = recent_data['season'].mode()
+#                 if len(season_mode) > 0:
+#                     season = season_mode.iloc[0]
+#                     if season == 2:  # Wet season
+#                         prediction_value *= 1.2
+#                     elif season in [1, 3]:  # Transition
+#                         prediction_value *= 1.1
+#             print(f"   Enhanced: {prediction_value:.2f}")
+        
+#         risk_level = get_risk_level(prediction_value)
+#         explanation = create_risk_explanation(
+#             regency_name, prediction_value, risk_level,
+#             avg_temp, avg_precip, avg_humidity, model_used
+#         )
+        
+#         neighboring_info = get_neighboring_info(
+#             regency_name, current_data['Regency'].unique(), current_data
+#         )
+        
+#         # Factors
+#         factors = [
+#             {'name': 'Temperature', 'value': f'{avg_temp:.1f}°C', 'threshold': '25-30°C optimal'},
+#             {'name': 'Precipitation', 'value': f'{avg_precip:.1f}mm', 'threshold': '>100mm high risk'},
+#             {'name': 'Humidity', 'value': f'{avg_humidity:.1f}%', 'threshold': '>80% favorable'}
+#         ]
+        
+#         if processed_data is not None:
+#             if 'month' in regency_data.columns:
+#                 current_month = int(regency_data['month'].iloc[-1]) if len(regency_data) > 0 else 1
+#                 factors.append({'name': 'Current Month', 'value': str(current_month), 'threshold': 'Peak: Jun-Aug'})
+            
+#             if 'cases_lag_4w' in regency_data.columns:
+#                 lag_cases = float(regency_data['cases_lag_4w'].iloc[-1]) if len(regency_data) > 0 and not pd.isna(regency_data['cases_lag_4w'].iloc[-1]) else 0.0
+#                 factors.append({'name': 'Cases 4 weeks ago', 'value': f'{lag_cases:.0f}', 'threshold': 'Trend indicator'})
+        
+#         recommendations = generate_recommendations_for_risk(risk_level, regency_name)
+        
+#         response_data = {
+#             'prediction': float(prediction_value),
+#             'risk_level': risk_level,
+#             'explanation': explanation,
+#             'recommendations': recommendations,
+#             'neighboring_info': neighboring_info,
+#             'factors': factors,
+#             'model_used': model_used,
+#             'spatio_temporal_features': processed_data is not None,
+#             'data_source': 'trained_stgnn_model' if model_used else 'environmental_calculation'
+#         }
+        
+#         return safe_jsonify(response_data)
+        
+#     except Exception as e:
+#         error_msg = f'Error making prediction: {str(e)}'
+#         print(f"❌ Prediction error: {error_msg}")
+#         print(traceback.format_exc())
+#         return safe_jsonify({'error': error_msg}), 500
+
+# In app2.py - FINAL HYBRID SOLUTION
+
 @app.route('/predict', methods=['POST'])
 def predict():
-    """Make prediction using spatio-temporal features"""
+    """Hybrid prediction: AI baseline + environmental adjustment"""
     global predictor, current_data, processed_data, model_trained
     
     try:
         if current_data is None:
-            return safe_jsonify({'error': 'No data loaded. Please load data first.'})
+            return safe_jsonify({'error': 'No data loaded'})
         
         regency_name = request.form.get('regency_name')
         if not regency_name:
-            return safe_jsonify({'error': 'Regency name is required'})
+            return safe_jsonify({'error': 'Regency name required'})
         
         print(f"🎯 Making prediction for: {regency_name}")
         
-        # Use processed data if available, otherwise fall back to original
         data_to_use = processed_data if processed_data is not None else current_data
         regency_data = data_to_use[data_to_use['Regency'] == regency_name]
         
         if regency_data.empty:
             return safe_jsonify({'error': f'No data found for {regency_name}'})
         
-        # Get environmental data (with temporal features if available) - ensure native Python floats
+        # Get environmental data for this location
         avg_temp = float(regency_data['temperature_avg'].mean())
         avg_precip = float(regency_data['precipitation_total'].mean())
         avg_humidity = float(regency_data['humidity'].mean())
-
-        print(f"📊 Environmental data for {regency_name}: T={avg_temp:.1f}°C, P={avg_precip:.1f}mm, H={avg_humidity:.1f}%")
+        avg_cases = float(regency_data['cases'].mean())
         
-        # Try to use trained AI model first
-        if model_trained and AI_MODULES_AVAILABLE:
-           try:
-               # Initialize predictor if not already done
-               if predictor is None and os.path.exists('dengue_stgnn_model.pth'):
-                   predictor = DenguePredictor('dengue_stgnn_model.pth')
-               
-               if predictor is not None:
-                   # Get latest data for additional features
-                   latest_data = regency_data.iloc[-1]
-                   
-                   # Prepare input for model - include all available features
-                   model_input = np.array([[
-                       avg_temp, 
-                       avg_precip, 
-                       avg_humidity,
-                       latest_data.get('pressure', 1013),
-                       latest_data.get('cloud_cover', 50),
-                       latest_data.get('wind_speed', 5),
-                       latest_data.get('wind_direction', 180),
-                       latest_data.get('ndvi', 0.5),
-                       latest_data.get('latitude', -7.8),
-                       latest_data.get('longitude', 110.4)
-                   ]])
-                   
-                   # Get prediction from trained model
-                   prediction_result = predictor.predict(model_input)
-                   prediction_value = float(prediction_result['predictions'][0][0])
-                   
-                   print(f"AI Model prediction: {prediction_value:.2f}")
-                   
-               else:
-                   raise Exception("Model predictor not available")
-                   
-           except Exception as model_error:
-               print(f"AI model prediction failed: {model_error}")
-               # Fallback to environmental calculation
-               prediction_value = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency_name)
-               print(f"Environmental fallback prediction: {prediction_value:.2f}")
-        else:
-           # Use environmental data when model not trained
-           prediction_value = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency_name)
-           print(f"Environmental prediction: {prediction_value:.2f}")
+        print(f"📊 {regency_name}: T={avg_temp:.1f}°C, P={avg_precip:.1f}mm, H={avg_humidity:.1f}%, Historical avg={avg_cases:.1f}")
         
-        # If we have temporal features, adjust prediction
-        if processed_data is not None and 'month_sin' in processed_data.columns:
-            # Use seasonal information to adjust prediction
-            recent_data = regency_data.tail(10)  # Last 10 records
-            if 'season' in recent_data.columns:
-                season_mode = recent_data['season'].mode()
-                if len(season_mode) > 0:
-                    season = season_mode.iloc[0]
-                    # Adjust based on season (wet season = higher risk)
-                    if season == 2:  # Wet season
-                        prediction_value *= 1.2
-                    elif season in [1, 3]:  # Transition seasons
-                        prediction_value *= 1.1
+        # Get AI model baseline
+        ai_baseline = None
+        model_used = False
+        
+        if model_trained and AI_MODULES_AVAILABLE and os.path.exists('dengue_stgnn_model.pth'):
+            try:
+                print("🤖 Getting AI baseline...")
+                
+                if predictor is None:
+                    from models.predictor import DenguePredictor
+                    predictor = DenguePredictor('dengue_stgnn_model.pth')
+                
+                model_info = predictor.get_model_info()
+                feature_cols = model_info.get('feature_cols', [])
+                node_ids = model_info.get('node_ids', [])
+                
+                # Collect features for all locations
+                all_location_features = []
+                location_names = []
+                
+                for node_id in node_ids:
+                    node_data = data_to_use[data_to_use['Regency'].str.upper().str.contains(node_id.upper(), na=False)]
+                    
+                    if not node_data.empty:
+                        latest = node_data.iloc[-1]
+                        location_names.append(node_id)
+                    else:
+                        latest = regency_data.iloc[-1]
+                        location_names.append(regency_name)
+                    
+                    if feature_cols:
+                        node_features = [float(latest.get(feat, 0.0)) for feat in feature_cols]
+                    else:
+                        numeric_cols = data_to_use.select_dtypes(include=[np.number]).columns
+                        exclude = ['Year', 'Week', 'cases']
+                        feat_cols = [c for c in numeric_cols if c not in exclude]
+                        node_features = latest[feat_cols].values.astype(np.float32).tolist()
+                    
+                    all_location_features.append(node_features)
+                
+                all_features = np.array(all_location_features, dtype=np.float32)
+                
+                # Get AI prediction
+                result = predictor.predict_with_all_locations(all_features, regency_name)
+                ai_baseline = float(result['predictions'][0][0])
+                
+                print(f"   AI baseline: {ai_baseline:.2f}")
+                model_used = True
+                
+            except Exception as e:
+                print(f"   ⚠️ AI failed: {e}")
+                ai_baseline = None
+        
+        # ✅ HYBRID CALCULATION
+        if ai_baseline is not None and ai_baseline > 0.1:
+            # Use AI as baseline, adjust with location-specific factors
             
-            print(f"Enhanced prediction with temporal features: {prediction_value:.2f}")
+            # Calculate overall average from all locations
+            overall_avg = float(data_to_use['cases'].mean())
+            
+            # Location-specific ratio (how this location compares to average)
+            location_ratio = avg_cases / overall_avg if overall_avg > 0 else 1.0
+            
+            # Apply location adjustment to AI baseline
+            # If this location historically has 2x the average, apply 2x to AI prediction
+            adjusted_prediction = ai_baseline * location_ratio
+            
+            # Add environmental risk adjustment
+            env_factor = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency_name)
+            
+            # Normalize env_factor (typically 0.5-2.5) to a multiplier (0.8-1.2)
+            env_multiplier = 0.8 + (env_factor / 5.0)
+            
+            # Final prediction
+            final_prediction = adjusted_prediction * env_multiplier
+            
+            print(f"   Location ratio: {location_ratio:.2f}x")
+            print(f"   Adjusted: {adjusted_prediction:.2f}")
+            print(f"   Env multiplier: {env_multiplier:.2f}")
+            print(f"   Final: {final_prediction:.2f}")
+            
+        else:
+            # Fallback: pure environmental calculation
+            final_prediction = calculate_environmental_risk(
+                avg_temp, avg_precip, avg_humidity, regency_name
+            )
+            # Scale based on historical average
+            if avg_cases > 0:
+                final_prediction = final_prediction * (avg_cases / 5.0)  # Rough scaling
+            
+            print(f"   Using environmental fallback: {final_prediction:.2f}")
         
+        # Temporal adjustment
+        if processed_data is not None and 'season' in regency_data.columns:
+            recent_season = regency_data.tail(10)['season'].mode()
+            if len(recent_season) > 0:
+                season = recent_season.iloc[0]
+                if season == 2:  # Wet season
+                    final_prediction *= 1.15
+                elif season in [1, 3]:
+                    final_prediction *= 1.05
+        
+        prediction_value = final_prediction
         risk_level = get_risk_level(prediction_value)
         
-         # Generate explanation based on real data
-        explanation = create_risk_explanation(regency_name, prediction_value, risk_level, avg_temp, avg_precip, avg_humidity, model_trained)
+        explanation = create_risk_explanation(
+            regency_name, prediction_value, risk_level,
+            avg_temp, avg_precip, avg_humidity, model_used
+        )
         
-        # Get neighboring info
-        neighboring_info = get_neighboring_info(regency_name, current_data['Regency'].unique(), current_data)
+        neighboring_info = get_neighboring_info(
+            regency_name, current_data['Regency'].unique(), current_data
+        )
         
-        # Enhanced factors with temporal information - ensure all values are native Python types
         factors = [
             {'name': 'Temperature', 'value': f'{avg_temp:.1f}°C', 'threshold': '25-30°C optimal'},
             {'name': 'Precipitation', 'value': f'{avg_precip:.1f}mm', 'threshold': '>100mm high risk'},
-            {'name': 'Humidity', 'value': f'{avg_humidity:.1f}%', 'threshold': '>80% favorable'}
+            {'name': 'Humidity', 'value': f'{avg_humidity:.1f}%', 'threshold': '>80% favorable'},
+            {'name': 'Historical Avg', 'value': f'{avg_cases:.1f}', 'threshold': 'Location pattern'}
         ]
         
+<<<<<<< Updated upstream
         if processed_data is not None:
             # Add temporal factors
             if 'month' in regency_data.columns:
@@ -1295,6 +1695,8 @@ def predict():
                 lag_cases = float(regency_data['cases_lag_4w'].iloc[-1]) if len(regency_data) > 0 and not pd.isna(regency_data['cases_lag_4w'].iloc[-1]) else 0.0
                 factors.append({'name': 'Cases 4 weeks ago', 'value': f'{lag_cases:.0f}', 'threshold': 'Trend indicator'})
         
+=======
+>>>>>>> Stashed changes
         recommendations = generate_recommendations_for_risk(risk_level, regency_name)
         
         response_data = {
@@ -1304,19 +1706,19 @@ def predict():
             'recommendations': recommendations,
             'neighboring_info': neighboring_info,
             'factors': factors,
-            'model_used': model_trained,
+            'model_used': model_used,
             'spatio_temporal_features': processed_data is not None,
-            'data_source': 'enhanced_spatio_temporal_data'
+            'data_source': 'hybrid_ai_environmental' if model_used else 'environmental_historical'
         }
         
         return safe_jsonify(response_data)
         
     except Exception as e:
-        error_msg = f'Error making prediction: {str(e)}'
-        print(f"❌ Prediction error: {error_msg}")
-        print(traceback.format_exc())
+        error_msg = f'Error: {str(e)}'
+        print(f"❌ {error_msg}")
+        traceback.print_exc()
         return safe_jsonify({'error': error_msg}), 500
-
+    
 @app.route('/plot/<regency_name>')
 def plot_data(regency_name):
     """Get plot data with temporal features if available"""
@@ -1366,10 +1768,130 @@ def plot_data(regency_name):
     except Exception as e:
         return safe_jsonify({'error': f'Error generating plot data: {str(e)}'})
 
+# @app.route('/get-risk-data')
+# def get_risk_data():
+#     """Get enhanced risk data using spatio-temporal features"""
+#     global processed_data, current_data, cached_risk_data, model_trained
+    
+#     try:
+#         data_to_use = processed_data if processed_data is not None else current_data
+        
+#         if data_to_use is None:
+#             return safe_jsonify({'error': 'No data loaded. Please load data first.'})
+        
+#         # Use cached data if available to maintain consistency
+#         if cached_risk_data is not None:
+#             print("📊 Using cached risk data for consistency")
+#             return safe_jsonify(cached_risk_data)
+        
+#         print("🔄 Calculating enhanced risk data with spatio-temporal features...")
+        
+#         regency_list = data_to_use['Regency'].unique()
+#         risk_data = []
+        
+#         for regency in regency_list:
+#             regency_data = data_to_use[data_to_use['Regency'] == regency]
+            
+#             if not regency_data.empty:
+#                 # Core environmental factors
+#                 avg_temp = float(regency_data['temperature_avg'].mean())
+#                 avg_precip = float(regency_data['precipitation_total'].mean())
+#                 avg_humidity = float(regency_data['humidity'].mean())
+                
+#                 # Calculate averages for additional environmental factors
+#                 avg_pressure = float(regency_data['pressure'].mean()) if 'pressure' in regency_data.columns else 1013.0
+#                 avg_ndvi = float(regency_data['ndvi'].mean()) if 'ndvi' in regency_data.columns else 0.5
+#                 avg_cloud_cover = float(regency_data['cloud_cover'].mean()) if 'cloud_cover' in regency_data.columns else 50.0
+#                 avg_wind_speed = float(regency_data['wind_speed'].mean()) if 'wind_speed' in regency_data.columns else 5.0
+                
+#                 # Temperature range
+#                 min_temp = float(regency_data['temperature_min'].mean()) if 'temperature_min' in regency_data.columns else avg_temp - 5
+#                 max_temp = float(regency_data['temperature_max'].mean()) if 'temperature_max' in regency_data.columns else avg_temp + 5
+                
+#                 # Calculate prediction
+#                 prediction = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency)
+                
+#                 # Enhance with temporal features if available
+#                 if processed_data is not None and 'season' in regency_data.columns:
+#                     recent_season = regency_data['season'].iloc[-1] if len(regency_data) > 0 else 0
+#                     if recent_season == 2:  # Wet season
+#                         prediction *= 1.15
+#                     elif recent_season in [1, 3]:  # Transition seasons
+#                         prediction *= 1.05
+                
+#                 risk_level = get_risk_level(prediction)
+                
+#                 # Create detailed explanation
+#                 explanation = create_risk_explanation(regency, prediction, risk_level, 
+#                                                     avg_temp, avg_precip, avg_humidity, model_trained)
+                
+#                 # Get neighboring info
+#                 neighboring_info = get_neighboring_info(regency, regency_list, current_data)
+                
+#                 # Generate recommendations
+#                 recommendations = generate_recommendations_for_risk(risk_level, regency)
+                
+#                 risk_entry = {
+#                     'regency': regency,
+#                     'risk_level': risk_level,
+#                     'prediction': round(prediction, 2),
+#                     # Core environmental data
+#                     'temperature_avg': round(avg_temp, 1),
+#                     'temperature_min': round(min_temp, 1),
+#                     'temperature_max': round(max_temp, 1),
+#                     'precipitation_total': round(avg_precip, 1),
+#                     'humidity': round(avg_humidity, 1),
+#                     # Additional environmental data
+#                     'pressure': round(avg_pressure, 1),
+#                     'ndvi': round(avg_ndvi, 3),
+#                     'cloud_cover': round(avg_cloud_cover, 1),
+#                     'wind_speed': round(avg_wind_speed, 1),
+
+#                     # Analysis and recommendations
+#                     'explanation': explanation,
+#                     'neighboring_info': neighboring_info,
+#                     'recommendations': recommendations,
+#                     'model_used': model_trained,
+#                     'data_source': 'real_environmental_data',
+#                     'spatio_temporal_enhanced': processed_data is not None
+#                 }
+
+#                 print(f"✅ {regency}: T={avg_temp:.1f}°C, P={avg_precip:.1f}mm, H={avg_humidity:.1f}%, NDVI={avg_ndvi:.3f}, Pressure={avg_pressure:.1f}hPa")
+                
+#                 # Add temporal information if available
+#                 if processed_data is not None:
+#                     if 'month' in regency_data.columns:
+#                         risk_entry['current_month'] = int(regency_data['month'].iloc[-1]) if len(regency_data) > 0 else 1
+                    
+#                     if 'season' in regency_data.columns:
+#                         risk_entry['current_season'] = int(regency_data['season'].iloc[-1]) if len(regency_data) > 0 else 0
+                    
+#                     # Add lag information
+#                     for lag_var in ['cases_lag_4w', 'temperature_avg_lag_4w']:
+#                         if lag_var in regency_data.columns:
+#                             lag_val = regency_data[lag_var].iloc[-1] if len(regency_data) > 0 and not pd.isna(regency_data[lag_var].iloc[-1]) else 0.0
+#                             risk_entry[lag_var] = float(lag_val)
+                
+#                 risk_data.append(risk_entry)
+        
+#         # Cache the results to maintain consistency
+#         cached_risk_data = risk_data
+        
+#         print(f"✅ Generated enhanced risk data for {len(risk_data)} health centers")
+#         return safe_jsonify(risk_data)
+        
+#     except Exception as e:
+#         error_msg = f'Error getting risk data: {str(e)}'
+#         print(f"❌ Risk data error: {error_msg}")
+#         print(traceback.format_exc())
+#         return safe_jsonify({'error': error_msg})
+
+# In app2.py - UPDATE the /get-risk-data route
+
 @app.route('/get-risk-data')
 def get_risk_data():
-    """Get enhanced risk data using spatio-temporal features"""
-    global processed_data, current_data, cached_risk_data, model_trained
+    """Get enhanced risk data using trained STGNN model - MATCHES DASHBOARD"""
+    global processed_data, current_data, cached_risk_data, model_trained, predictor
     
     try:
         data_to_use = processed_data if processed_data is not None else current_data
@@ -1377,16 +1899,106 @@ def get_risk_data():
         if data_to_use is None:
             return safe_jsonify({'error': 'No data loaded. Please load data first.'})
         
-        # Use cached data if available to maintain consistency
+        # Use cached data if available
         if cached_risk_data is not None:
             print("📊 Using cached risk data for consistency")
             return safe_jsonify(cached_risk_data)
         
-        print("🔄 Calculating enhanced risk data with spatio-temporal features...")
+        print("🔄 Calculating enhanced risk data with STGNN model...")
         
         regency_list = data_to_use['Regency'].unique()
         risk_data = []
         
+        # Calculate overall average for location ratios
+        overall_avg = float(data_to_use['cases'].mean())
+        print(f"   Overall average cases: {overall_avg:.2f}")
+        
+        # Get AI predictions for all locations
+        all_ai_predictions = {}
+        
+        if model_trained and AI_MODULES_AVAILABLE and os.path.exists('dengue_stgnn_model.pth'):
+            try:
+                print("🤖 Getting AI model predictions for all locations...")
+                
+                # Initialize predictor if needed
+                if predictor is None:
+                    from models.predictor import DenguePredictor
+                    predictor = DenguePredictor('dengue_stgnn_model.pth')
+                
+                model_info = predictor.get_model_info()
+                feature_cols = model_info.get('feature_cols', [])
+                node_ids = model_info.get('node_ids', [])
+                
+                # Collect features for all locations
+                all_location_features = []
+                regency_to_index = {}  # ✅ Maps regency name to index in array
+                
+                for i, node_id in enumerate(node_ids):
+                    # Find matching regency
+                    matched_regency = None
+                    for regency in regency_list:
+                        if node_id.upper() in regency.upper():
+                            matched_regency = regency
+                            break
+                    
+                    if matched_regency is None:
+                        matched_regency = regency_list[i] if i < len(regency_list) else regency_list[0]
+                    
+                    # ✅ Store mapping: regency name -> index
+                    regency_to_index[matched_regency] = i
+                    
+                    # Get features for this location
+                    node_data = data_to_use[data_to_use['Regency'] == matched_regency]
+                    
+                    if not node_data.empty:
+                        latest = node_data.iloc[-1]
+                    else:
+                        latest = data_to_use.iloc[-1]
+                    
+                    if feature_cols:
+                        node_features = [float(latest.get(feat, 0.0)) for feat in feature_cols]
+                    else:
+                        numeric_cols = data_to_use.select_dtypes(include=[np.number]).columns
+                        exclude = ['Year', 'Week', 'cases']
+                        feat_cols = [c for c in numeric_cols if c not in exclude]
+                        node_features = latest[feat_cols].values.astype(np.float32).tolist()
+                    
+                    all_location_features.append(node_features)
+                
+                all_features = np.array(all_location_features, dtype=np.float32)
+                
+                # Get predictions from model
+                all_features = np.array(all_location_features, dtype=np.float32)
+                window_size = getattr(predictor.config, 'WINDOW_SIZE', 8)
+                input_sequence = np.tile(all_features, (window_size, 1, 1))
+                input_batch = np.expand_dims(input_sequence, axis=0)
+                input_tensor = torch.FloatTensor(input_batch).to(predictor.device)
+                
+                with torch.no_grad():
+                    outputs = predictor.model(input_tensor, predictor.adj_matrix)
+                
+                predictions = outputs['predictions'].cpu().numpy()[0]
+                
+                # Apply inverse transform
+                if predictor.metadata.get('target_transform') == 'log1p':
+                    predictions = np.expm1(np.maximum(predictions, 0))
+                
+                predictions = np.maximum(predictions, 0)
+                # ✅ FIX: Use correct mapping to store predictions
+                for regency, idx in regency_to_index.items():
+                    all_ai_predictions[regency] = float(predictions[idx])
+                
+                print(f"   ✅ Got predictions for {len(all_ai_predictions)} locations")
+                for regency, pred in all_ai_predictions.items():
+                    print(f"      {regency}: {pred:.2f}")
+                
+            except Exception as e:
+                print(f"   ⚠️ AI model failed: {e}")
+                import traceback
+                traceback.print_exc()
+                all_ai_predictions = {}
+        
+        # Process each regency
         for regency in regency_list:
             regency_data = data_to_use[data_to_use['Regency'] == regency]
             
@@ -1395,8 +2007,9 @@ def get_risk_data():
                 avg_temp = float(regency_data['temperature_avg'].mean())
                 avg_precip = float(regency_data['precipitation_total'].mean())
                 avg_humidity = float(regency_data['humidity'].mean())
+                avg_cases = float(regency_data['cases'].mean())
                 
-                # Calculate averages for additional environmental factors
+                # Additional environmental data
                 avg_pressure = float(regency_data['pressure'].mean()) if 'pressure' in regency_data.columns else 1013.0
                 avg_ndvi = float(regency_data['ndvi'].mean()) if 'ndvi' in regency_data.columns else 0.5
                 avg_cloud_cover = float(regency_data['cloud_cover'].mean()) if 'cloud_cover' in regency_data.columns else 50.0
@@ -1406,22 +2019,50 @@ def get_risk_data():
                 min_temp = float(regency_data['temperature_min'].mean()) if 'temperature_min' in regency_data.columns else avg_temp - 5
                 max_temp = float(regency_data['temperature_max'].mean()) if 'temperature_max' in regency_data.columns else avg_temp + 5
                 
-                # Calculate prediction
-                prediction = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency)
+                # ✅ HYBRID PREDICTION (same as dashboard)
+                if regency in all_ai_predictions:
+                    ai_pred = all_ai_predictions[regency]
+                    
+                    # Location ratio
+                    location_ratio = avg_cases / overall_avg if overall_avg > 0 else 1.0
+                    
+                    # Adjusted prediction
+                    adjusted_prediction = ai_pred * location_ratio
+                    
+                    # Environmental factor
+                    env_factor = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency)
+                    env_multiplier = 0.8 + (env_factor / 5.0)
+                    
+                    # Final prediction
+                    prediction = adjusted_prediction * env_multiplier
+                    
+                    print(f"   {regency}: AI={ai_pred:.2f}, ratio={location_ratio:.2f}, final={prediction:.2f}")
+                    model_used = True
+                    
+                else:
+                    # Fallback to environmental calculation
+                    prediction = calculate_environmental_risk(avg_temp, avg_precip, avg_humidity, regency)
+                    if avg_cases > 0:
+                        prediction = prediction * (avg_cases / 5.0)
+                    model_used = False
                 
-                # Enhance with temporal features if available
+                # Temporal adjustment
                 if processed_data is not None and 'season' in regency_data.columns:
-                    recent_season = regency_data['season'].iloc[-1] if len(regency_data) > 0 else 0
-                    if recent_season == 2:  # Wet season
-                        prediction *= 1.15
-                    elif recent_season in [1, 3]:  # Transition seasons
-                        prediction *= 1.05
+                    recent_season = regency_data.tail(10)['season'].mode()
+                    if len(recent_season) > 0:
+                        season = recent_season.iloc[0]
+                        if season == 2:  # Wet season
+                            prediction *= 1.15
+                        elif season in [1, 3]:
+                            prediction *= 1.05
                 
                 risk_level = get_risk_level(prediction)
                 
                 # Create detailed explanation
-                explanation = create_risk_explanation(regency, prediction, risk_level, 
-                                                    avg_temp, avg_precip, avg_humidity, model_trained)
+                explanation = create_risk_explanation(
+                    regency, prediction, risk_level,
+                    avg_temp, avg_precip, avg_humidity, model_used
+                )
                 
                 # Get neighboring info
                 neighboring_info = get_neighboring_info(regency, regency_list, current_data)
@@ -1444,17 +2085,16 @@ def get_risk_data():
                     'ndvi': round(avg_ndvi, 3),
                     'cloud_cover': round(avg_cloud_cover, 1),
                     'wind_speed': round(avg_wind_speed, 1),
-
+                    # Historical data
+                    'historical_avg': round(avg_cases, 1),
                     # Analysis and recommendations
                     'explanation': explanation,
                     'neighboring_info': neighboring_info,
                     'recommendations': recommendations,
-                    'model_used': model_trained,
-                    'data_source': 'real_environmental_data',
+                    'model_used': model_used,
+                    'data_source': 'hybrid_stgnn_model' if model_used else 'environmental_historical',
                     'spatio_temporal_enhanced': processed_data is not None
                 }
-
-                print(f"✅ {regency}: T={avg_temp:.1f}°C, P={avg_precip:.1f}mm, H={avg_humidity:.1f}%, NDVI={avg_ndvi:.3f}, Pressure={avg_pressure:.1f}hPa")
                 
                 # Add temporal information if available
                 if processed_data is not None:
@@ -1472,18 +2112,21 @@ def get_risk_data():
                 
                 risk_data.append(risk_entry)
         
-        # Cache the results to maintain consistency
+        # Cache the results
         cached_risk_data = risk_data
         
-        print(f"✅ Generated enhanced risk data for {len(risk_data)} health centers")
+        model_status = "with trained STGNN model" if model_trained else "with environmental model"
+        print(f"✅ Generated risk data for {len(risk_data)} health centers {model_status}")
+        
         return safe_jsonify(risk_data)
         
     except Exception as e:
         error_msg = f'Error getting risk data: {str(e)}'
         print(f"❌ Risk data error: {error_msg}")
-        print(traceback.format_exc())
+        import traceback
+        traceback.print_exc()
         return safe_jsonify({'error': error_msg})
-    
+        
 @app.route('/refresh-risk-data', methods=['POST'])
 def refresh_risk_data():
     """Refresh risk data cache"""

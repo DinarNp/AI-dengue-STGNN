@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}District Dashboard - {{ regency.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="fas fa-hospital"></i> {{ regency.name }} - Health Office Dashboard</h2>
+    <hr>
+    
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body stat-card">
+                    <h3>{{ total_cases_this_year }}</h3>
+                    <p>Total Cases This Year</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body stat-card">
+                    <h3>
+                        {% if latest_prediction %}
+                            {{ "%.0f"|format(latest_prediction.predicted_cases) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                    <p>Next Month Prediction</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body stat-card">
+                    <h3>
+                        {% if latest_prediction %}
+                            <span class="risk-badge risk-{{ latest_prediction.risk_level.replace('_', '-') }}">
+                                {{ latest_prediction.risk_level.replace('_', ' ').upper() }}
+                            </span>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                    <p>Risk Level</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ url_for('district_health.update_cases') }}" class="btn btn-primary btn-custom">
+                            <i class="fas fa-edit"></i> Update Dengue Cases
+                        </a>
+                        <a href="{{ url_for('district_health.view_predictions') }}" class="btn btn-success btn-custom">
+                            <i class="fas fa-chart-line"></i> View Predictions
+                        </a>
+                        <a href="{{ url_for('district_health.view_reports') }}" class="btn btn-info btn-custom">
+                            <i class="fas fa-file-alt"></i> View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Monthly Trend -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-area"></i> Monthly Trend (Last 12 Months)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Cases -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Recent Monthly Data</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Month</th>
+                                    <th>Cases</th>
+                                    <th>Data Source</th>
+                                    <th>Updated At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in recent_cases %}
+                                <tr>
+                                    <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
+                                    <td>{{ case.cases }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ case.data_source }}</span>
+                                    </td>
+                                    <td>{{ case.updated_at.strftime('%Y-%m-%d') if case.updated_at else 'N/A' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No data available</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('trendChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ monthly_trend | map(attribute='month') | list | tojson }},
+        datasets: [{
+            label: 'Dengue Cases',
+            data: {{ monthly_trend | map(attribute='cases') | list | tojson }},
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %}

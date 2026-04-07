@@ -58,6 +58,7 @@ class DengueDataPreprocessor:
             return self._generate_synthetic_data()
     
     def _add_proper_date_column(self, df: pd.DataFrame) -> pd.DataFrame:
+<<<<<<< Updated upstream
         """Add proper date column from Year and Week"""
         print("🕐 Adding proper date column from Year and Week...")
         
@@ -81,6 +82,52 @@ class DengueDataPreprocessor:
             df['day_of_year_cos'] = np.cos(2 * np.pi * df['day_of_year'] / 365)
             df['week_of_year_sin'] = np.sin(2 * np.pi * df['week_of_year'] / 52)
             df['week_of_year_cos'] = np.cos(2 * np.pi * df['week_of_year'] / 52)
+=======
+        """Add proper date column from Year and Week/Month"""
+        
+        try:
+            # Check if we have Week or Month column to determine data type
+            if 'Month' in df.columns:
+                print("🕐 Adding proper date column from Year and Month (MONTHLY DATA)...")
+                # Convert Year and Month to proper date (first day of month)
+                df['date'] = pd.to_datetime(
+                    df['Year'].astype(str) + '-' + 
+                    df['Month'].astype(str).str.zfill(2) + '-01'
+                )
+                
+                # Add temporal features for monthly data
+                df['month'] = df['date'].dt.month
+                df['quarter'] = df['date'].dt.quarter
+                
+                # Cyclical encoding for temporal features (monthly focus)
+                df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+                df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+                df['quarter_sin'] = np.sin(2 * np.pi * df['quarter'] / 4)
+                df['quarter_cos'] = np.cos(2 * np.pi * df['quarter'] / 4)
+                
+            elif 'Week' in df.columns:
+                print("🕐 Adding proper date column from Year and Week (WEEKLY DATA)...")
+                # Convert Year and Week to proper date
+                df['date'] = df.apply(lambda row: 
+                    pd.Timestamp(year=int(row['Year']), month=1, day=1) + 
+                    pd.Timedelta(weeks=int(row['Week'])-1), axis=1)
+                
+                # Add more temporal features for weekly data
+                df['day_of_year'] = df['date'].dt.dayofyear
+                df['month'] = df['date'].dt.month
+                df['quarter'] = df['date'].dt.quarter
+                df['week_of_year'] = df['date'].dt.isocalendar().week
+                
+                # Cyclical encoding for temporal features
+                df['month_sin'] = np.sin(2 * np.pi * df['month'] / 12)
+                df['month_cos'] = np.cos(2 * np.pi * df['month'] / 12)
+                df['day_of_year_sin'] = np.sin(2 * np.pi * df['day_of_year'] / 365)
+                df['day_of_year_cos'] = np.cos(2 * np.pi * df['day_of_year'] / 365)
+                df['week_of_year_sin'] = np.sin(2 * np.pi * df['week_of_year'] / 52)
+                df['week_of_year_cos'] = np.cos(2 * np.pi * df['week_of_year'] / 52)
+            else:
+                raise ValueError("Data must have either 'Week' or 'Month' column")
+>>>>>>> Stashed changes
             
             # Seasonal features for Indonesia
             df['season'] = df['month'].map({
@@ -102,8 +149,39 @@ class DengueDataPreprocessor:
             
         except Exception as e:
             print(f"⚠️ Error adding date column: {e}")
+<<<<<<< Updated upstream
             # Fallback: create simple date
             df['date'] = pd.to_datetime(df['Year'].astype(str) + '-01-01') + pd.to_timedelta((df['Week']-1)*7, unit='D')
+=======
+            # Fallback: create simple date based on what's available
+            if 'Month' in df.columns:
+                # For monthly data
+                df['date'] = pd.to_datetime(
+                    df['Year'].astype(str) + '-' + 
+                    df['Month'].astype(str).str.zfill(2) + '-01'
+                )
+                df['month'] = df['Month']
+                df['quarter'] = ((df['Month'] - 1) // 3) + 1
+            elif 'Week' in df.columns:
+                # For weekly data
+                df['date'] = pd.to_datetime(df['Year'].astype(str) + '-01-01') + pd.to_timedelta((df['Week']-1)*7, unit='D')
+                df['month'] = df['date'].dt.month
+                df['quarter'] = df['date'].dt.quarter
+            else:
+                # Last resort: just use year
+                df['date'] = pd.to_datetime(df['Year'].astype(str) + '-01-01')
+                df['month'] = 1
+                df['quarter'] = 1
+            
+            # Add basic seasonal features
+            df['season'] = df['month'].map({
+                6: 0, 7: 0, 8: 0, 9: 0,
+                10: 1, 11: 1,
+                12: 2, 1: 2, 2: 2, 3: 2,
+                4: 3, 5: 3,
+            })
+            
+>>>>>>> Stashed changes
             return df
     
     def _manual_csv_parsing(self, file_path: str) -> pd.DataFrame:
@@ -207,35 +285,91 @@ class DengueDataPreprocessor:
         return df
     
     def create_date_features(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Create date-related features"""
+        """Create date-related features - ADAPTIVE for both weekly and monthly data"""
         df = df.copy()
         
-        if 'Year' not in df.columns or 'Week' not in df.columns:
-            print("Warning: Year or Week column missing, using defaults")
-            if 'Year' not in df.columns:
-                df['Year'] = 2021
-            if 'Week' not in df.columns:
-                df['Week'] = range(1, len(df) + 1)
+        # Check if we have monthly or weekly data
+        has_month = 'Month' in df.columns
+        has_week = 'Week' in df.columns
         
-        try:
-            df['Date'] = pd.to_datetime(df['Year'].astype(str) + '-W' + 
-                                       df['Week'].astype(str).str.zfill(2) + '-1', 
-                                       format='%Y-W%W-%w', errors='coerce')
+        if has_month and not has_week:
+            # MONTHLY DATA
+            print("📅 Creating date features for MONTHLY data...")
+            try:
+                # Create date from Year and Month (already done in _add_proper_date_column)
+                if 'date' not in df.columns:
+                    df['date'] = pd.to_datetime(
+                        df['Year'].astype(str) + '-' + 
+                        df['Month'].astype(str).str.zfill(2) + '-01'
+                    )
+                
+                # Use existing date column
+                df['Date'] = df['date']
+                
+                # Create Month cyclical features (if not already created)
+                if 'Month_sin' not in df.columns:
+                    df['Month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
+                if 'Month_cos' not in df.columns:
+                    df['Month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
+                
+                # Create Week features as ZERO for monthly data (to maintain compatibility)
+                df['Week'] = 0
+                df['Week_sin'] = 0
+                df['Week_cos'] = 0
+                
+                print(f"   ✅ Created monthly features (date range: {df['date'].min()} to {df['date'].max()})")
+                
+            except Exception as e:
+                print(f"⚠️ Error creating monthly date features: {e}")
+                df['Date'] = pd.date_range(start='2021-01-01', periods=len(df), freq='MS')  # Month start
+                df['Month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
+                df['Month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
+                df['Week'] = 0
+                df['Week_sin'] = 0
+                df['Week_cos'] = 0
+        
+        elif has_week:
+            # WEEKLY DATA
+            print("📅 Creating date features for WEEKLY data...")
+            if 'Year' not in df.columns:
+                print("Warning: Year column missing, using defaults")
+                df['Year'] = 2021
             
-            if df['Date'].isna().all():
+            try:
+                df['Date'] = pd.to_datetime(df['Year'].astype(str) + '-W' + 
+                                           df['Week'].astype(str).str.zfill(2) + '-1', 
+                                           format='%Y-W%W-%w', errors='coerce')
+                
+                if df['Date'].isna().all():
+                    df['Date'] = pd.date_range(start='2021-01-01', periods=len(df), freq='W')
+                
+                df['Week_sin'] = np.sin(2 * np.pi * df['Week'] / 52)
+                df['Week_cos'] = np.cos(2 * np.pi * df['Week'] / 52)
+                
+                # Add Month from Date
+                if 'Month' not in df.columns:
+                    df['Month'] = df['Date'].dt.month
+                df['Month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
+                df['Month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
+                
+                print(f"   ✅ Created weekly features (date range: {df['Date'].min()} to {df['Date'].max()})")
+                
+            except Exception as e:
+                print(f"⚠️ Error creating weekly date features: {e}")
                 df['Date'] = pd.date_range(start='2021-01-01', periods=len(df), freq='W')
-            
+                df['Week_sin'] = np.sin(2 * np.pi * df['Week'] / 52)
+                df['Week_cos'] = np.cos(2 * np.pi * df['Week'] / 52)
+                df['Month'] = df['Date'].dt.month
+                df['Month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
+                df['Month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
+        
+        else:
+            # NO TEMPORAL DATA - use defaults
+            print("⚠️ No Month or Week column found, using default temporal features")
+            df['Date'] = pd.date_range(start='2021-01-01', periods=len(df), freq='W')
+            df['Week'] = df['Date'].dt.isocalendar().week
             df['Week_sin'] = np.sin(2 * np.pi * df['Week'] / 52)
             df['Week_cos'] = np.cos(2 * np.pi * df['Week'] / 52)
-            df['Month'] = df['Date'].dt.month
-            df['Month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
-            df['Month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
-            
-        except Exception as e:
-            print(f"Error creating date features: {e}")
-            df['Date'] = pd.date_range(start='2021-01-01', periods=len(df), freq='W')
-            df['Week_sin'] = np.sin(2 * np.pi * np.arange(len(df)) / 52)
-            df['Week_cos'] = np.cos(2 * np.pi * np.arange(len(df)) / 52)
             df['Month'] = df['Date'].dt.month
             df['Month_sin'] = np.sin(2 * np.pi * df['Month'] / 12)
             df['Month_cos'] = np.cos(2 * np.pi * df['Month'] / 12)
@@ -255,7 +389,19 @@ class DengueDataPreprocessor:
             df['Cases'] = np.random.poisson(5, len(df))
         
         try:
+<<<<<<< Updated upstream
             df = df.sort_values([location_col, 'date'])
+=======
+            # Sort by date if available, otherwise by Year and Week/Month
+            if 'date' in df.columns:
+                df = df.sort_values([location_col, 'date'])
+            elif 'Month' in df.columns:
+                df = df.sort_values([location_col, 'Year', 'Month'])
+            elif 'Week' in df.columns:
+                df = df.sort_values([location_col, 'Year', 'Week'])
+            else:
+                df = df.sort_values([location_col, 'Year'])
+>>>>>>> Stashed changes
             
             # Enhanced lag features for cases
             for lag in range(1, n_lags + 1):
@@ -342,29 +488,53 @@ class DengueDataPreprocessor:
         
         return df
     
-    def _get_adaptive_config(self, target_mean: float) -> Dict:
-        """Get adaptive training configuration based on target scale"""
-        if target_mean > 8:  # High-scale dataset threshold
-            return {
-                'LEARNING_RATE': 0.0001,
-                'DROPOUT': 0.4,
-                'BATCH_SIZE': 32,
-                'WEIGHT_DECAY': 0.001,
-                'EPOCHS': 200,
-                'PATIENCE': 15,
+    def _get_adaptive_config(self, target_mean: float, n_locations: int = 5) -> Dict:
+        """Create adaptive configuration - FIXED VERSION"""
+        
+        if target_mean > 8.0:  # High-scale data
+            print(f"🔄 High-scale data detected - applying log1p normalization")
+            
+            # ✅ BETTER HIGH-SCALE CONFIG
+            adaptive_config = {
+                'LEARNING_RATE': 0.0005,      # ✅ Higher LR for better learning
+                'DROPOUT': 0.15,              # ✅ Lower dropout (was 0.4)
+                'BATCH_SIZE': 8,             # ✅ Smaller batches (was 32)
+                'WEIGHT_DECAY': 1e-6,        # ✅ Less regularization
+                'EPOCHS': 1000,               # ✅ More epochs (was 200)
+                'PATIENCE': 100,              # ✅ More patience (was 15)
+                'GRADIENT_CLIP': 1.0,
+                'HIDDEN_DIM': 256,
+                'NUM_LAYERS': 4,
+                'NUM_HEADS': 4,
+                'K_NEIGHBORS': 3,            # ✅ Reduce graph connectivity
                 'scale_type': 'high'
             }
-        else:  # Low-scale dataset
-            return {
+            
+            print(f"📋 Applied adaptive config for high scale:")
+            print(f"   Learning Rate: {adaptive_config['LEARNING_RATE']}")
+            print(f"   Dropout: {adaptive_config['DROPOUT']}")
+            print(f"   Batch Size: {adaptive_config['BATCH_SIZE']}")
+            print(f"   Epochs: {adaptive_config['EPOCHS']}")
+            print(f"   Patience: {adaptive_config['PATIENCE']}")
+            
+        else:  # Low-scale data
+            adaptive_config = {
                 'LEARNING_RATE': 0.001,
-                'DROPOUT': 0.2,
+                'DROPOUT': 0.15,
                 'BATCH_SIZE': 16,
-                'WEIGHT_DECAY': 0.0001,
+                'WEIGHT_DECAY': 1e-6,
                 'EPOCHS': 300,
-                'PATIENCE': 25,
+                'PATIENCE': 30,
+                'GRADIENT_CLIP': 1.0,
+                'HIDDEN_DIM': 128,
+                'NUM_LAYERS': 3,
+                'NUM_HEADS': 4,
+                'K_NEIGHBORS': 4,
                 'scale_type': 'low'
             }
-    
+        
+        return adaptive_config
+
     def preprocess_data(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, Dict]:
         """Complete preprocessing pipeline with adaptive target normalization - FIXED VERSION"""
         print("Starting adaptive data preprocessing...")
@@ -383,6 +553,12 @@ class DengueDataPreprocessor:
         else:
             df['Kecamatan_encoded'] = 0
         
+        # Get unique locations count
+        if 'Region' in df.columns:
+            n_locations = df['Region'].nunique()
+        else:
+            n_locations = 5  # Default
+            
         # Define feature columns
         feature_cols = [
             'Latitude', 'Longitude', 'NDVI', 'Temperature_Avg', 'Temperature_Min',
@@ -426,7 +602,7 @@ class DengueDataPreprocessor:
         # 🎯 ANALYZE DATA SPLIT EFFECT
         n_samples = len(target_values)
         train_size = int(0.7 * n_samples)
-        val_size = int(0.1 * n_samples)
+        val_size = int(0.15 * n_samples)
         
         train_targets = target_values[:train_size]
         val_targets = target_values[train_size:train_size + val_size]
@@ -475,7 +651,7 @@ class DengueDataPreprocessor:
             }
         
         # 🎯 GET ADAPTIVE CONFIG
-        adaptive_config = self._get_adaptive_config(target_mean)
+        adaptive_config = self._get_adaptive_config(target_mean, n_locations)
         print(f"📋 Applied adaptive config for {adaptive_config['scale_type']} scale:")
         print(f"   Learning Rate: {adaptive_config['LEARNING_RATE']}")
         print(f"   Dropout: {adaptive_config['DROPOUT']}")
@@ -527,6 +703,74 @@ class DengueDataPreprocessor:
         
         return features_scaled, target_values_normalized, metadata
     
+    def analyze_dataset_characteristics(self, df: pd.DataFrame, targets: np.ndarray):
+        """Comprehensive dataset analysis for paper reporting"""
+        
+        print("\n" + "="*80)
+        print("DATASET CHARACTERISTICS ANALYSIS")
+        print("="*80)
+        
+        # Basic statistics
+        stats = {
+            'total_records': len(targets),
+            'mean': targets.mean(),
+            'median': np.median(targets),
+            'std': targets.std(),
+            'min': targets.min(),
+            'max': targets.max(),
+            'zero_count': np.sum(targets == 0),
+            'zero_percentage': np.sum(targets == 0) / len(targets) * 100
+        }
+        
+        print(f"\n📊 Overall Target Statistics:")
+        print(f"   Total records: {stats['total_records']}")
+        print(f"   Mean: {stats['mean']:.2f} cases/week")
+        print(f"   Median: {stats['median']:.2f}")
+        print(f"   Std Dev: {stats['std']:.2f}")
+        print(f"   Range: [{stats['min']:.0f}, {stats['max']:.0f}]")
+        print(f"   Zero observations: {stats['zero_count']} ({stats['zero_percentage']:.1f}%)")
+        
+        # Percentiles
+        percentiles = [25, 50, 75, 90, 95]
+        perc_values = np.percentile(targets, percentiles)
+        print(f"\n   Percentiles:")
+        for p, v in zip(percentiles, perc_values):
+            print(f"      P{p}: {v:.1f}")
+        
+        # Seasonal analysis
+        if 'Week' in df.columns:
+            df_temp = df.copy()
+            df_temp['Cases'] = targets
+            weekly_stats = df_temp.groupby('Week')['Cases'].agg(['mean', 'std', 'count'])
+            
+            season_variation = weekly_stats['mean'].std() / weekly_stats['mean'].mean()
+            print(f"\n📅 Seasonal Analysis:")
+            print(f"   Seasonal coefficient of variation: {season_variation:.2f}")
+            
+            # Identify peak weeks
+            high_weeks = weekly_stats[weekly_stats['mean'] > weekly_stats['mean'].quantile(0.75)].index.tolist()
+            low_weeks = weekly_stats[weekly_stats['mean'] < weekly_stats['mean'].quantile(0.25)].index.tolist()
+            print(f"   Peak transmission weeks: {high_weeks[:5]}...")
+            print(f"   Low transmission weeks: {low_weeks[:5]}...")
+        
+        # Location analysis
+        if 'Region' in df.columns:
+            df_temp = df.copy()
+            df_temp['Cases'] = targets
+            location_stats = df_temp.groupby('Region')['Cases'].agg(['mean', 'std', 'min', 'max', 'count'])
+            
+            print(f"\n🗺️ Spatial Heterogeneity:")
+            for region in location_stats.index:
+                stats = location_stats.loc[region]
+                print(f"   {region}:")
+                print(f"      Mean: {stats['mean']:.2f}, Std: {stats['std']:.2f}")
+                print(f"      Range: [{stats['min']:.0f}, {stats['max']:.0f}], N={stats['count']}")
+            
+            location_cv = location_stats['mean'].std() / location_stats['mean'].mean()
+            print(f"   Location coefficient of variation: {location_cv:.2f}")
+        
+        return stats
+
     def debug_data_split_detailed(self, df: pd.DataFrame, target_values: np.ndarray):
         """Comprehensive debug analysis of data distribution"""
         

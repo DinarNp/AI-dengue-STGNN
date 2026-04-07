@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block title %}Model Training - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-brain"></i> Model Training</h2>
+    <p class="text-muted">Train and manage STGNN prediction models</p>
+    <hr>
+    
+    <!-- Training Status -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-info-circle"></i> Training Status</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total Models:</strong> {{ status.total_models }}</p>
+                    <p><strong>Training Available:</strong> 
+                        {% if status.training_available %}
+                            <span class="badge bg-success">Yes</span>
+                        {% else %}
+                            <span class="badge bg-danger">No</span>
+                        {% endif %}
+                    </p>
+                    {% if status.active_model %}
+                    <p><strong>Active Model:</strong> {{ status.active_model.name }}</p>
+                    <p class="small">
+                        MAE: {{ "%.3f"|format(status.active_model.mae) }}<br>
+                        RMSE: {{ "%.3f"|format(status.active_model.rmse) }}<br>
+                        R²: {{ "%.3f"|format(status.active_model.r2_score) }}
+                    </p>
+                    {% else %}
+                    <p class="text-muted">No active model</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-play-circle"></i> Quick Training</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Step 1: Export Training Data</h6>
+                            <div class="mb-2">
+                                <label>Year Range:</label>
+                                <div class="input-group">
+                                    <input type="number" id="exportYearStart" class="form-control" value="2021" min="2020">
+                                    <span class="input-group-text">to</span>
+                                    <input type="number" id="exportYearEnd" class="form-control" value="2024" max="2030">
+                                </div>
+                            </div>
+                            <button class="btn btn-success w-100" onclick="exportTrainingData()">
+                                <i class="fas fa-download"></i> Export Data
+                            </button>
+                            <div id="exportResult" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6>Step 2: Train Model</h6>
+                            <div class="mb-2">
+                                <label>Model Name:</label>
+                                <input type="text" id="modelName" class="form-control" placeholder="e.g., STGNN_v1.0">
+                            </div>
+                            <div class="mb-2">
+                                <label>Data File:</label>
+                                <input type="text" id="dataFilename" class="form-control" placeholder="training_data_2021_2024.csv">
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="trainModel()">
+                                <i class="fas fa-cogs"></i> Start Training
+                            </button>
+                            <div id="trainResult" class="mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Model List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list"></i> Trained Models</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Model Name</th>
+                                    <th>Training Date</th>
+                                    <th>MAE</th>
+                                    <th>RMSE</th>
+                                    <th>R²</th>
+                                    <th>Samples</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for model in all_models %}
+                                <tr>
+                                    <td><strong>{{ model.version_name }}</strong></td>
+                                    <td>{{ model.training_date.strftime('%Y-%m-%d %H:%M') if model.training_date else 'N/A' }}</td>
+                                    <td>{{ "%.3f"|format(model.mae) if model.mae else 'N/A' }}</td>
+                                    <td>{{ "%.3f"|format(model.rmse) if model.rmse else 'N/A' }}</td>
+                                    <td>{{ "%.3f"|format(model.r2_score) if model.r2_score else 'N/A' }}</td>
+                                    <td>{{ model.training_samples or 'N/A' }}</td>
+                                    <td>
+                                        {% if model.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if not model.is_active %}
+                                            <button class="btn btn-sm btn-primary" onclick="activateModel({{ model.id }})">
+                                                <i class="fas fa-check"></i> Activate
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteModel({{ model.id }})">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        {% else %}
+                                            <span class="text-muted">Currently Active</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted">No models trained yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Training Logs -->
+    {% if status.recent_training_logs %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent Training Logs</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Started</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in status.recent_training_logs %}
+                            <tr>
+                                <td>{{ log.started }}</td>
+                                <td>
+                                    {% if log.status == 'completed' %}
+                                        <span class="badge bg-success">{{ log.status }}</span>
+                                    {% elif log.status == 'failed' %}
+                                        <span class="badge bg-danger">{{ log.status }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">{{ log.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><small>{{ log.details }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 id="loadingMessage">Processing...</h5>
+                <p class="text-muted" id="loadingDetail">Please wait...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let loadingModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+});
+
+function showLoading(message, detail) {
+    document.getElementById('loadingMessage').textContent = message;
+    document.getElementById('loadingDetail').textContent = detail;
+    loadingModal.show();
+}
+
+function hideLoading() {
+    loadingModal.hide();
+}
+
+function exportTrainingData() {
+    const yearStart = document.getElementById('exportYearStart').value;
+    const yearEnd = document.getElementById('exportYearEnd').value;
+    
+    if (!yearStart || !yearEnd) {
+        alert('Please enter both start and end years');
+        return;
+    }
+    
+    showLoading('Exporting Data', 'Gathering data from database...');
+    
+    fetch('/admin/training/export-data', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            year_start: parseInt(yearStart),
+            year_end: parseInt(yearEnd)
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            document.getElementById('exportResult').innerHTML = 
+                `<div class="alert alert-success">
+                    <i class="fas fa-check"></i> Exported ${data.records} records to ${data.filename}
+                </div>`;
+            document.getElementById('dataFilename').value = data.filename;
+        } else {
+            document.getElementById('exportResult').innerHTML = 
+                `<div class="alert alert-danger">${data.message}</div>`;
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        document.getElementById('exportResult').innerHTML = 
+            `<div class="alert alert-danger">Error: ${error}</div>`;
+    });
+}
+
+function trainModel() {
+    const modelName = document.getElementById('modelName').value;
+    const dataFilename = document.getElementById('dataFilename').value;
+    
+    if (!modelName || !dataFilename) {
+        alert('Please enter model name and data filename');
+        return;
+    }
+    
+    if (!confirm(`Start training model "${modelName}"? This may take several minutes.`)) {
+        return;
+    }
+    
+    showLoading('Training Model', 'This may take 5-20 minutes depending on data size...');
+    
+    fetch('/admin/training/train-model', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            model_name: modelName,
+            data_filename: dataFilename,
+            description: 'Trained via web interface'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            document.getElementById('trainResult').innerHTML = 
+                `<div class="alert alert-success">
+                    <i class="fas fa-check"></i> Training completed!<br>
+                    MAE: ${data.metrics.mae.toFixed(3)}<br>
+                    RMSE: ${data.metrics.rmse.toFixed(3)}<br>
+                    R²: ${data.metrics.r2.toFixed(3)}<br>
+                    Samples: ${data.training_samples}
+                </div>`;
+            // Reload page after 3 seconds
+            setTimeout(() => location.reload(), 3000);
+        } else {
+            document.getElementById('trainResult').innerHTML = 
+                `<div class="alert alert-danger">
+                    Training failed: ${data.message}
+                    ${data.error_detail ? '<pre>' + data.error_detail + '</pre>' : ''}
+                </div>`;
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        document.getElementById('trainResult').innerHTML = 
+            `<div class="alert alert-danger">Error: ${error}</div>`;
+    });
+}
+
+function activateModel(modelId) {
+    if (!confirm('Activate this model? It will be used for all predictions.')) {
+        return;
+    }
+    
+    fetch(`/admin/training/activate-model/${modelId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+}
+
+function deleteModel(modelId) {
+    if (!confirm('Delete this model? This action cannot be undone.')) {
+        return;
+    }
+    
+    fetch(`/admin/training/delete-model/${modelId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => alert('Error: ' + error));
+}
+</script>
+{% endblock %}

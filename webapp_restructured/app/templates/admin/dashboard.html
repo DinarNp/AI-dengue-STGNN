@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h2>
+    <hr>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body stat-card">
+                    <h3>{{ stats.total_regencies }}</h3>
+                    <p>Active Regencies</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card-body stat-card">
+                    <h3>{{ stats.total_cases }}</h3>
+                    <p>Total Cases Recorded</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body stat-card">
+                    <h3>{{ stats.total_users }}</h3>
+                    <p>System Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body stat-card">
+                    <h3>
+                        {% if active_model %}
+                            Active
+                        {% else %}
+                            None
+                        {% endif %}
+                    </h3>
+                    <p>Model Status</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <a href="{{ url_for('admin.data_management') }}" class="btn btn-primary w-100 btn-custom">
+                                <i class="fas fa-database"></i> Manage Data
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="btn btn-success w-100 btn-custom">
+                                <i class="fas fa-chart-line"></i> Generate Predictions
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="btn btn-info w-100 btn-custom">
+                                <i class="fas fa-upload"></i> Upload Model
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ url_for('admin.view_logs') }}" class="btn btn-secondary w-100 btn-custom">
+                                <i class="fas fa-file-alt"></i> View Logs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Processing Logs -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Recent Processing Logs</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Process Type</th>
+                                    <th>Status</th>
+                                    <th>Records</th>
+                                    <th>User</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for log in recent_logs %}
+                                <tr>
+                                    <td>{{ log.started_at.strftime('%Y-%m-%d %H:%M') if log.started_at else 'N/A' }}</td>
+                                    <td>{{ log.process_type }}</td>
+                                    <td>
+                                        {% if log.status == 'completed' %}
+                                            <span class="badge bg-success">{{ log.status }}</span>
+                                        {% elif log.status == 'failed' %}
+                                            <span class="badge bg-danger">{{ log.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">{{ log.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ log.records_processed or 0 }}</td>
+                                    <td>{{ log.user.username if log.user else 'System' }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No recent logs</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

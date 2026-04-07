@@ -22,31 +22,57 @@ class GraphConstructor:
         
         a = np.sin(dlat/2)**2 + np.cos(lat1[:, None]) * np.cos(lat2[None, :]) * np.sin(dlon/2)**2
         c = 2 * np.arcsin(np.sqrt(a))
-        r = 6371  # Earth's radius in km
+        r = 6378  # Earth's radius in km
         
         return r * c
     
-    def build_spatial_adjacency(self, location_coords: np.ndarray) -> np.ndarray:
+    def build_spatial_adjacency(self, location_coords: np.ndarray, 
+                               k_neighbors: int = None) -> np.ndarray:
         """Build spatial adjacency matrix based on geographical distance"""
+        if k_neighbors is None:
+            # k_neighbors = getattr(self.config, 'K_NEIGHBORS', 4)
+            k_neighbors = 3  # ✅ Connect to only 3 neighbors, not all!
+
         n_nodes = len(location_coords)
-        distances = self.haversine_distance(location_coords, location_coords)
         
         # k-NN approach: connect each node to k nearest neighbors
         adj_matrix = np.zeros((n_nodes, n_nodes))
+
+        distances = self.haversine_distance(location_coords, location_coords)
         
+        # OLD CODE
+        # for i in range(n_nodes):
+        #     # Get k nearest neighbors (excluding self)
+        #     distances_i = distances[i].copy()
+        #     distances_i[i] = np.inf  # Exclude self
+        #     nearest_indices = np.argsort(distances_i)[:self.config.K_NEAREST]
+            
+        #     for j in nearest_indices:
+        #         # Inverse distance weighting
+        #         if distances[i, j] > 0:
+        #             weight = 1.0 / (1.0 + distances[i, j])
+        #             adj_matrix[i, j] = weight
+        #             adj_matrix[j, i] = weight  # Symmetric
+        
+        # For each node, connect to k nearest neighbors
         for i in range(n_nodes):
             # Get k nearest neighbors (excluding self)
-            distances_i = distances[i].copy()
-            distances_i[i] = np.inf  # Exclude self
-            nearest_indices = np.argsort(distances_i)[:self.config.K_NEAREST]
+            neighbor_indices = np.argsort(distances[i])[1:k_neighbors+1]
             
-            for j in nearest_indices:
-                # Inverse distance weighting
-                if distances[i, j] > 0:
-                    weight = 1.0 / (1.0 + distances[i, j])
-                    adj_matrix[i, j] = weight
-                    adj_matrix[j, i] = weight  # Symmetric
+            # Set weights based on inverse distance
+            for j in neighbor_indices:
+                distance = distances[i, j]
+                weight = 1.0 / (1.0 + distance)
+                adj_matrix[i, j] = weight
+                adj_matrix[j, i] = weight  # Symmetric
+
+        # (NEW UPDATE) Add self-connections
+        np.fill_diagonal(adj_matrix, 1.0)
         
+        # (NEW UPDATE) Normalize (optional)
+        row_sums = adj_matrix.sum(axis=1, keepdims=True)
+        adj_matrix = adj_matrix / row_sums
+
         return adj_matrix
     
     def build_environmental_similarity(self, features: np.ndarray, node_mapping: Dict) -> np.ndarray:

@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Predictions Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2><i class="fas fa-crystal-ball"></i> Predictions Management</h2>
+    <p class="text-muted">Generate and manage dengue case predictions</p>
+    <hr>
+    
+    <!-- Active Model Info -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-brain"></i> Active Model</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_model %}
+                        <p><strong>Name:</strong> {{ active_model.version_name }}</p>
+                        <p><strong>Training Date:</strong> {{ active_model.training_date.strftime('%Y-%m-%d') if active_model.training_date else 'N/A' }}</p>
+                        <p><strong>Performance:</strong></p>
+                        <ul>
+                            <li>MAE: {{ "%.3f"|format(active_model.mae) if active_model.mae else 'N/A' }}</li>
+                            <li>RMSE: {{ "%.3f"|format(active_model.rmse) if active_model.rmse else 'N/A' }}</li>
+                            <li>R²: {{ "%.3f"|format(active_model.r2_score) if active_model.r2_score else 'N/A' }}</li>
+                        </ul>
+                    {% else %}
+                        <p class="text-warning"><i class="fas fa-exclamation-triangle"></i> No active model</p>
+                        <p>Please train and activate a model first.</p>
+                        <a href="{{ url_for('admin.training') }}" class="btn btn-primary">Go to Training</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-chart-line"></i> Recent Predictions</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_predictions %}
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Regencies</th>
+                                <th>Avg Predicted</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in recent_predictions %}
+                            <tr>
+                                <td>{{ pred.year }}-{{ "%02d"|format(pred.month) }}</td>
+                                <td>{{ pred.count }}</td>
+                                <td>{{ "%.1f"|format(pred.avg_predicted) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted">No predictions generated yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generate Predictions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-play"></i> Generate New Predictions</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="predictionTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button">
+                                Single Month
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="batch-tab" data-bs-toggle="tab" data-bs-target="#batch" type="button">
+                                Batch (Multiple Months)
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content mt-3" id="predictionTabsContent">
+                        <!-- Single Month -->
+                        <div class="tab-pane fade show active" id="single" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Year</label>
+                                    <input type="number" id="singleYear" class="form-control" value="2025" min="2020" max="2030">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Month</label>
+                                    <select id="singleMonth" class="form-select">
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5" selected>May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-primary w-100" onclick="generateSingle()">
+                                        <i class="fas fa-play"></i> Generate
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="singleResult" class="mt-3"></div>
+                        </div>
+                        
+                        <!-- Batch Months -->
+                        <div class="tab-pane fade" id="batch" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label>Year</label>
+                                    <input type="number" id="batchYear" class="form-control" value="2025" min="2020" max="2030">
+                                </div>
+                                <div class="col-md-6">
+                                    <label>Select Months</label>
+                                    <div class="row">
+                                        <div class="col-4">
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="1"><label>Jan</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="2"><label>Feb</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="3"><label>Mar</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="4"><label>Apr</label></div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="5" checked><label>May</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="6" checked><label>Jun</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="7" checked><label>Jul</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="8"><label>Aug</label></div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="9"><label>Sep</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="10"><label>Oct</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="11"><label>Nov</label></div>
+                                            <div class="form-check"><input class="form-check-input month-check" type="checkbox" value="12"><label>Dec</label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-end">
+                                    <button class="btn btn-success w-100" onclick="generateBatch()">
+                                        <i class="fas fa-bolt"></i> Generate Batch
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="batchResult" class="mt-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Options -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-download"></i> Export Predictions</h5>
+                </div>
+                <div class="card-body">
+                    <p>Export all generated predictions to CSV file for analysis or sharing.</p>
+                    <a href="{{ url_for('admin.export_predictions') }}" class="btn btn-info">
+                        <i class="fas fa-file-csv"></i> Export All Predictions to CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" data-bs-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+                <h5>Generating Predictions...</h5>
+                <p class="text-muted">Please wait, this may take a moment</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let loadingModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+});
+
+function generateSingle() {
+    const year = document.getElementById('singleYear').value;
+    const month = document.getElementById('singleMonth').value;
+    
+    if (!year || !month) {
+        alert('Please select year and month');
+        return;
+    }
+    
+    loadingModal.show();
+    
+    fetch('/admin/predictions/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({year: parseInt(year), month: parseInt(month)})
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        
+        if (data.success > 0) {
+            let html = `<div class="alert alert-success">
+                <strong>Success!</strong> Generated ${data.success} predictions<br>`;
+            
+            if (data.predictions && data.predictions.length > 0) {
+                html += '<table class="table table-sm mt-2"><thead><tr><th>Regency</th><th>Predicted</th><th>Risk</th></tr></thead><tbody>';
+                data.predictions.forEach(p => {
+                    html += `<tr>
+                        <td>${p.regency}</td>
+                        <td><strong>${p.predicted_cases.toFixed(0)}</strong></td>
+                        <td><span class="risk-badge risk-${p.risk_level.replace('_', '-')}">${p.risk_level.toUpperCase()}</span></td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+            }
+            
+            html += '</div>';
+            document.getElementById('singleResult').innerHTML = html;
+        } else {
+            document.getElementById('singleResult').innerHTML = 
+                `<div class="alert alert-danger">Failed: ${data.errors ? data.errors.join('<br>') : 'Unknown error'}</div>`;
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        document.getElementById('singleResult').innerHTML = 
+            `<div class="alert alert-danger">Error: ${error}</div>`;
+    });
+}
+
+function generateBatch() {
+    const year = document.getElementById('batchYear').value;
+    const checkboxes = document.querySelectorAll('.month-check:checked');
+    const months = Array.from(checkboxes).map(cb => parseInt(cb.value));
+    
+    if (months.length === 0) {
+        alert('Please select at least one month');
+        return;
+    }
+    
+    loadingModal.show();
+    
+    fetch('/admin/predictions/generate-batch', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({year: parseInt(year), months: months})
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingModal.hide();
+        
+        if (data.success) {
+            document.getElementById('batchResult').innerHTML = 
+                `<div class="alert alert-success">
+                    <strong>Success!</strong> Generated ${data.total_predictions} predictions for ${data.months_processed} months
+                </div>`;
+            
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            document.getElementById('batchResult').innerHTML = 
+                `<div class="alert alert-danger">Error: ${data.message}</div>`;
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        document.getElementById('batchResult').innerHTML = 
+            `<div class="alert alert-danger">Error: ${error}</div>`;
+    });
+}
+</script>
+{% endblock %}

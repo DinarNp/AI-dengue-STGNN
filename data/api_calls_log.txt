@@ -1,0 +1,77 @@
+====================================================================================================
+NASA POWER & OpenWeatherMap API Call Log
+Started: 2026-03-09T22:57:55.785057
+====================================================================================================
+
+
+================================================================================
+API Call #507 - NASA POWER (Test)
+Timestamp: 2026-03-09T22:57:56.750647
+================================================================================
+REQUEST:
+URL: https://power.larc.nasa.gov/api/temporal/daily/point
+Parameters:
+  parameters: T2M
+  community: AG
+  longitude: 0
+  latitude: 0
+  start: 20220101
+  end: 20220107
+  format: JSON
+Full URL: https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M&community=AG&longitude=0&latitude=0&start=20220101&end=20220107&format=JSON
+
+RESPONSE:
+Status: SUCCESS
+Response Time: 0.95 seconds
+Raw Response Data:
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "properties": {
+    "parameter": {
+      "T2M": {
+        "20220101": 26.94,
+        "20220102": 27.14,
+        "20220103": 27.38,
+        "20220104": 27.24,
+        "20220105": 27.35,
+        "20220106": 26.76,
+        "20220107": 26.93
+      }
+    }
+  },
+  "header": {
+    "title": "NASA/POWER Source Native Resolution Daily Data",
+    "api": {
+      "version": "v2.8.10",
+      "name": "POWER Daily API"
+    },
+    "sources": [
+      "MERRA2"
+    ],
+    "fill_value": -999.0,
+    "time_standard": "LST",
+    "start": "20220101",
+    "end": "20220107"
+  },
+  "messages": [],
+  "parameters": {
+    "T2M": {
+      "units": "C",
+      "longname": "Temperature at 2 Meters"
+    }
+  },
+  "times": {
+    "data": 0.271,
+    "process": 0.01
+  }
+}
+
+================================================================================
