@@ -287,13 +287,7 @@ function importCSV() {
 }
 
 function downloadTemplate() {
-    const templates = {
-        'dengue': '/static/templates/dengue_cases_template.csv',
-        'climate': '/static/templates/climate_data_template.csv',
-        'ndvi': '/static/templates/ndvi_data_template.csv'
-    };
-    
-    window.location.href = templates['{{ data_type }}'] || '#';
+    window.location.href = '/admin/data/template/{{ data_type }}';
 }
 </script>
 {% endblock %}

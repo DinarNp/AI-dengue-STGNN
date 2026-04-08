@@ -112,7 +112,7 @@
         <i class="fas fa-info-circle alert-icon"></i>
         <div class="alert-text">
           <div class="alert-title">SKDR / DINKES Case Data</div>
-          Case data is entered manually by district health officers from SKDR or DINKES monthly reports. Use the View/Edit button to see existing data per kabupaten.
+          Case data is entered manually by district health officers from SKDR or DINKES monthly reports. Use the View/Edit button to see existing data per regency.
         </div>
       </div>
 
@@ -126,6 +126,9 @@
             </div>
           </div>
           <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm btn-success" onclick="openAddCaseModal({{ stat.regency_id }}, '{{ stat.regency }}')">
+              <i class="fas fa-plus"></i> Add
+            </button>
             <a href="{{ url_for('admin.view_data', data_type='dengue', regency_id=stat.regency_id) }}" class="btn btn-sm btn-outline-secondary">
               <i class="fas fa-table"></i> View
             </a>
@@ -133,7 +136,7 @@
         </div>
         {% else %}
         <div style="grid-column:1/-1;" class="table-empty">
-          <i class="fas fa-database"></i>No kabupaten data available
+          <i class="fas fa-database"></i>No regency data available
         </div>
         {% endfor %}
       </div>
@@ -142,6 +145,9 @@
         <a href="{{ url_for('admin.view_data', data_type='dengue') }}" class="btn btn-primary">
           <i class="fas fa-table"></i> View / Edit All Case Data
         </a>
+        <button class="btn btn-success" onclick="openAddCaseModal(null, null)">
+          <i class="fas fa-plus"></i> Add Case Data
+        </button>
         <a href="{{ url_for('admin.export_csv', data_type='dengue') }}" class="btn btn-outline-secondary">
           <i class="fas fa-download"></i> Export Cases CSV
         </a>
@@ -175,9 +181,9 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Kabupaten</label>
+            <label class="form-label">Regency</label>
             <select id="climateRegency" class="form-select">
-              <option value="all">All Kabupaten</option>
+              <option value="all">All Regencies</option>
               {% for stat in data_stats %}
               <option value="{{ stat.regency }}">{{ stat.regency }}</option>
               {% endfor %}
@@ -189,7 +195,7 @@
           <div id="climateResult" class="mt-12"></div>
         </div>
 
-        <!-- Data completeness per kabupaten -->
+        <!-- Data completeness per regency -->
         <div>
           <h6 style="font-weight:600;margin-bottom:16px;">Data Completeness</h6>
           {% for stat in data_stats %}
@@ -242,7 +248,7 @@
           <div class="pipeline-step-num">2</div>
           <div class="pipeline-step-content">
             <div class="pipeline-step-title">Process TIFF → Values</div>
-            <div class="pipeline-step-desc">Extract NDVI values per kabupaten from uploaded GeoTIFFs using <code>ndvi_epi_week_kabupaten.py</code>.</div>
+            <div class="pipeline-step-desc">Extract NDVI values per regency from uploaded GeoTIFFs using <code>ndvi_epi_week_kabupaten.py</code>.</div>
             <button class="btn btn-outline-secondary btn-sm" onclick="showToast('NDVI processing started', 'info', 'Processing')">
               <i class="fas fa-cogs"></i> Run Processing
             </button>
@@ -311,6 +317,57 @@
   </div><!-- card-body -->
 </div><!-- card -->
 
+<!-- Add Dengue Case Modal -->
+<div class="modal fade" id="addCaseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title"><i class="fas fa-plus-circle" style="color:var(--success);margin-right:8px;"></i>Add Case Data</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Regency</label>
+          <select id="addCaseRegency" class="form-select">
+            {% for r in regencies %}
+            <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">Year</label>
+            <input type="number" id="addCaseYear" class="form-control" min="2000" max="2100" value="{{ now.year if now else 2024 }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Month</label>
+            <select id="addCaseMonth" class="form-select">
+              {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),(7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
+              <option value="{{ m }}">{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cases</label>
+          <input type="number" id="addCaseCases" class="form-control" min="0" placeholder="Number of dengue cases">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          <input type="text" id="addCaseNotes" class="form-control" placeholder="e.g. from SKDR">
+        </div>
+        <div id="addCaseResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-success" onclick="submitAddCase()" id="addCaseSubmitBtn">
+          <i class="fas fa-save"></i> Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- NDVI Upload Modal -->
 <div class="modal fade" id="uploadNDVIModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
@@ -322,7 +379,7 @@
       <div class="modal-body">
         <div class="alert-box warning">
           <i class="fas fa-exclamation-triangle alert-icon"></i>
-          <div class="alert-text">Upload .TIFF files downloaded from NASA NEO for all 5 kabupaten boundaries.</div>
+          <div class="alert-text">Upload .TIFF files downloaded from NASA NEO for all 5 regencies boundaries.</div>
         </div>
         <div class="form-group mt-12">
           <label class="form-label">Select TIFF File(s)</label>
@@ -343,6 +400,74 @@
 
 {% block extra_js %}
 <script>
+function openAddCaseModal(regencyId, regencyName) {
+  document.getElementById('addCaseResult').innerHTML = '';
+  document.getElementById('addCaseCases').value = '';
+  document.getElementById('addCaseNotes').value = '';
+
+  const select = document.getElementById('addCaseRegency');
+  if (regencyId) {
+    select.value = regencyId;
+    select.disabled = true;
+  } else {
+    select.disabled = false;
+  }
+
+  // Default to current month
+  const now = new Date();
+  document.getElementById('addCaseYear').value = now.getFullYear();
+  document.getElementById('addCaseMonth').value = now.getMonth() + 1;
+
+  new bootstrap.Modal(document.getElementById('addCaseModal')).show();
+}
+
+function submitAddCase() {
+  const select = document.getElementById('addCaseRegency');
+  const regencyId = select.value;
+  const year      = parseInt(document.getElementById('addCaseYear').value);
+  const month     = parseInt(document.getElementById('addCaseMonth').value);
+  const cases     = document.getElementById('addCaseCases').value;
+  const notes     = document.getElementById('addCaseNotes').value;
+
+  if (!regencyId || !year || !month || cases === '') {
+    document.getElementById('addCaseResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Please fill in all required fields.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('addCaseSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/admin/data/dengue/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      regency_id: parseInt(regencyId),
+      year: year,
+      month: month,
+      cases: parseInt(cases),
+      notes: notes
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      showToast(data.message, 'success', 'Case Data Saved');
+      bootstrap.Modal.getInstance(document.getElementById('addCaseModal')).hide();
+      setTimeout(function() { location.reload(); }, 800);
+    } else {
+      document.getElementById('addCaseResult').innerHTML =
+        '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(function(err) {
+    setButtonLoading(btn, false);
+    document.getElementById('addCaseResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+
 // Tab activation on page load via URL param
 document.addEventListener('DOMContentLoaded', function() {
   const tab = new URLSearchParams(window.location.search).get('tab');

@@ -76,29 +76,50 @@ def data_management():
     
     return render_template('admin/data_management.html',
                          regencies=regencies,
-                         data_stats=data_stats)
+                         data_stats=data_stats,
+                         now=datetime.now())
 
 
 @admin.route('/data/dengue/add', methods=['POST'])
 @admin_required
 def add_dengue_data():
-    """Add dengue case data"""
+    """Add or update dengue case data"""
     try:
         data = request.get_json()
-        
-        pipeline = DataPipelineService(current_app.config)
-        result = pipeline.add_dengue_cases(
-            regency_id=int(data['regency_id']),
-            year=int(data['year']),
-            month=int(data['month']),
-            cases=int(data['cases']),
-            user_id=current_user.id,
-            notes=data.get('notes', '')
-        )
-        
-        return jsonify(result)
-        
+        regency_id = int(data['regency_id'])
+        year       = int(data['year'])
+        month      = int(data['month'])
+        cases      = int(data['cases'])
+        notes      = data.get('notes', '')
+
+        existing = DengueCase.query.filter_by(
+            regency_id=regency_id, year=year, month=month
+        ).first()
+
+        if existing:
+            existing.cases = cases
+            existing.notes = notes
+            existing.updated_at = datetime.utcnow()
+            existing.reported_by_id = current_user.id
+            action = 'updated'
+        else:
+            db.session.add(DengueCase(
+                regency_id=regency_id,
+                year=year,
+                month=month,
+                cases=cases,
+                notes=notes,
+                data_source='manual',
+                reported_by_id=current_user.id
+            ))
+            action = 'added'
+
+        db.session.commit()
+        return jsonify({'success': True, 'action': action,
+                        'message': f'Dengue cases {action} successfully'})
+
     except Exception as e:
+        db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
 
 
@@ -561,6 +582,55 @@ def view_data(data_type):
                          records=records,
                          regency=regency,
                          regency_id=regency_id)
+
+
+@admin.route('/data/template/<data_type>')
+@admin_required
+def download_template(data_type):
+    """Return a CSV template for the given data type with correct headers and regency names"""
+    import io
+    import csv
+    from flask import Response
+
+    regencies = [r.name for r in Regency.query.filter_by(is_active=True).order_by(Regency.id).all()]
+
+    output = io.StringIO()
+
+    if data_type == 'dengue':
+        fieldnames = ['Year', 'Month', 'Region', 'Cases', 'Notes']
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for name in regencies:
+            writer.writerow({'Year': 2024, 'Month': 1, 'Region': name, 'Cases': 0, 'Notes': ''})
+
+    elif data_type == 'climate':
+        fieldnames = ['Year', 'Month', 'Region', 'Temperature_Min', 'Temperature_Max',
+                      'Temperature_Avg', 'Humidity', 'Precipitation_Total',
+                      'Pressure', 'Wind_Speed', 'Wind_Direction', 'Cloud_Cover']
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for name in regencies:
+            writer.writerow({'Year': 2024, 'Month': 1, 'Region': name,
+                             'Temperature_Min': '', 'Temperature_Max': '', 'Temperature_Avg': '',
+                             'Humidity': '', 'Precipitation_Total': '', 'Pressure': '',
+                             'Wind_Speed': '', 'Wind_Direction': '', 'Cloud_Cover': ''})
+
+    elif data_type == 'ndvi':
+        fieldnames = ['Year', 'Month', 'Region', 'NDVI', 'Is_Imputed']
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for name in regencies:
+            writer.writerow({'Year': 2024, 'Month': 1, 'Region': name, 'NDVI': '', 'Is_Imputed': 'No'})
+
+    else:
+        return jsonify({'success': False, 'message': 'Invalid data type'}), 400
+
+    output.seek(0)
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename={data_type}_template.csv'}
+    )
 
 
 @admin.route('/data/export-csv/<data_type>')
