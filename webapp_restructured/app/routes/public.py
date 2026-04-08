@@ -14,7 +14,8 @@ public = Blueprint('public', __name__)
 @public.route('/')
 def index():
     """Landing page"""
-    return render_template('public/index.html')
+    regencies = Regency.query.filter_by(is_active=True).order_by(Regency.id).all()
+    return render_template('public/index.html', regencies=regencies)
 
 
 @public.route('/dashboard')

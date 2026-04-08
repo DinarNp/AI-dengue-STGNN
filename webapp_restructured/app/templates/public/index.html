@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Home — DengueWatch{% endblock %}
+{% block title %}Home — Explain Dengue{% endblock %}
 
 {% block content %}
 
@@ -20,7 +20,7 @@
           Prediction
         </h1>
         <p class="hero-subtitle">
-          Leveraging Spatio-Temporal Graph Neural Networks to predict dengue fever outbreaks across 5 kabupaten — helping health officers act before epidemics begin.
+          Leveraging Spatio-Temporal Graph Neural Networks to predict dengue fever outbreaks across 5 regencies — helping health officers act before epidemics begin.
         </p>
 
         <!-- Stats -->
@@ -59,17 +59,17 @@
           </div>
         </div>
         <!-- Floating badges -->
-        <div class="hero-badge-float" style="top:10px;right:10px;">
+        <div class="hero-badge-float" style="top:10px;right:50px;">
           <i class="fas fa-shield-alt" style="color:#10b981;margin-right:6px;"></i>
-          Risk Level: <strong style="color:#10b981;">LOW</strong>
+          5 Regencies 
         </div>
-        <div class="hero-badge-float" style="bottom:20px;left:10px;">
+        <div class="hero-badge-float" style="bottom:20px;left:40px;">
           <i class="fas fa-brain" style="color:#0ea5e9;margin-right:6px;"></i>
-          STGNN Model Active
+          AI Model
         </div>
-        <div class="hero-badge-float" style="bottom:80px;right:0px;">
+        <div class="hero-badge-float" style="bottom:70px;right:-30px;">
           <i class="fas fa-chart-line" style="color:#f59e0b;margin-right:6px;"></i>
-          5 Predictions Ready
+          Risk Level Prediction: <strong style="color:#10b981;">LOW</strong>
         </div>
       </div>
     </div>
@@ -91,7 +91,7 @@
           <i class="fas fa-brain" style="color:#0ea5e9;"></i>
         </div>
         <h5 class="feature-title">AI-Powered Predictions</h5>
-        <p class="feature-desc">STGNN model analyzes historical case data, climate patterns, and NDVI satellite vegetation indices to predict dengue outbreaks with high accuracy.</p>
+        <p class="feature-desc">STGNN model analyzes historical case data, climate patterns, and NDVI satellite vegetation indices to predict dengue outbreaks with explanations.</p>
       </div>
 
       <div class="feature-card fade-in">
@@ -99,7 +99,7 @@
           <i class="fas fa-chart-line" style="color:#10b981;"></i>
         </div>
         <h5 class="feature-title">Real-Time Monitoring</h5>
-        <p class="feature-desc">Track dengue cases across all 5 kabupaten in real-time. View interactive trends, statistics, and color-coded risk levels at a glance.</p>
+        <p class="feature-desc">Track dengue cases across all 5 regencies in real-time. View interactive trends, statistics, and color-coded risk levels at a glance.</p>
       </div>
 
       <div class="feature-card fade-in">
@@ -115,7 +115,7 @@
           <i class="fas fa-users" style="color:#8b5cf6;"></i>
         </div>
         <h5 class="feature-title">Multi-Role Access</h5>
-        <p class="feature-desc">Role-based access for system administrators, district health officers (per kabupaten), and the general public — each with tailored views.</p>
+        <p class="feature-desc">Role-based access for system administrators, district health officers (per regency), and the general public — each with tailored views.</p>
       </div>
 
       <div class="feature-card fade-in">
@@ -123,7 +123,7 @@
           <i class="fas fa-cloud-sun-rain" style="color:#0ea5e9;"></i>
         </div>
         <h5 class="feature-title">Climate Integration</h5>
-        <p class="feature-desc">Automatically fetches NASA climate data (temperature, humidity, rainfall) and NDVI satellite imagery monthly to continuously improve model accuracy.</p>
+        <p class="feature-desc">Automatically fetches NASA climate data (temperature, humidity, rainfall, etc) and NDVI satellite imagery monthly to continuously improve model accuracy.</p>
       </div>
 
       <div class="feature-card fade-in">
@@ -131,7 +131,7 @@
           <i class="fas fa-database" style="color:#10b981;"></i>
         </div>
         <h5 class="feature-title">Simplified Data Management</h5>
-        <p class="feature-desc">One-click data updates replacing complex manual workflows. Upload, process, and generate predictions in minutes — not hours.</p>
+        <p class="feature-desc">One-click data updates replacing complex manual workflows. Upload, process, and generate predictions in minutes.</p>
       </div>
 
     </div>
@@ -143,27 +143,29 @@
   <div class="container" style="max-width:1200px;margin:0 auto;">
     <div style="text-align:center;margin-bottom:48px;">
       <h2 class="section-heading">Coverage Area</h2>
-      <p class="section-subheading" style="margin-bottom:0;">All 5 kabupaten / kota in Daerah Istimewa Yogyakarta</p>
+      <p class="section-subheading" style="margin-bottom:0;">All 5 regencies in Daerah Istimewa Yogyakarta (source: BPS 2022)</p>
     </div>
 
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
-      {% set kabupaten = [
-        {'name': 'KAB BANTUL', 'pop': '1,053,971', 'icon': 'fa-map-marker-alt', 'color': '#0ea5e9'},
-        {'name': 'KAB GUNUNG KIDUL', 'pop': '747,893', 'icon': 'fa-mountain', 'color': '#8b5cf6'},
-        {'name': 'KAB KULON PROGO', 'pop': '436,395', 'icon': 'fa-water', 'color': '#10b981'},
-        {'name': 'KAB SLEMAN', 'pop': '1,197,128', 'icon': 'fa-city', 'color': '#f59e0b'},
-        {'name': 'KOTA YOGYAKARTA', 'pop': '422,732', 'icon': 'fa-landmark', 'color': '#ef4444'}
-      ] %}
+      {% set style_map = {
+        'KAB BANTUL':       {'icon': 'fa-map-marker-alt', 'color': '#0ea5e9'},
+        'KAB GUNUNG KIDUL': {'icon': 'fa-mountain',       'color': '#8b5cf6'},
+        'KAB KULON PROGO':  {'icon': 'fa-water',          'color': '#10b981'},
+        'KAB SLEMAN':       {'icon': 'fa-city',           'color': '#f59e0b'},
+        'KOTA YOGYAKARTA':  {'icon': 'fa-landmark',       'color': '#ef4444'}
+      } %}
 
-      {% for k in kabupaten %}
-      <div class="regency-card" {% if loop.index == 4 %}style="grid-column:1/span 2;"{% elif loop.index == 5 %}{% endif %}>
+      {% for r in regencies %}
+      {% set s = style_map.get(r.name, {'icon': 'fa-map-marker-alt', 'color': '#64748b'}) %}
+      <div class="regency-card" {% if loop.index == 4 %}style="grid-column:1/span 2;"{% endif %}>
         <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:40px;height:40px;border-radius:8px;background:{{ k.color }}18;display:flex;align-items:center;justify-content:center;">
-            <i class="fas {{ k.icon }}" style="color:{{ k.color }};font-size:17px;"></i>
+          <div style="width:40px;height:40px;border-radius:8px;background:{{ s.color }}18;display:flex;align-items:center;justify-content:center;">
+            <i class="fas {{ s.icon }}" style="color:{{ s.color }};font-size:17px;"></i>
           </div>
           <div>
-            <div class="regency-name">{{ k.name }}</div>
-            <div class="regency-meta"><i class="fas fa-users" style="margin-right:4px;"></i>Pop. {{ k.pop }}</div>
+            <div class="regency-name">{{ r.name }}</div>
+            <div class="regency-meta"><i class="fas fa-users" style="margin-right:4px;"></i>Population {{ '{:,}'.format(r.population) if r.population else 'N/A' }}</div>
+            <div class="regency-meta"><i class="fas fa-map-marker-alt" style="margin-right:4px;"></i>Area {{ r.area_km2 }} km²</div>
           </div>
         </div>
       </div>
@@ -192,7 +194,7 @@
             <div class="step-number">2</div>
             <div class="step-content">
               <div class="step-title">Data Processing</div>
-              <div class="step-desc">Raw data cleaned, imputed, and normalized. Spatio-temporal features constructed across all 5 kabupaten.</div>
+              <div class="step-desc">Raw data cleaned, imputed, and normalized. Spatio-temporal features constructed across all 5 regencies.</div>
             </div>
           </div>
           <div class="step-item">

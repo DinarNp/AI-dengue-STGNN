@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Outbreak Dashboard — DengueWatch{% endblock %}
+{% block title %}Outbreak Dashboard — Explain Dengue{% endblock %}
 
 {% block breadcrumb %}
 <li class="breadcrumb-item active">Public Dashboard</li>
@@ -70,7 +70,7 @@
     <div class="stat-icon icon-secondary"><i class="fas fa-city"></i></div>
     <div class="stat-content">
       <div class="stat-value">5</div>
-      <div class="stat-label">Kabupaten Monitored</div>
+      <div class="stat-label">Regency Monitored</div>
     </div>
   </div>
 </div>
@@ -80,7 +80,7 @@
   <div class="card-header">
     <h5 class="card-header-title"><i class="fas fa-wave-square" style="color:var(--primary);margin-right:8px;"></i>Provincial Trend — Last 12 Months</h5>
     <div class="card-header-actions">
-      <span class="badge badge-primary">All Kabupaten</span>
+      <span class="badge badge-primary">All Regency</span>
     </div>
   </div>
   <div class="card-body">
@@ -90,9 +90,9 @@
   </div>
 </div>
 
-<!-- ===== KABUPATEN CARDS GRID ===== -->
+<!-- ===== REGENCY CARDS GRID ===== -->
 <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-  <h5 style="font-weight:600;margin:0;">Kabupaten Status</h5>
+  <h5 style="font-weight:600;margin:0;">Regency Status</h5>
   <span class="pill">{{ current_year }} data</span>
 </div>
 
