@@ -1,159 +1,176 @@
 {% extends "base.html" %}
 
-{% block title %}Update Cases - {{ regency.name }}{% endblock %}
+{% block title %}Input Cases — {{ regency.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('district_health.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">Input Cases</li>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2><i class="fas fa-edit"></i> Update Dengue Cases - {{ regency.name }}</h2>
-    <p class="text-muted">Enter or update monthly dengue case data for your regency</p>
-    <hr>
-    
-    <!-- Update Form -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5><i class="fas fa-plus"></i> Add/Update Case Data</h5>
-                </div>
-                <div class="card-body">
-                    <form id="caseForm">
-                        <div class="mb-3">
-                            <label for="year" class="form-label">Year</label>
-                            <input type="number" class="form-control" id="year" value="{{ current_year }}" min="2020" max="2030" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="month" class="form-label">Month</label>
-                            <select class="form-select" id="month" required>
-                                <option value="">Select month...</option>
-                                <option value="1">January</option>
-                                <option value="2">February</option>
-                                <option value="3">March</option>
-                                <option value="4">April</option>
-                                <option value="5">May</option>
-                                <option value="6">June</option>
-                                <option value="7">July</option>
-                                <option value="8">August</option>
-                                <option value="9">September</option>
-                                <option value="10">October</option>
-                                <option value="11">November</option>
-                                <option value="12">December</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cases" class="form-label">Number of Cases</label>
-                            <input type="number" class="form-control" id="cases" min="0" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="notes" class="form-label">Notes (Optional)</label>
-                            <textarea class="form-control" id="notes" rows="3" placeholder="Any additional information..."></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-custom w-100">
-                            <i class="fas fa-save"></i> Save Data
-                        </button>
-                    </form>
-                    
-                    <div id="message" class="mt-3"></div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Current Year Data -->
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5><i class="fas fa-calendar"></i> {{ current_year }} Data</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Month</th>
-                                    <th>Cases</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for case in existing_cases %}
-                                <tr>
-                                    <td>{{ case.year }}-{{ "%02d"|format(case.month) }}</td>
-                                    <td><strong>{{ case.cases }}</strong></td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="editCase({{ case.year }}, {{ case.month }}, {{ case.cases }})">
-                                            <i class="fas fa-edit"></i> Edit
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted">No data for {{ current_year }} yet</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-edit" style="color:var(--primary);margin-right:8px;"></i>
+    Input Dengue Cases — {{ regency.name }}
+  </h1>
+  <p class="page-subtitle">Enter or update monthly dengue case data for your regency</p>
+</div>
+
+<!-- Form + Table -->
+<div class="grid-2">
+
+  <!-- Form Card -->
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-header" style="background:var(--primary);">
+      <h5 class="card-header-title" style="color:white;">
+        <i class="fas fa-plus-circle" style="margin-right:8px;"></i>Add / Update Case Data
+      </h5>
     </div>
+    <div class="card-body">
+      <form id="caseForm">
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label class="form-label">Year</label>
+            <input type="number" class="form-control" id="year" value="{{ current_year }}" min="2020" max="2030" required>
+          </div>
+          <div>
+            <label class="form-label">Month</label>
+            <select class="form-select" id="month" required>
+              <option value="">Select month...</option>
+              {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),(7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
+              <option value="{{ m }}">{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label class="form-label">Number of Cases</label>
+          <input type="number" class="form-control" id="cases" min="0" placeholder="e.g. 45" required>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label class="form-label">Notes <span style="color:var(--text-muted);font-weight:400;">(Optional)</span></label>
+          <textarea class="form-control" id="notes" rows="3" placeholder="Any additional information..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-w" id="submitBtn">
+          <i class="fas fa-save"></i> Save Data
+        </button>
+      </form>
+
+      <div id="formMessage" class="mt-3"></div>
+    </div>
+  </div>
+
+  <!-- Current Year Data -->
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-header">
+      <h5 class="card-header-title">
+        <i class="fas fa-calendar-check" style="color:var(--success);margin-right:8px;"></i>
+        {{ current_year }} Data
+      </h5>
+      <div class="card-header-actions">
+        <span class="pill">{{ existing_cases | length }} entries</span>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th>Cases</th>
+              <th style="width:80px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for case in existing_cases %}
+            <tr>
+              <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
+              <td><span style="font-weight:600;font-size:15px;">{{ case.cases }}</span></td>
+              <td>
+                <button class="btn btn-outline-secondary btn-sm"
+                  onclick="editCase({{ case.year }}, {{ case.month }}, {{ case.cases }})">
+                  <i class="fas fa-pen"></i>
+                </button>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="3" class="table-empty">
+                <i class="fas fa-inbox"></i> No data for {{ current_year }} yet
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.getElementById('caseForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const year = document.getElementById('year').value;
-    const month = document.getElementById('month').value;
-    const cases = document.getElementById('cases').value;
-    const notes = document.getElementById('notes').value;
-    
-    if (!year || !month || !cases) {
-        showMessage('Please fill in all required fields', 'danger');
-        return;
+  e.preventDefault();
+  const year   = document.getElementById('year').value;
+  const month  = document.getElementById('month').value;
+  const cases  = document.getElementById('cases').value;
+  const notes  = document.getElementById('notes').value;
+
+  if (!year || !month || cases === '') {
+    showMsg('Please fill in all required fields', 'danger');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  fetch('/district/cases/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ year: parseInt(year), month: parseInt(month), cases: parseInt(cases), notes })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      showMsg('Data saved successfully!', 'success');
+      document.getElementById('cases').value = '';
+      document.getElementById('notes').value = '';
+      setTimeout(() => location.reload(), 1500);
+    } else {
+      showMsg('Error: ' + data.message, 'danger');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-save"></i> Save Data';
     }
-    
-    fetch('/district/cases/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            year: parseInt(year),
-            month: parseInt(month),
-            cases: parseInt(cases),
-            notes: notes
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showMessage('Data saved successfully!', 'success');
-            // Reset form
-            document.getElementById('cases').value = '';
-            document.getElementById('notes').value = '';
-            // Reload after 2 seconds
-            setTimeout(() => location.reload(), 2000);
-        } else {
-            showMessage('Error: ' + data.message, 'danger');
-        }
-    })
-    .catch(error => {
-        showMessage('Error: ' + error, 'danger');
-    });
+  })
+  .catch(err => {
+    showMsg('Error: ' + err, 'danger');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Data';
+  });
 });
 
-function showMessage(msg, type) {
-    const messageDiv = document.getElementById('message');
-    messageDiv.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+function showMsg(msg, type) {
+  const colors = { success: '#10b981', danger: '#ef4444', warning: '#f59e0b' };
+  document.getElementById('formMessage').innerHTML =
+    `<div style="padding:12px 16px;border-radius:8px;background:${colors[type]}18;border:1px solid ${colors[type]}40;color:${colors[type]};font-size:14px;font-weight:500;">
+      <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" style="margin-right:6px;"></i>${msg}
+    </div>`;
 }
 
 function editCase(year, month, cases) {
-    document.getElementById('year').value = year;
-    document.getElementById('month').value = month;
-    document.getElementById('cases').value = cases;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('year').value  = year;
+  document.getElementById('month').value = month;
+  document.getElementById('cases').value = cases;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
 {% endblock %}

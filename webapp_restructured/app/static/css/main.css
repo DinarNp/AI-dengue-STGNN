@@ -431,12 +431,22 @@ img { max-width: 100%; }
 .main-content {
   margin-left: var(--sidebar-width);
   margin-top: var(--topbar-height);
-  padding: 28px 28px 60px;
+  padding: 0;
+  width: calc(100% - var(--sidebar-width));
   min-height: calc(100vh - var(--topbar-height));
-  transition: margin-left var(--transition-slow);
+  transition: margin-left var(--transition-slow), width var(--transition-slow);
 }
 
-.main-content.sidebar-collapsed { margin-left: 72px; }
+.main-content.sidebar-collapsed {
+  margin-left: 72px;
+  width: calc(100% - 72px);
+}
+
+.content-inner {
+  padding: 24px 28px 70px;
+  width: 100%;
+  box-sizing: border-box;
+}
 
 /* =========================================================
    PUBLIC CONTENT AREA (no sidebar)
@@ -464,6 +474,8 @@ img { max-width: 100%; }
 /* Page header */
 .page-header {
   margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 /* =========================================================
@@ -478,13 +490,25 @@ img { max-width: 100%; }
 .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
 .grid-no-mb { margin-bottom: 0 !important; }
 
+/* Inline grids inside cards (forms, small layouts) — no bottom margin */
+.form-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.form-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+@media (max-width: 1280px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 1024px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
   .grid-3-2, .grid-2-1 { grid-template-columns: 1fr; }
+  .form-grid-3, .form-grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
+
 @media (max-width: 640px) {
   .grid-2, .grid-3, .grid-4, .grid-3-2, .grid-2-1 { grid-template-columns: 1fr; }
+  .form-grid-2, .form-grid-3, .form-grid-4 { grid-template-columns: 1fr; }
   .public-content { width: 96%; padding: 24px 0 80px; }
 }
 
@@ -1936,6 +1960,18 @@ pre {
    RESPONSIVE
    ========================================================= */
 
+/* --- Large screens (1440–1799px) --- */
+@media (min-width: 1440px) {
+  .content-inner { padding: 28px 40px 70px; }
+}
+
+/* --- Very large screens (≥1800px, e.g. 2056px) --- */
+@media (min-width: 1800px) {
+  .content-inner { padding: 32px 60px 80px; }
+  .page-title    { font-size: 24px; }
+  .page-header   { margin-bottom: 28px; }
+}
+
 @media (max-width: 1024px) {
   .auth-left { display: none; }
   .auth-right { width: 100%; padding: 40px 32px; }
@@ -1960,10 +1996,8 @@ pre {
 
   .topbar-hamburger { display: flex; }
 
-  .main-content {
-    margin-left: 0;
-    padding: 20px 16px;
-  }
+  .main-content { margin-left: 0; }
+  .content-inner { padding: 20px 16px 70px; }
 
   .app-footer { left: 0; }
 

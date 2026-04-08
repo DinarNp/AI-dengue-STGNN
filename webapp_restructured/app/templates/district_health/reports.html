@@ -1,97 +1,134 @@
 {% extends "base.html" %}
 
-{% block title %}Reports - {{ regency.name }}{% endblock %}
+{% block title %}Reports — {{ regency.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('district_health.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">Reports</li>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2><i class="fas fa-file-alt"></i> Reports - {{ regency.name }}</h2>
-    <p class="text-muted">Statistical reports and analysis for your regency</p>
-    <hr>
-    
-    <!-- Yearly Statistics -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-calendar-alt"></i> Yearly Statistics</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="yearlyChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Monthly Breakdown -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-bar"></i> Monthly Breakdown - {{ current_year }}</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Month</th>
-                                    <th>Cases</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for case in monthly_breakdown %}
-                                <tr>
-                                    <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
-                                    <td>{{ case.cases }}</td>
-                                    <td>
-                                        {% if case.cases < 30 %}
-                                            <span class="badge bg-success">Low</span>
-                                        {% elif case.cases < 60 %}
-                                            <span class="badge bg-warning">Medium</span>
-                                        {% elif case.cases < 100 %}
-                                            <span class="badge bg-orange">High</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Very High</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted">No data available</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+<!-- Page Header -->
+<div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1 class="page-title">
+      <i class="fas fa-file-alt" style="color:var(--primary);margin-right:8px;"></i>
+      Reports — {{ regency.name }}
+    </h1>
+    <p class="page-subtitle">Statistical reports and analysis for your regency</p>
+  </div>
+  <span class="pill"><i class="fas fa-calendar" style="margin-right:5px;"></i>{{ current_year }}</span>
 </div>
+
+<!-- Yearly Statistics Chart -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>Yearly Case Statistics
+    </h5>
+  </div>
+  <div class="card-body">
+    <div class="chart-container" style="height:260px;">
+      <canvas id="yearlyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Monthly Breakdown -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-chart-bar" style="color:var(--secondary);margin-right:8px;"></i>Monthly Breakdown — {{ current_year }}
+    </h5>
+    <div class="card-header-actions">
+      <span class="pill">{{ monthly_breakdown | length }} months</span>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Cases</th>
+            <th>Proportion</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set total = namespace(v=0) %}
+          {% for case in monthly_breakdown %}{% set total.v = total.v + case.cases %}{% endfor %}
+
+          {% for case in monthly_breakdown %}
+          <tr>
+            <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
+            <td><span style="font-weight:600;font-size:15px;">{{ case.cases }}</span></td>
+            <td style="min-width:140px;">
+              {% set pct = ((case.cases / total.v) * 100) | int if total.v > 0 else 0 %}
+              <div class="progress-bar-wrapper" style="margin:0;">
+                <div class="progress-track">
+                  <div class="progress-fill {% if case.cases >= 100 %}danger{% elif case.cases >= 60 %}warning{% else %}success{% endif %}"
+                       style="width:{{ pct }}%;"></div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ pct }}%</div>
+            </td>
+            <td>
+              {% if case.cases < 30 %}
+                <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low</span>
+              {% elif case.cases < 60 %}
+                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium</span>
+              {% elif case.cases < 100 %}
+                <span class="risk-badge risk-high"><span class="risk-dot high"></span>High</span>
+              {% else %}
+                <span class="risk-badge risk-very-high"><span class="risk-dot very-high"></span>Very High</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="table-empty">
+              <i class="fas fa-database"></i> No data available for {{ current_year }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const ctx = document.getElementById('yearlyChart');
-new Chart(ctx, {
+const yearlyCtx = document.getElementById('yearlyChart');
+if (yearlyCtx) {
+  new Chart(yearlyCtx, {
     type: 'bar',
     data: {
-        labels: {{ yearly_stats | map(attribute='year') | list | tojson }},
-        datasets: [{
-            label: 'Total Cases',
-            data: {{ yearly_stats | map(attribute='total_cases') | list | tojson }},
-            backgroundColor: 'rgba(54, 162, 235, 0.5)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 2
-        }]
+      labels: {{ yearly_stats | map(attribute='year') | list | tojson }},
+      datasets: [{
+        label: 'Total Cases',
+        data: {{ yearly_stats | map(attribute='total_cases') | list | tojson }},
+        backgroundColor: 'rgba(14,165,233,0.7)',
+        borderColor: '#0ea5e9',
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
     },
     options: {
-        responsive: true,
-        scales: {
-            y: { beginAtZero: true }
-        }
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      }
     }
-});
+  });
+}
 </script>
 {% endblock %}

@@ -407,10 +407,4 @@ function exportData() {
   window.location.href = `/admin/data/export?year_start=${yearStart}&year_end=${yearEnd}`;
 }
 </script>
-<style>
-@media (max-width: 768px) {
-  [style*="grid-template-columns:repeat(2,1fr)"] { grid-template-columns: 1fr !important; }
-  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
-}
-</style>
 {% endblock %}

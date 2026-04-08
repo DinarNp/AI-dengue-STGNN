@@ -1,161 +1,175 @@
 {% extends "base.html" %}
 
-{% block title %}District Dashboard - {{ regency.name }}{% endblock %}
+{% block title %}Dashboard — {{ regency.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2><i class="fas fa-hospital"></i> {{ regency.name }} - Health Office Dashboard</h2>
-    <hr>
-    
-    <!-- Quick Stats -->
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div class="card-body stat-card">
-                    <h3>{{ total_cases_this_year }}</h3>
-                    <p>Total Cases This Year</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div class="card-body stat-card">
-                    <h3>
-                        {% if latest_prediction %}
-                            {{ "%.0f"|format(latest_prediction.predicted_cases) }}
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </h3>
-                    <p>Next Month Prediction</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <div class="card-body stat-card">
-                    <h3>
-                        {% if latest_prediction %}
-                            <span class="risk-badge risk-{{ latest_prediction.risk_level.replace('_', '-') }}">
-                                {{ latest_prediction.risk_level.replace('_', ' ').upper() }}
-                            </span>
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </h3>
-                    <p>Risk Level</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Quick Actions -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-bolt"></i> Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{{ url_for('district_health.update_cases') }}" class="btn btn-primary btn-custom">
-                            <i class="fas fa-edit"></i> Update Dengue Cases
-                        </a>
-                        <a href="{{ url_for('district_health.view_predictions') }}" class="btn btn-success btn-custom">
-                            <i class="fas fa-chart-line"></i> View Predictions
-                        </a>
-                        <a href="{{ url_for('district_health.view_reports') }}" class="btn btn-info btn-custom">
-                            <i class="fas fa-file-alt"></i> View Reports
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Monthly Trend -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-area"></i> Monthly Trend (Last 12 Months)</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="trendChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Recent Cases -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-list"></i> Recent Monthly Data</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Month</th>
-                                    <th>Cases</th>
-                                    <th>Data Source</th>
-                                    <th>Updated At</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for case in recent_cases %}
-                                <tr>
-                                    <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
-                                    <td>{{ case.cases }}</td>
-                                    <td>
-                                        <span class="badge bg-secondary">{{ case.data_source }}</span>
-                                    </td>
-                                    <td>{{ case.updated_at.strftime('%Y-%m-%d') if case.updated_at else 'N/A' }}</td>
-                                </tr>
-                                {% else %}
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted">No data available</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
+<!-- Page Header -->
+<div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1 class="page-title">
+      <i class="fas fa-hospital" style="color:var(--primary);margin-right:8px;"></i>
+      {{ regency.name }}
+    </h1>
+    <p class="page-subtitle">District Health Office Dashboard — {{ current_year }}</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{{ url_for('district_health.update_cases') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-edit"></i> Input Cases
+    </a>
+    <a href="{{ url_for('district_health.view_predictions') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-chart-line"></i> Predictions
+    </a>
+  </div>
 </div>
+
+<!-- Stat Cards -->
+<div class="grid-3">
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-notes-medical"></i></div>
+    <div class="stat-content">
+      <div class="stat-value" data-counter="{{ total_cases_this_year }}">{{ total_cases_this_year }}</div>
+      <div class="stat-label">Total Cases {{ current_year }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-secondary">
+    <div class="stat-icon icon-secondary"><i class="fas fa-brain"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">
+        {% if latest_prediction %}{{ "%.0f"|format(latest_prediction.predicted_cases) }}{% else %}<span style="font-size:18px;color:#94a3b8;">N/A</span>{% endif %}
+      </div>
+      <div class="stat-label">Next Month Prediction</div>
+    </div>
+  </div>
+
+  <div class="stat-card {% if latest_prediction %}border-left-{% if latest_prediction.risk_level == 'low' %}success{% elif latest_prediction.risk_level == 'medium' %}warning{% elif latest_prediction.risk_level == 'high' %}warning{% else %}danger{% endif %}{% else %}border-left-primary{% endif %}">
+    <div class="stat-icon {% if latest_prediction %}icon-{% if latest_prediction.risk_level == 'low' %}success{% elif latest_prediction.risk_level == 'medium' %}warning{% else %}danger{% endif %}{% else %}icon-primary{% endif %}">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-value" style="font-size:18px;">
+        {% if latest_prediction %}
+          <span class="risk-badge risk-{{ latest_prediction.risk_level.replace('_','-') }}">
+            <span class="risk-dot {{ latest_prediction.risk_level.replace('_','-') }}"></span>
+            {{ latest_prediction.risk_level.replace('_',' ').upper() }}
+          </span>
+        {% else %}
+          <span style="color:#94a3b8;">N/A</span>
+        {% endif %}
+      </div>
+      <div class="stat-label">Current Risk Level</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>Quick Actions</h5>
+  </div>
+  <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+    <a href="{{ url_for('district_health.update_cases') }}" class="btn btn-primary">
+      <i class="fas fa-edit"></i> Input / Update Cases
+    </a>
+    <a href="{{ url_for('district_health.view_predictions') }}" class="btn btn-outline-secondary">
+      <i class="fas fa-chart-line"></i> View Predictions
+    </a>
+    <a href="{{ url_for('district_health.view_reports') }}" class="btn btn-outline-secondary">
+      <i class="fas fa-file-alt"></i> View Reports
+    </a>
+  </div>
+</div>
+
+<!-- Trend Chart -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>Monthly Trend — Last 12 Months</h5>
+    <div class="card-header-actions">
+      <span class="badge badge-primary">{{ regency.name }}</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="chart-container" style="height:260px;">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Cases -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-list" style="color:var(--text-muted);margin-right:8px;"></i>Recent Monthly Data</h5>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Cases</th>
+            <th>Data Source</th>
+            <th>Updated At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for case in recent_cases %}
+          <tr>
+            <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
+            <td><span style="font-weight:600;font-size:15px;">{{ case.cases }}</span></td>
+            <td><span class="pill">{{ case.data_source }}</span></td>
+            <td style="color:var(--text-muted);">{{ case.updated_at.strftime('%Y-%m-%d') if case.updated_at else 'N/A' }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" class="table-empty">
+              <i class="fas fa-database"></i> No data available yet
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-const ctx = document.getElementById('trendChart');
-new Chart(ctx, {
+const trendCtx = document.getElementById('trendChart');
+if (trendCtx) {
+  new Chart(trendCtx, {
     type: 'line',
     data: {
-        labels: {{ monthly_trend | map(attribute='month') | list | tojson }},
-        datasets: [{
-            label: 'Dengue Cases',
-            data: {{ monthly_trend | map(attribute='cases') | list | tojson }},
-            borderColor: 'rgb(75, 192, 192)',
-            backgroundColor: 'rgba(75, 192, 192, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
+      labels: {{ monthly_trend | map(attribute='month') | list | tojson }},
+      datasets: [{
+        label: 'Dengue Cases',
+        data: {{ monthly_trend | map(attribute='cases') | list | tojson }},
+        borderColor: '#0ea5e9',
+        backgroundColor: 'rgba(14,165,233,0.08)',
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#0ea5e9',
+        pointRadius: 4,
+        pointHoverRadius: 7
+      }]
     },
     options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-            legend: { display: true }
-        },
-        scales: {
-            y: { beginAtZero: true }
-        }
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      }
     }
-});
+  });
+}
 </script>
 {% endblock %}
