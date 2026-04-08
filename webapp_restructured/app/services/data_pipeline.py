@@ -27,9 +27,8 @@ class DataPipelineService:
     
     def __init__(self, config):
         self.config = config
-        self.openweather_api_key = config.OPENWEATHER_API_KEY
-        self.nasa_power_url = config.NASA_POWER_API_URL
-        self.api_delay = config.API_DELAY_SECONDS
+        self.openweather_api_key = config.get('OPENWEATHER_API_KEY')
+        self.api_delay = config.get('API_DELAY_SECONDS', 1.5)
         
     # ==========================================
     # 1. DENGUE CASE MANAGEMENT
@@ -166,204 +165,143 @@ class DataPipelineService:
             }
     
     # ==========================================
-    # 2. CLIMATE DATA FETCHING
+    # 2. CLIMATE DATA FETCHING (OpenWeatherMap only)
     # ==========================================
-    
+
     def fetch_climate_data_for_month(self, regency_id: int, year: int, month: int) -> Dict:
         """
-        Fetch climate data from APIs for a specific regency and month
-        Integrates functionality from get_climate_data_v3.py
-        
-        Args:
-            regency_id: ID of the regency
-            year: Year
-            month: Month
-            
-        Returns:
-            Dictionary with climate data or error
+        Fetch climate data for a specific regency and month using OpenWeatherMap
+        One Call API 3.0 day_summary endpoint (one call per day, then average).
+        Monthly aggregation matches convert_weekly_to_monthly.py: mean for all vars.
         """
         try:
-            # Get regency info
             regency = Regency.query.get(regency_id)
             if not regency:
                 return {'success': False, 'message': 'Regency not found'}
-            
-            # Get date range for the month
+
+            if not self.openweather_api_key:
+                return {'success': False, 'message': 'OpenWeatherMap API key not configured'}
+
             start_date = datetime(year, month, 1)
-            if month == 12:
-                end_date = datetime(year + 1, 1, 1) - timedelta(days=1)
-            else:
-                end_date = datetime(year, month + 1, 1) - timedelta(days=1)
-            
-            # Try NASA POWER API first
-            climate_data = self._fetch_nasa_power(
-                regency.latitude,
-                regency.longitude,
-                start_date,
-                end_date
+            end_date   = datetime(year + 1, 1, 1) - timedelta(days=1) if month == 12 \
+                         else datetime(year, month + 1, 1) - timedelta(days=1)
+
+            monthly_avg = self._fetch_openweather_month(
+                regency.latitude, regency.longitude, start_date, end_date
             )
-            
-            if not climate_data:
-                # Fallback to OpenWeather if NASA fails
-                climate_data = self._fetch_openweather(
-                    regency.latitude,
-                    regency.longitude,
-                    start_date,
-                    end_date
-                )
-            
-            if not climate_data:
-                return {'success': False, 'message': 'Failed to fetch climate data from all sources'}
-            
-            # Calculate monthly averages
-            monthly_avg = {
-                'temperature_min': np.mean(climate_data.get('temp_min', [])),
-                'temperature_max': np.mean(climate_data.get('temp_max', [])),
-                'temperature_avg': np.mean(climate_data.get('temp_avg', [])),
-                'humidity': np.mean(climate_data.get('humidity', [])),
-                'precipitation_total': np.sum(climate_data.get('precipitation', [])),
-                'pressure': np.mean(climate_data.get('pressure', [])),
-                'wind_speed': np.mean(climate_data.get('wind_speed', [])),
-                'wind_direction': np.mean(climate_data.get('wind_direction', [])),
-                'cloud_cover': np.mean(climate_data.get('cloud_cover', []))
+
+            if not any(v is not None for v in monthly_avg.values()):
+                return {'success': False, 'message': 'OpenWeatherMap returned no data for this period'}
+
+            db_fields = {
+                'temperature_min':     monthly_avg.get('Temperature_Min'),
+                'temperature_max':     monthly_avg.get('Temperature_Max'),
+                'temperature_avg':     monthly_avg.get('Temperature_Avg'),
+                'humidity':            monthly_avg.get('Humidity'),
+                'precipitation_total': monthly_avg.get('Precipitation_Total'),
+                'pressure':            monthly_avg.get('Pressure'),
+                'wind_speed':          monthly_avg.get('Wind_Speed'),
+                'wind_direction':      monthly_avg.get('Wind_Direction'),
+                'cloud_cover':         monthly_avg.get('Cloud_Cover'),
             }
-            
-            # Save to database
+
             existing = ClimateData.query.filter_by(
-                regency_id=regency_id,
-                year=year,
-                month=month
+                regency_id=regency_id, year=year, month=month
             ).first()
-            
+
             if existing:
-                for key, value in monthly_avg.items():
-                    setattr(existing, key, value)
-                existing.data_source = climate_data.get('source', 'unknown')
-                existing.fetched_at = datetime.utcnow()
+                for col, val in db_fields.items():
+                    if val is not None:
+                        setattr(existing, col, val)
+                existing.data_source = 'openweather'
+                existing.fetched_at  = datetime.utcnow()
             else:
-                new_climate = ClimateData(
-                    regency_id=regency_id,
-                    year=year,
-                    month=month,
-                    **monthly_avg,
-                    data_source=climate_data.get('source', 'unknown')
-                )
-                db.session.add(new_climate)
-            
+                db.session.add(ClimateData(
+                    regency_id=regency_id, year=year, month=month,
+                    data_source='openweather',
+                    **{k: v for k, v in db_fields.items() if v is not None}
+                ))
+
             db.session.commit()
-            
-            return {
-                'success': True,
-                'data': monthly_avg,
-                'source': climate_data.get('source', 'unknown')
-            }
-            
+            return {'success': True, 'data': db_fields, 'source': 'openweather'}
+
         except Exception as e:
             db.session.rollback()
-            return {
-                'success': False,
-                'message': f'Error: {str(e)}'
-            }
-    
-    def _fetch_nasa_power(self, lat: float, lon: float, start_date: datetime, 
-                         end_date: datetime) -> Optional[Dict]:
-        """Fetch data from NASA POWER API"""
-        try:
-            params = {
-                'parameters': 'T2M,T2M_MIN,T2M_MAX,RH2M,PRECTOTCORR,PS,WS2M',
-                'community': 'AG',
-                'longitude': lon,
-                'latitude': lat,
-                'start': start_date.strftime('%Y%m%d'),
-                'end': end_date.strftime('%Y%m%d'),
-                'format': 'JSON'
-            }
-            
-            response = requests.get(self.nasa_power_url, params=params, timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                parameters = data.get('properties', {}).get('parameter', {})
-                
-                return {
-                    'temp_min': list(parameters.get('T2M_MIN', {}).values()),
-                    'temp_max': list(parameters.get('T2M_MAX', {}).values()),
-                    'temp_avg': list(parameters.get('T2M', {}).values()),
-                    'humidity': list(parameters.get('RH2M', {}).values()),
-                    'precipitation': list(parameters.get('PRECTOTCORR', {}).values()),
-                    'pressure': list(parameters.get('PS', {}).values()),
-                    'wind_speed': list(parameters.get('WS2M', {}).values()),
-                    'wind_direction': [0] * len(list(parameters.get('WS2M', {}).values())),  # NASA doesn't provide direction
-                    'cloud_cover': [50] * len(list(parameters.get('WS2M', {}).values())),  # Default estimate
-                    'source': 'nasa_power'
-                }
-            
-            return None
-            
-        except Exception as e:
-            print(f"NASA POWER API error: {str(e)}")
-            return None
-    
-    def _fetch_openweather(self, lat: float, lon: float, start_date: datetime, 
-                          end_date: datetime) -> Optional[Dict]:
-        """Fetch data from OpenWeather API"""
-        try:
-            # OpenWeather One Call API 3.0 Day Summary
-            # Note: This requires a subscription for historical data
-            # Simplified implementation - you may need to adjust based on your API plan
-            
-            url = 'https://api.openweathermap.org/data/3.0/onecall/day_summary'
-            
-            # Collect data for each day
-            all_data = {
-                'temp_min': [],
-                'temp_max': [],
-                'temp_avg': [],
-                'humidity': [],
-                'precipitation': [],
-                'pressure': [],
-                'wind_speed': [],
-                'wind_direction': [],
-                'cloud_cover': []
-            }
-            
-            current_date = start_date
-            while current_date <= end_date:
-                params = {
-                    'lat': lat,
-                    'lon': lon,
-                    'date': current_date.strftime('%Y-%m-%d'),
+            return {'success': False, 'message': f'Error: {str(e)}'}
+
+    def _fetch_openweather_month(self, lat: float, lon: float,
+                                 start_date: datetime, end_date: datetime) -> Dict:
+        """
+        Call OpenWeatherMap One Call API 3.0 day_summary once per day for the
+        given date range, then average all daily values for the month.
+
+        Endpoint: GET https://api.openweathermap.org/data/3.0/onecall/day_summary
+        Params  : lat, lon, date (YYYY-MM-DD), appid, units=metric
+
+        Response fields used:
+            temperature.min/max/afternoon → Temperature_Min/Max/Avg
+            humidity.afternoon            → Humidity
+            precipitation.total           → Precipitation_Total
+            pressure.afternoon            → Pressure
+            wind.max.speed/direction      → Wind_Speed/Direction
+            cloud_cover.afternoon         → Cloud_Cover
+
+        Aggregation matches convert_weekly_to_monthly.py: mean for all climate vars.
+        """
+        import time
+
+        url   = 'https://api.openweathermap.org/data/3.0/onecall/day_summary'
+        accum = {k: [] for k in [
+            'Temperature_Min', 'Temperature_Max', 'Temperature_Avg',
+            'Humidity', 'Precipitation_Total', 'Pressure',
+            'Wind_Speed', 'Wind_Direction', 'Cloud_Cover'
+        ]}
+
+        current = start_date
+        while current <= end_date:
+            try:
+                resp = requests.get(url, params={
+                    'lat':   lat,
+                    'lon':   lon,
+                    'date':  current.strftime('%Y-%m-%d'),
                     'appid': self.openweather_api_key,
-                    'units': 'metric'
-                }
-                
-                response = requests.get(url, params=params, timeout=30)
-                
-                if response.status_code == 200:
-                    data = response.json()
-                    
-                    all_data['temp_min'].append(data.get('temperature', {}).get('min', 25))
-                    all_data['temp_max'].append(data.get('temperature', {}).get('max', 30))
-                    all_data['temp_avg'].append(data.get('temperature', {}).get('afternoon', 28))
-                    all_data['humidity'].append(data.get('humidity', {}).get('afternoon', 70))
-                    all_data['precipitation'].append(data.get('precipitation', {}).get('total', 0))
-                    all_data['pressure'].append(data.get('pressure', {}).get('afternoon', 1010))
-                    all_data['wind_speed'].append(data.get('wind', {}).get('max', {}).get('speed', 5))
-                    all_data['wind_direction'].append(data.get('wind', {}).get('max', {}).get('direction', 180))
-                    all_data['cloud_cover'].append(data.get('cloud_cover', {}).get('afternoon', 50))
-                
-                current_date += timedelta(days=1)
-                
-                # Rate limiting
-                import time
-                time.sleep(self.api_delay)
-            
-            all_data['source'] = 'openweather'
-            return all_data
-            
-        except Exception as e:
-            print(f"OpenWeather API error: {str(e)}")
-            return None
+                    'units': 'metric'   # Celsius, m/s, hPa
+                }, timeout=30)
+
+                if resp.status_code == 200:
+                    d = resp.json()
+
+                    temp   = d.get('temperature', {})
+                    hum    = d.get('humidity', {})
+                    pres   = d.get('pressure', {})
+                    wind   = d.get('wind', {}).get('max', {})
+                    cc     = d.get('cloud_cover', {})
+                    precip = d.get('precipitation', {})
+
+                    def _add(key, val):
+                        if val is not None:
+                            accum[key].append(val)
+
+                    _add('Temperature_Min',     temp.get('min'))
+                    _add('Temperature_Max',     temp.get('max'))
+                    _add('Temperature_Avg',     temp.get('afternoon'))
+                    _add('Humidity',            hum.get('afternoon'))
+                    _add('Pressure',            pres.get('afternoon'))
+                    _add('Wind_Speed',          wind.get('speed'))
+                    _add('Wind_Direction',      wind.get('direction'))
+                    _add('Cloud_Cover',         cc.get('afternoon'))
+                    _add('Precipitation_Total', precip.get('total'))
+
+                else:
+                    print(f"OpenWeatherMap {resp.status_code} for {current.strftime('%Y-%m-%d')}: {resp.text[:200]}")
+
+            except Exception as e:
+                print(f"OpenWeatherMap error for {current.strftime('%Y-%m-%d')}: {e}")
+
+            current += timedelta(days=1)
+            time.sleep(self.api_delay)
+
+        return {k: round(float(np.mean(v)), 4) if v else None for k, v in accum.items()}
     
     def fetch_all_climate_data(self, year: int, month: int, user_id: int) -> Dict:
         """
@@ -648,7 +586,7 @@ class DataPipelineService:
                             'NDVI': ndvi.ndvi_value if ndvi else None,
                             'Cloud_Cover': climate.cloud_cover if climate else None,
                             'Humidity': climate.humidity if climate else None,
-                            'Precipitation_Total': climate.precipitation_total if climate else None,
+                            'Precipitation': climate.precipitation if climate else None,
                             'Temperature_Min': climate.temperature_min if climate else None,
                             'Temperature_Max': climate.temperature_max if climate else None,
                             'Temperature_Avg': climate.temperature_avg if climate else None,

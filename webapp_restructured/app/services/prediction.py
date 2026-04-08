@@ -173,7 +173,7 @@ class PredictionService:
             if input_data is None:
                 return {
                     'success': False,
-                    'message': f'Insufficient historical data. Need {self.config.WINDOW_SIZE_MONTHLY} months of data.'
+                    'message': f'Insufficient historical data. Need {self.config.get("WINDOW_SIZE_MONTHLY", 4)} months of data.'
                 }
             
             # Make prediction
@@ -295,7 +295,7 @@ class PredictionService:
         Returns:
             Risk level string
         """
-        thresholds = self.config.RISK_THRESHOLDS
+        thresholds = self.config.get('RISK_THRESHOLDS', {'low': 30, 'medium': 60, 'high': 100, 'very_high': 150})
         
         if predicted_cases < thresholds['low']:
             return 'low'

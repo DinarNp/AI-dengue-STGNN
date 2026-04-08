@@ -56,7 +56,8 @@
                                 <th>Temp Avg</th>
                                 <th>Humidity</th>
                                 <th>Precipitation</th>
-                                <th>Source</th>
+                                <th>Updated</th>
+                                <th>Action</th>
                             {% elif data_type == 'ndvi' %}
                                 <th>Year</th>
                                 <th>Month</th>
@@ -89,7 +90,26 @@
                                 <td>{{ "%.1f"|format(record.temperature_avg) if record.temperature_avg else 'N/A' }}°C</td>
                                 <td>{{ "%.1f"|format(record.humidity) if record.humidity else 'N/A' }}%</td>
                                 <td>{{ "%.1f"|format(record.precipitation_total) if record.precipitation_total else 'N/A' }} mm</td>
-                                <td><span class="badge bg-secondary">{{ record.data_source }}</span></td>
+                                <td>{{ record.fetched_at.strftime('%Y-%m-%d') if record.fetched_at else 'N/A' }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="openClimateDetail({
+                                        region: '{{ record.regency.name }}',
+                                        period: '{{ record.year }}-{{ '%02d' % record.month }}',
+                                        temp_min:    {{ record.temperature_min   or 'null' }},
+                                        temp_max:    {{ record.temperature_max   or 'null' }},
+                                        temp_avg:    {{ record.temperature_avg   or 'null' }},
+                                        humidity:    {{ record.humidity          or 'null' }},
+                                        precip:      {{ record.precipitation_total or 'null' }},
+                                        pressure:    {{ record.pressure          or 'null' }},
+                                        wind_speed:  {{ record.wind_speed        or 'null' }},
+                                        wind_dir:    {{ record.wind_direction    or 'null' }},
+                                        cloud:       {{ record.cloud_cover       or 'null' }},
+                                        source:      '{{ record.data_source or "N/A" }}',
+                                        fetched:     '{{ record.fetched_at.strftime("%Y-%m-%d") if record.fetched_at else "N/A" }}'
+                                    })">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
                             {% elif data_type == 'ndvi' %}
                                 <td>{{ record.year }}</td>
                                 <td>{{ record.month }}</td>
@@ -174,6 +194,83 @@
 </div>
 {% endif %}
 
+<!-- Climate Detail Modal -->
+{% if data_type == 'climate' %}
+<div class="modal fade" id="climateDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-cloud-sun-rain"></i> Climate Detail — <span id="cdRegion"></span> <span class="badge bg-secondary ms-1" id="cdPeriod"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <div class="text-muted small mb-1"><i class="fas fa-thermometer-half text-danger"></i> Temperature</div>
+                                <div class="fw-bold fs-5" id="cdTempAvg">—</div>
+                                <div class="text-muted small" id="cdTempRange">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <div class="text-muted small mb-1"><i class="fas fa-tint text-primary"></i> Humidity</div>
+                                <div class="fw-bold fs-5" id="cdHumidity">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <div class="text-muted small mb-1"><i class="fas fa-cloud-showers-heavy text-info"></i> Precipitation</div>
+                                <div class="fw-bold fs-5" id="cdPrecip">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <div class="text-muted small mb-1"><i class="fas fa-compress-arrows-alt text-secondary"></i> Pressure</div>
+                                <div class="fw-bold fs-5" id="cdPressure">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <div class="text-muted small mb-1"><i class="fas fa-wind text-success"></i> Wind</div>
+                                <div class="fw-bold fs-5" id="cdWindSpeed">—</div>
+                                <div class="text-muted small" id="cdWindDir">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <div class="text-muted small mb-1"><i class="fas fa-cloud text-warning"></i> Cloud Cover</div>
+                                <div class="fw-bold fs-5" id="cdCloud">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-3">
+                <div class="text-muted small">
+                    <i class="fas fa-database me-1"></i> Source: <span id="cdSource"></span>
+                    &nbsp;|&nbsp;
+                    <i class="fas fa-clock me-1"></i> Fetched: <span id="cdFetched"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Import Modal -->
 <div class="modal fade" id="importModal" tabindex="-1">
     <div class="modal-dialog">
@@ -245,6 +342,27 @@ function submitEditCase() {
         document.getElementById('editCaseResult').innerHTML =
             '<div class="alert alert-danger">Request failed: ' + err + '</div>';
     });
+}
+
+function openClimateDetail(d) {
+    const fmt  = (v, dec, unit) => v !== null ? v.toFixed(dec) + unit : 'N/A';
+    document.getElementById('cdRegion').textContent  = d.region;
+    document.getElementById('cdPeriod').textContent  = d.period;
+    document.getElementById('cdTempAvg').textContent = fmt(d.temp_avg, 1, ' °C');
+    document.getElementById('cdTempRange').textContent =
+        (d.temp_min !== null && d.temp_max !== null)
+        ? `Min ${d.temp_min.toFixed(1)} °C — Max ${d.temp_max.toFixed(1)} °C`
+        : 'Min/Max N/A';
+    document.getElementById('cdHumidity').textContent = fmt(d.humidity, 1, ' %');
+    document.getElementById('cdPrecip').textContent   = fmt(d.precip, 1, ' mm');
+    document.getElementById('cdPressure').textContent = fmt(d.pressure, 1, ' hPa');
+    document.getElementById('cdWindSpeed').textContent = fmt(d.wind_speed, 1, ' m/s');
+    document.getElementById('cdWindDir').textContent  =
+        d.wind_dir !== null ? d.wind_dir.toFixed(0) + '°' : 'N/A';
+    document.getElementById('cdCloud').textContent    = fmt(d.cloud, 1, ' %');
+    document.getElementById('cdSource').textContent  = d.source;
+    document.getElementById('cdFetched').textContent = d.fetched;
+    new bootstrap.Modal(document.getElementById('climateDetailModal')).show();
 }
 
 function importCSV() {

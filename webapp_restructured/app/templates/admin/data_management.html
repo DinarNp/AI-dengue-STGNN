@@ -63,11 +63,7 @@
               </div>
             </td>
             <td>
-              {% set score = namespace(v=0) %}
-              {% if stat.latest_dengue and stat.latest_dengue != 'N/A' %}{% set score.v = score.v + 1 %}{% endif %}
-              {% if stat.latest_climate and stat.latest_climate != 'N/A' %}{% set score.v = score.v + 1 %}{% endif %}
-              {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}{% set score.v = score.v + 1 %}{% endif %}
-              {% set pct = (score.v / 3 * 100) | int %}
+              {% set pct = stat.completeness_pct %}
               <div class="progress-track" style="height:6px;width:80px;">
                 <div class="progress-fill {% if pct == 100 %}success{% elif pct >= 50 %}warning{% else %}danger{% endif %}"
                      style="width:{{ pct }}%;"></div>
@@ -159,8 +155,8 @@
       <div class="alert-box info mb-16">
         <i class="fas fa-satellite alert-icon"></i>
         <div class="alert-text">
-          <div class="alert-title">NASA Climate Data (Auto-Fetch)</div>
-          Climate data is automatically fetched on the 1st of each month via <code>get_climate_data_v3.py</code>. Use manual fetch below for backfill or re-fetching.
+          <div class="alert-title">Open Weather Climate Data (Auto-Fetch)</div>
+          Climate data is automatically fetched on the 1st of each month. Use manual fetch below for backfill or re-fetching.
         </div>
       </div>
 
@@ -170,7 +166,7 @@
           <h6 style="font-weight:600;margin-bottom:16px;">Manual Fetch</h6>
           <div class="form-group">
             <label class="form-label">Year</label>
-            <input type="number" id="climateYear" class="form-control" value="2024" min="2020" max="2030">
+            <input type="number" id="climateYear" class="form-control" value="2026" min="2020" max="2050">
           </div>
           <div class="form-group">
             <label class="form-label">Month</label>
@@ -291,7 +287,7 @@
         <i class="fas fa-info-circle alert-icon"></i>
         <div class="alert-text">
           <div class="alert-title">Export All Data</div>
-          Exports a combined CSV file: <code>data_monthly_5kab_YYYY_YYYY_ndvi.csv</code> — used as training data input.
+          Exports a combined CSV file.
         </div>
       </div>
 
@@ -299,11 +295,11 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-label">Start Year</label>
-            <input type="number" id="exportYearStart" class="form-control" value="2021" min="2018" max="2030">
+            <input type="number" id="exportYearStart" class="form-control" value="2021" min="2018" max="2050">
           </div>
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-label">End Year</label>
-            <input type="number" id="exportYearEnd" class="form-control" value="2024" min="2018" max="2030">
+            <input type="number" id="exportYearEnd" class="form-control" value="2025" min="2018" max="2050">
           </div>
         </div>
 

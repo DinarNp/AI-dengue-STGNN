@@ -57,21 +57,48 @@ def data_management():
         latest_dengue = DengueCase.query.filter_by(
             regency_id=regency.id
         ).order_by(DengueCase.year.desc(), DengueCase.month.desc()).first()
-        
+
         latest_climate = ClimateData.query.filter_by(
             regency_id=regency.id
         ).order_by(ClimateData.year.desc(), ClimateData.month.desc()).first()
-        
+
         latest_ndvi = NDVIData.query.filter_by(
             regency_id=regency.id
         ).order_by(NDVIData.year.desc(), NDVIData.month.desc()).first()
-        
+
+        # --- Overall completeness: months with ALL 3 types present ---
+        # Collect distinct (year, month) sets per data type for this regency
+        dengue_months = set(
+            (r.year, r.month) for r in
+            DengueCase.query.filter_by(regency_id=regency.id)
+            .with_entities(DengueCase.year, DengueCase.month).all()
+        )
+        climate_months = set(
+            (r.year, r.month) for r in
+            ClimateData.query.filter_by(regency_id=regency.id)
+            .with_entities(ClimateData.year, ClimateData.month).all()
+        )
+        ndvi_months = set(
+            (r.year, r.month) for r in
+            NDVIData.query.filter_by(regency_id=regency.id)
+            .with_entities(NDVIData.year, NDVIData.month).all()
+        )
+
+        all_months = dengue_months | climate_months | ndvi_months
+        complete_months = dengue_months & climate_months & ndvi_months
+
+        completeness_pct = (
+            round(len(complete_months) / len(all_months) * 100)
+            if all_months else 0
+        )
+
         data_stats.append({
             'regency_id': regency.id,
             'regency': regency.name,
             'latest_dengue': f"{latest_dengue.year}-{latest_dengue.month:02d}" if latest_dengue else 'N/A',
             'latest_climate': f"{latest_climate.year}-{latest_climate.month:02d}" if latest_climate else 'N/A',
-            'latest_ndvi': f"{latest_ndvi.year}-{latest_ndvi.month:02d}" if latest_ndvi else 'N/A'
+            'latest_ndvi': f"{latest_ndvi.year}-{latest_ndvi.month:02d}" if latest_ndvi else 'N/A',
+            'completeness_pct': completeness_pct,
         })
     
     return render_template('admin/data_management.html',

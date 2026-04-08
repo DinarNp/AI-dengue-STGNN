@@ -171,7 +171,7 @@ class TrainingService:
             # Generate model filename
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             model_filename = f"{model_name.replace(' ', '_')}_{timestamp}.pth"
-            model_path = os.path.join(self.config.MODEL_FOLDER, model_filename)
+            model_path = os.path.join(self.config.get('MODEL_FOLDER', 'models'), model_filename)
             
             # Save model
             import torch
