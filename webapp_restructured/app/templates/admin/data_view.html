@@ -5,8 +5,11 @@
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2><i class="fas fa-table"></i> {{ data_type.title() }} Data</h2>
-        <a href="{{ url_for('admin.data_management') }}" class="btn btn-secondary">
+        <h2>
+            <i class="fas fa-table"></i> {{ data_type.title() }} Data
+            {% if regency %}<span class="badge bg-primary ms-2" style="font-size:0.6em;vertical-align:middle;">{{ regency.name }}</span>{% endif %}
+        </h2>
+        <a href="{{ url_for('admin.data_management', _anchor='tabCases') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to Data Management
         </a>
     </div>
@@ -44,8 +47,8 @@
                                 <th>Month</th>
                                 <th>Region</th>
                                 <th>Cases</th>
-                                <th>Source</th>
                                 <th>Updated</th>
+                                <th>Action</th>
                             {% elif data_type == 'climate' %}
                                 <th>Year</th>
                                 <th>Month</th>
@@ -71,9 +74,14 @@
                                 <td>{{ record.year }}</td>
                                 <td>{{ record.month }}</td>
                                 <td>{{ record.regency.name }}</td>
-                                <td><strong>{{ record.cases }}</strong></td>
-                                <td><span class="badge bg-secondary">{{ record.data_source }}</span></td>
+                                <td><strong id="cases-val-{{ record.id }}">{{ record.cases }}</strong></td>
                                 <td>{{ record.updated_at.strftime('%Y-%m-%d') if record.updated_at else 'N/A' }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="openEditModal({{ record.id }}, '{{ record.regency.name }}', {{ record.year }}, {{ record.month }}, {{ record.cases }})">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
                             {% elif data_type == 'climate' %}
                                 <td>{{ record.year }}</td>
                                 <td>{{ record.month }}</td>
@@ -112,23 +120,23 @@
                 <ul class="pagination justify-content-center">
                     {% if records.has_prev %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.prev_num) }}">Previous</a>
+                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.prev_num, regency_id=regency_id) }}">Previous</a>
                     </li>
                     {% endif %}
-                    
+
                     {% for page_num in records.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
                         {% if page_num %}
                             <li class="page-item {% if page_num == records.page %}active{% endif %}">
-                                <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=page_num) }}">{{ page_num }}</a>
+                                <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=page_num, regency_id=regency_id) }}">{{ page_num }}</a>
                             </li>
                         {% else %}
                             <li class="page-item disabled"><span class="page-link">...</span></li>
                         {% endif %}
                     {% endfor %}
-                    
+
                     {% if records.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.next_num) }}">Next</a>
+                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.next_num, regency_id=regency_id) }}">Next</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -137,6 +145,34 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Dengue Case Modal -->
+{% if data_type == 'dengue' %}
+<div class="modal fade" id="editCaseModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Dengue Cases</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3" id="editCaseInfo"></p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Cases</label>
+                    <input type="number" id="editCasesInput" class="form-control" min="0">
+                </div>
+                <div id="editCaseResult"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitEditCase()">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Import Modal -->
 <div class="modal fade" id="importModal" tabindex="-1">
@@ -170,6 +206,47 @@
 
 {% block extra_js %}
 <script>
+let _editCaseId = null;
+
+function openEditModal(caseId, regency, year, month, currentCases) {
+    _editCaseId = caseId;
+    document.getElementById('editCaseInfo').textContent = regency + ' — ' + year + '/' + String(month).padStart(2, '0');
+    document.getElementById('editCasesInput').value = currentCases;
+    document.getElementById('editCaseResult').innerHTML = '';
+    new bootstrap.Modal(document.getElementById('editCaseModal')).show();
+}
+
+function submitEditCase() {
+    const newVal = parseInt(document.getElementById('editCasesInput').value);
+    if (isNaN(newVal) || newVal < 0) {
+        document.getElementById('editCaseResult').innerHTML =
+            '<div class="alert alert-danger">Please enter a valid non-negative number.</div>';
+        return;
+    }
+
+    fetch('/admin/data/dengue/' + _editCaseId + '/edit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cases: newVal })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // Update displayed value in table without full reload
+            const cell = document.getElementById('cases-val-' + _editCaseId);
+            if (cell) cell.textContent = data.cases;
+            bootstrap.Modal.getInstance(document.getElementById('editCaseModal')).hide();
+        } else {
+            document.getElementById('editCaseResult').innerHTML =
+                '<div class="alert alert-danger">Error: ' + data.message + '</div>';
+        }
+    })
+    .catch(err => {
+        document.getElementById('editCaseResult').innerHTML =
+            '<div class="alert alert-danger">Request failed: ' + err + '</div>';
+    });
+}
+
 function importCSV() {
     const fileInput = document.getElementById('csvFile');
     const file = fileInput.files[0];

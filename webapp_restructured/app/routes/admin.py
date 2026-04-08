@@ -67,6 +67,7 @@ def data_management():
         ).order_by(NDVIData.year.desc(), NDVIData.month.desc()).first()
         
         data_stats.append({
+            'regency_id': regency.id,
             'regency': regency.name,
             'latest_dengue': f"{latest_dengue.year}-{latest_dengue.month:02d}" if latest_dengue else 'N/A',
             'latest_climate': f"{latest_climate.year}-{latest_climate.month:02d}" if latest_climate else 'N/A',
@@ -98,6 +99,22 @@ def add_dengue_data():
         return jsonify(result)
         
     except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@admin.route('/data/dengue/<int:case_id>/edit', methods=['PATCH'])
+@admin_required
+def edit_dengue_case(case_id):
+    """Edit dengue case value"""
+    try:
+        data = request.get_json()
+        case = DengueCase.query.get_or_404(case_id)
+        case.cases = int(data['cases'])
+        case.updated_at = datetime.utcnow()
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Case updated successfully', 'cases': case.cases})
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
 
 
@@ -508,30 +525,42 @@ def delete_model(model_id):
 @admin_required
 def view_data(data_type):
     """View data table with pagination"""
-    from ..services.csv_manager import CSVDataManager
-    
     page = request.args.get('page', 1, type=int)
+    regency_id = request.args.get('regency_id', type=int)
     per_page = 50
-    
+
+    regency = Regency.query.get(regency_id) if regency_id else None
+
     if data_type == 'dengue':
-        records = DengueCase.query.order_by(
+        q = DengueCase.query
+        if regency_id:
+            q = q.filter_by(regency_id=regency_id)
+        records = q.order_by(
             DengueCase.year.desc(), DengueCase.month.desc()
         ).paginate(page=page, per_page=per_page, error_out=False)
     elif data_type == 'climate':
-        records = ClimateData.query.order_by(
+        q = ClimateData.query
+        if regency_id:
+            q = q.filter_by(regency_id=regency_id)
+        records = q.order_by(
             ClimateData.year.desc(), ClimateData.month.desc()
         ).paginate(page=page, per_page=per_page, error_out=False)
     elif data_type == 'ndvi':
-        records = NDVIData.query.order_by(
+        q = NDVIData.query
+        if regency_id:
+            q = q.filter_by(regency_id=regency_id)
+        records = q.order_by(
             NDVIData.year.desc(), NDVIData.month.desc()
         ).paginate(page=page, per_page=per_page, error_out=False)
     else:
         flash('Invalid data type', 'danger')
         return redirect(url_for('admin.data_management'))
-    
+
     return render_template('admin/data_view.html',
                          data_type=data_type,
-                         records=records)
+                         records=records,
+                         regency=regency,
+                         regency_id=regency_id)
 
 
 @admin.route('/data/export-csv/<data_type>')

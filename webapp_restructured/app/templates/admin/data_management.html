@@ -126,7 +126,7 @@
             </div>
           </div>
           <div style="display:flex;gap:8px;">
-            <a href="{{ url_for('admin.view_data', data_type='dengue') }}" class="btn btn-sm btn-outline-secondary">
+            <a href="{{ url_for('admin.view_data', data_type='dengue', regency_id=stat.regency_id) }}" class="btn btn-sm btn-outline-secondary">
               <i class="fas fa-table"></i> View
             </a>
           </div>
