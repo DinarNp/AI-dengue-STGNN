@@ -15,13 +15,13 @@
       <i class="fas fa-hospital" style="color:var(--primary);margin-right:8px;"></i>
       {{ regency.name }}
     </h1>
-    <p class="page-subtitle">District Health Office Dashboard — {{ current_year }}</p>
+    <p class="page-subtitle">Health District Office Dashboard — {{ current_year }}</p>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <a href="{{ url_for('district_health.update_cases') }}" class="btn btn-primary btn-sm">
+    <a href="{{ url_for('health_district.update_cases') }}" class="btn btn-primary btn-sm">
       <i class="fas fa-edit"></i> Input Cases
     </a>
-    <a href="{{ url_for('district_health.view_predictions') }}" class="btn btn-outline-secondary btn-sm">
+    <a href="{{ url_for('health_district.view_predictions') }}" class="btn btn-outline-secondary btn-sm">
       <i class="fas fa-chart-line"></i> Predictions
     </a>
   </div>
@@ -73,13 +73,13 @@
     <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>Quick Actions</h5>
   </div>
   <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
-    <a href="{{ url_for('district_health.update_cases') }}" class="btn btn-primary">
+    <a href="{{ url_for('health_district.update_cases') }}" class="btn btn-primary">
       <i class="fas fa-edit"></i> Input / Update Cases
     </a>
-    <a href="{{ url_for('district_health.view_predictions') }}" class="btn btn-outline-secondary">
+    <a href="{{ url_for('health_district.view_predictions') }}" class="btn btn-outline-secondary">
       <i class="fas fa-chart-line"></i> View Predictions
     </a>
-    <a href="{{ url_for('district_health.view_reports') }}" class="btn btn-outline-secondary">
+    <a href="{{ url_for('health_district.view_reports') }}" class="btn btn-outline-secondary">
       <i class="fas fa-file-alt"></i> View Reports
     </a>
   </div>

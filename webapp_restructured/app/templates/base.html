@@ -117,33 +117,33 @@
         </a>
       </div>
 
-      {% elif current_user.is_district_health() %}
-      <!-- DISTRICT HEALTH NAV -->
+      {% elif current_user.is_health_district() %}
+      <!-- HEALTH DISTRICT NAV -->
       <div class="nav-section-label">My District</div>
       <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'district_health.dashboard' %}active{% endif %}"
-           href="{{ url_for('district_health.dashboard') }}">
+        <a class="nav-link-item {% if request.endpoint == 'health_district.dashboard' %}active{% endif %}"
+           href="{{ url_for('health_district.dashboard') }}">
           <span class="nav-icon"><i class="fas fa-hospital"></i></span>
           <span class="nav-text">Dashboard</span>
         </a>
       </div>
       <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'district_health.update_cases' %}active{% endif %}"
-           href="{{ url_for('district_health.update_cases') }}">
+        <a class="nav-link-item {% if request.endpoint == 'health_district.update_cases' %}active{% endif %}"
+           href="{{ url_for('health_district.update_cases') }}">
           <span class="nav-icon"><i class="fas fa-edit"></i></span>
           <span class="nav-text">Input Cases</span>
         </a>
       </div>
       <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'district_health.view_predictions' %}active{% endif %}"
-           href="{{ url_for('district_health.view_predictions') }}">
+        <a class="nav-link-item {% if request.endpoint == 'health_district.view_predictions' %}active{% endif %}"
+           href="{{ url_for('health_district.view_predictions') }}">
           <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
           <span class="nav-text">Predictions</span>
         </a>
       </div>
       <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'district_health.view_reports' %}active{% endif %}"
-           href="{{ url_for('district_health.view_reports') }}">
+        <a class="nav-link-item {% if request.endpoint == 'health_district.view_reports' %}active{% endif %}"
+           href="{{ url_for('health_district.view_reports') }}">
           <span class="nav-icon"><i class="fas fa-file-chart-column"></i></span>
           <span class="nav-text">Reports</span>
         </a>

@@ -17,8 +17,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # 'admin', 'district_health', 'public'
-    regency = db.Column(db.String(100), nullable=True)  # For district health office users
+    role = db.Column(db.String(20), nullable=False)  # 'admin', 'health_district', 'public'
+    regency = db.Column(db.String(100), nullable=True)  # For health district office users
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
@@ -38,15 +38,15 @@ class User(UserMixin, db.Model):
         """Check if user is admin"""
         return self.role == 'admin'
     
-    def is_district_health(self):
-        """Check if user is district health office"""
-        return self.role == 'district_health'
+    def is_health_district(self):
+        """Check if user is health district office"""
+        return self.role == 'health_district'
     
     def can_edit_regency(self, regency_name):
         """Check if user can edit data for specific regency"""
         if self.is_admin():
             return True
-        if self.is_district_health() and self.regency == regency_name:
+        if self.is_health_district() and self.regency == regency_name:
             return True
         return False
     

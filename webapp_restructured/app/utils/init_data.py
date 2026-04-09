@@ -38,7 +38,7 @@ def initialize_default_data():
         )
         db.session.add(regency)
     
-    # Create sample district health users for each regency
+    # Create sample health district users for each regency
     for regency_data in regencies_config:
         # Create username from regency name
         username = regency_data['name'].lower().replace(' ', '_').replace('kab_', '').replace('kota_', '')
@@ -46,7 +46,7 @@ def initialize_default_data():
         district_user = User(
             username=username,
             email=f"{username}@health.local",
-            role='district_health',
+            role='health_district',
             regency=regency_data['name']
         )
         district_user.set_password('health123')  # Change this in production!

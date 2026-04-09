@@ -32,15 +32,15 @@ def admin_required(f):
     return decorated_function
 
 
-def district_health_required(f):
-    """Decorator to require district health office role (or admin)"""
+def health_district_required(f):
+    """Decorator to require health district office role (or admin)"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             flash('Please log in to access this page.', 'warning')
             return redirect(url_for('auth.login'))
-        if not (current_user.is_admin() or current_user.is_district_health()):
-            flash('You need district health office privileges to access this page.', 'danger')
+        if not (current_user.is_admin() or current_user.is_health_district()):
+            flash('You need health district office privileges to access this page.', 'danger')
             return redirect(url_for('main.index'))
         return f(*args, **kwargs)
     return decorated_function
@@ -64,7 +64,7 @@ def check_regency_access(regency_id):
     if current_user.is_admin():
         return True
     
-    if current_user.is_district_health():
+    if current_user.is_health_district():
         regency = Regency.query.get(regency_id)
         if regency and regency.name == current_user.regency:
             return True

@@ -54,12 +54,12 @@ def create_app(config_name='development'):
     from .routes.auth import auth
     from .routes.public import public
     from .routes.admin import admin
-    from .routes.district_health import district_health
+    from .routes.health_district import health_district
     
     app.register_blueprint(auth)
     app.register_blueprint(public)
     app.register_blueprint(admin)
-    app.register_blueprint(district_health)
+    app.register_blueprint(health_district)
     
     # Create database tables
     with app.app_context():

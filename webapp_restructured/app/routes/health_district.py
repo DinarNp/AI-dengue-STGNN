@@ -7,17 +7,17 @@ from flask_login import current_user
 from datetime import datetime
 
 from ..models import db, Regency, DengueCase, Prediction
-from ..services.auth import district_health_required, check_regency_access
+from ..services.auth import health_district_required, check_regency_access
 from ..services.data_pipeline import DataPipelineService
 from ..services.prediction import PredictionService
 
-district_health = Blueprint('district_health', __name__, url_prefix='/district')
+health_district = Blueprint('health_district', __name__, url_prefix='/district')
 
 
-@district_health.route('/dashboard')
-@district_health_required
+@health_district.route('/dashboard')
+@health_district_required
 def dashboard():
-    """District health office dashboard"""
+    """Health district office dashboard"""
     # Get user's regency
     regency = Regency.query.filter_by(name=current_user.regency).first()
     
@@ -51,7 +51,7 @@ def dashboard():
             'cases': case.cases
         })
     
-    return render_template('district_health/dashboard.html',
+    return render_template('health_district/dashboard.html',
                          regency=regency,
                          recent_cases=recent_cases,
                          latest_prediction=latest_prediction,
@@ -59,8 +59,8 @@ def dashboard():
                          monthly_trend=monthly_trend)
 
 
-@district_health.route('/update-cases')
-@district_health_required
+@health_district.route('/update-cases')
+@health_district_required
 def update_cases():
     """View, add, and edit dengue cases for user's regency"""
     regency = Regency.query.filter_by(name=current_user.regency).first()
@@ -96,7 +96,7 @@ def update_cases():
         db.func.sum(DengueCase.cases)
     ).filter_by(regency_id=regency.id).scalar() or 0
 
-    return render_template('district_health/update_cases.html',
+    return render_template('health_district/update_cases.html',
                            regency=regency,
                            cases=cases,
                            selected_year=selected_year,
@@ -106,8 +106,8 @@ def update_cases():
                            now=datetime.now())
 
 
-@district_health.route('/cases/add', methods=['POST'])
-@district_health_required
+@health_district.route('/cases/add', methods=['POST'])
+@health_district_required
 def add_cases():
     """Add or update dengue cases — direct DB write, no pipeline dependency"""
     try:
@@ -153,8 +153,8 @@ def add_cases():
         return jsonify({'success': False, 'message': str(e)}), 400
 
 
-@district_health.route('/cases/<int:case_id>/edit', methods=['PATCH'])
-@district_health_required
+@health_district.route('/cases/<int:case_id>/edit', methods=['PATCH'])
+@health_district_required
 def edit_case(case_id):
     """Edit an existing dengue case — only allowed for user's own regency"""
     try:
@@ -177,8 +177,8 @@ def edit_case(case_id):
         return jsonify({'success': False, 'message': str(e)}), 400
 
 
-@district_health.route('/predictions')
-@district_health_required
+@health_district.route('/predictions')
+@health_district_required
 def view_predictions():
     """View predictions for user's regency"""
     regency = Regency.query.filter_by(name=current_user.regency).first()
@@ -207,13 +207,13 @@ def view_predictions():
             'recommendation': recommendation
         })
     
-    return render_template('district_health/predictions.html',
+    return render_template('health_district/predictions.html',
                          regency=regency,
                          predictions=predictions_with_recommendations)
 
 
-@district_health.route('/request-prediction', methods=['POST'])
-@district_health_required
+@health_district.route('/request-prediction', methods=['POST'])
+@health_district_required
 def request_prediction():
     """Request new prediction for upcoming month"""
     try:
@@ -246,8 +246,8 @@ def request_prediction():
         return jsonify({'success': False, 'message': str(e)}), 400
 
 
-@district_health.route('/reports')
-@district_health_required
+@health_district.route('/reports')
+@health_district_required
 def view_reports():
     """View reports and statistics"""
     regency = Regency.query.filter_by(name=current_user.regency).first()
@@ -280,7 +280,7 @@ def view_reports():
         year=current_year
     ).order_by(DengueCase.month).all()
     
-    return render_template('district_health/reports.html',
+    return render_template('health_district/reports.html',
                          regency=regency,
                          yearly_stats=yearly_stats,
                          monthly_breakdown=monthly_breakdown,

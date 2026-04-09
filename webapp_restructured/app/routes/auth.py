@@ -36,8 +36,8 @@ def login():
             # Redirect based on role
             if user.is_admin():
                 return redirect(url_for('admin.dashboard'))
-            elif user.is_district_health():
-                return redirect(url_for('district_health.dashboard'))
+            elif user.is_health_district():
+                return redirect(url_for('health_district.dashboard'))
             else:
                 return redirect(url_for('public.dashboard'))
         else:
