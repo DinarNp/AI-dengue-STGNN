@@ -222,52 +222,43 @@ def fetch_climate_data():
 @admin_required
 def upload_ndvi_data():
     """
-    Upload and process NDVI GeoTIFF file
-    REPLACES manual NEO processing
+    Upload two GeoTIFF files for a month and extract monthly NDVI per regency.
+    The two files correspond to the two 16-day MODIS composites in a month
+    (from https://neo.gsfc.nasa.gov/archive/geotiff/MOD_NDVI_16/).
+    Monthly NDVI = average of the two extracted values per regency.
     """
     try:
-        if 'file' not in request.files:
-            return jsonify({'success': False, 'message': 'No file uploaded'}), 400
-        
-        file = request.files['file']
-        year = int(request.form['year'])
-        month = int(request.form['month'])
-        
-        if file.filename == '':
-            return jsonify({'success': False, 'message': 'No file selected'}), 400
-        
-        # Save uploaded file
-        filename = secure_filename(file.filename)
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        file.save(upload_path)
-        
-        # Process NDVI data
-        pipeline = DataPipelineService(current_app.config)
-        result = pipeline.process_ndvi_from_satellite(upload_path, year, month, current_user.id)
-        
-        # Clean up uploaded file
-        os.remove(upload_path)
-        
-        return jsonify(result)
-        
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 400
+        file1 = request.files.get('file1')
+        file2 = request.files.get('file2')
+        year  = request.form.get('year')
+        month = request.form.get('month')
 
+        if not file1 or not file2:
+            return jsonify({'success': False, 'message': 'Both GeoTIFF files are required'}), 400
+        if not year or not month:
+            return jsonify({'success': False, 'message': 'Year and month are required'}), 400
 
-@admin.route('/data/ndvi/impute', methods=['POST'])
-@admin_required
-def impute_ndvi():
-    """Fill missing NDVI values using imputation"""
-    try:
-        data = request.get_json()
-        year = int(data['year'])
-        month = int(data['month'])
-        
-        pipeline = DataPipelineService(current_app.config)
-        result = pipeline.impute_missing_ndvi(year, month)
-        
+        year  = int(year)
+        month = int(month)
+
+        upload_folder = current_app.config.get('UPLOAD_FOLDER', '/tmp')
+        os.makedirs(upload_folder, exist_ok=True)
+
+        path1 = os.path.join(upload_folder, secure_filename(file1.filename))
+        path2 = os.path.join(upload_folder, secure_filename(file2.filename))
+        file1.save(path1)
+        file2.save(path2)
+
+        try:
+            pipeline = DataPipelineService(current_app.config)
+            result = pipeline.process_ndvi_two_tiffs(path1, path2, year, month, current_user.id)
+        finally:
+            for p in (path1, path2):
+                if os.path.exists(p):
+                    os.remove(p)
+
         return jsonify(result)
-        
+
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
 

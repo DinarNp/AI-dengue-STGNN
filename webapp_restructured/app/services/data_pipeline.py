@@ -371,77 +371,110 @@ class DataPipelineService:
     # 3. NDVI DATA PROCESSING
     # ==========================================
     
-    def process_ndvi_from_satellite(self, tiff_file_path: str, year: int, 
-                                    month: int, user_id: int) -> Dict:
+    def _extract_ndvi_from_tiff(self, tiff_path: str, regencies) -> Dict:
         """
-        Process NDVI data from uploaded GeoTIFF file
-        Simplified version of NEO/get_ndvi_kabupaten.py
-        
+        Extract raw NDVI values for all regencies from a single GeoTIFF.
+        Uses same logic as NEO/get_ndvi_kabupaten.py:
+          - pixel value * 0.0001 → NDVI  (MODIS standard scaling)
+          - nodata pixels → None
+        Returns dict: {regency.id: float or None}
+        """
+        import rasterio
+        values = {}
+        with rasterio.open(tiff_path) as src:
+            band = src.read(1)
+            nodata = src.nodata
+            for regency in regencies:
+                try:
+                    row, col = src.index(regency.longitude, regency.latitude)
+                    if 0 <= row < src.height and 0 <= col < src.width:
+                        raw = band[row, col]
+                        if nodata is not None and raw == nodata:
+                            values[regency.id] = None
+                        else:
+                            ndvi = float(raw) * 0.0001
+                            values[regency.id] = ndvi if -1.0 <= ndvi <= 1.0 else None
+                    else:
+                        values[regency.id] = None
+                except Exception:
+                    values[regency.id] = None
+        return values
+
+    def process_ndvi_two_tiffs(self, tiff1_path: str, tiff2_path: str,
+                               year: int, month: int, user_id: int) -> Dict:
+        """
+        Process monthly NDVI from two GeoTIFF files (two 16-day composites per month).
+        Mirrors NEO/get_ndvi_kabupaten.py extraction + monthly average logic.
+
+        Steps:
+          1. Extract NDVI per regency from file 1
+          2. Extract NDVI per regency from file 2
+          3. Average the two values → monthly NDVI
+          4. Save/update NDVIData in DB
+
         Args:
-            tiff_file_path: Path to GeoTIFF file
-            year: Year
-            month: Month
-            user_id: User performing the operation
-            
+            tiff1_path: Path to first GeoTIFF (first 16-day period)
+            tiff2_path: Path to second GeoTIFF (second 16-day period)
+            year: Target year
+            month: Target month
+            user_id: ID of user performing the upload
+
         Returns:
             Dictionary with processing results
         """
         try:
-            import rasterio
-            from rasterio.windows import from_bounds
-            
-            results = {
+            import rasterio  # noqa: confirm available
+        except ImportError:
+            return {
                 'success': 0,
                 'failed': 0,
-                'errors': []
+                'errors': ['rasterio is not installed. Run: pip install rasterio']
             }
-            
-            # Open GeoTIFF
-            with rasterio.open(tiff_file_path) as src:
-                regencies = Regency.query.filter_by(is_active=True).all()
-                
-                for regency in regencies:
-                    try:
-                        # Get pixel value at regency location
-                        row, col = src.index(regency.longitude, regency.latitude)
-                        ndvi_value = src.read(1, window=((row, row+1), (col, col+1)))[0, 0]
-                        
-                        # Validate NDVI value (-1 to 1 range)
-                        if -1 <= ndvi_value <= 1:
-                            # Save to database
-                            existing = NDVIData.query.filter_by(
-                                regency_id=regency.id,
-                                year=year,
-                                month=month
-                            ).first()
-                            
-                            if existing:
-                                existing.ndvi_value = float(ndvi_value)
-                                existing.processing_date = datetime.utcnow()
-                                existing.is_imputed = False
-                            else:
-                                new_ndvi = NDVIData(
-                                    regency_id=regency.id,
-                                    year=year,
-                                    month=month,
-                                    ndvi_value=float(ndvi_value),
-                                    data_source='modis',
-                                    is_imputed=False
-                                )
-                                db.session.add(new_ndvi)
-                            
-                            results['success'] += 1
-                        else:
-                            results['failed'] += 1
-                            results['errors'].append(f"{regency.name}: Invalid NDVI value {ndvi_value}")
-                    
-                    except Exception as e:
-                        results['failed'] += 1
-                        results['errors'].append(f"{regency.name}: {str(e)}")
-            
+
+        try:
+            regencies = Regency.query.filter_by(is_active=True).all()
+
+            values1 = self._extract_ndvi_from_tiff(tiff1_path, regencies)
+            values2 = self._extract_ndvi_from_tiff(tiff2_path, regencies)
+
+            results = {'success': 0, 'failed': 0, 'errors': []}
+
+            for regency in regencies:
+                v1 = values1.get(regency.id)
+                v2 = values2.get(regency.id)
+
+                # Average: use available values; skip if both missing
+                available = [v for v in (v1, v2) if v is not None]
+                if not available:
+                    results['failed'] += 1
+                    results['errors'].append(f"{regency.name}: No valid NDVI pixels in either file")
+                    continue
+
+                monthly_ndvi = round(float(np.mean(available)), 4)
+
+                existing = NDVIData.query.filter_by(
+                    regency_id=regency.id, year=year, month=month
+                ).first()
+
+                if existing:
+                    existing.ndvi_value = monthly_ndvi
+                    existing.processing_date = datetime.utcnow()
+                    existing.is_imputed = False
+                    existing.data_source = 'modis'
+                else:
+                    db.session.add(NDVIData(
+                        regency_id=regency.id,
+                        year=year,
+                        month=month,
+                        ndvi_value=monthly_ndvi,
+                        data_source='modis',
+                        is_imputed=False
+                    ))
+
+                results['success'] += 1
+
             db.session.commit()
-            
-            # Create processing log
+
             log = DataProcessingLog(
                 user_id=user_id,
                 process_type='ndvi_process',
@@ -452,14 +485,15 @@ class DataPipelineService:
             )
             db.session.add(log)
             db.session.commit()
-            
+
             return results
-            
+
         except Exception as e:
+            db.session.rollback()
             return {
                 'success': 0,
                 'failed': 0,
-                'errors': [f'Error processing NDVI file: {str(e)}']
+                'errors': [f'Error processing NDVI files: {str(e)}']
             }
     
     def impute_missing_ndvi(self, year: int, month: int) -> Dict:

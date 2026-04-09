@@ -193,14 +193,25 @@
 
         <!-- Data completeness per regency -->
         <div>
-          <h6 style="font-weight:600;margin-bottom:16px;">Data Completeness</h6>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h6 style="font-weight:600;margin:0;">Data Completeness</h6>
+            <a href="{{ url_for('admin.view_data', data_type='climate') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-table"></i> View All
+            </a>
+          </div>
           {% for stat in data_stats %}
           <div class="progress-bar-wrapper">
             <div class="progress-bar-label">
               <span class="label-name" style="font-size:12.5px;">{{ stat.regency }}</span>
-              <span class="label-value">
-                {% if stat.latest_climate and stat.latest_climate != 'N/A' %}{{ stat.latest_climate }}{% else %}No data{% endif %}
-              </span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="label-value">
+                  {% if stat.latest_climate and stat.latest_climate != 'N/A' %}{{ stat.latest_climate }}{% else %}No data{% endif %}
+                </span>
+                <a href="{{ url_for('admin.view_data', data_type='climate', regency_id=stat.regency_id) }}"
+                   class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;line-height:1.4;">
+                  <i class="fas fa-eye"></i> View
+                </a>
+              </div>
             </div>
             <div class="progress-track">
               <div class="progress-fill {% if stat.latest_climate and stat.latest_climate != 'N/A' %}success{% else %}danger{% endif %}"
@@ -208,76 +219,131 @@
             </div>
           </div>
           {% endfor %}
-
-          <div style="margin-top:16px;">
-            <a href="{{ url_for('admin.view_data', data_type='climate') }}" class="btn btn-outline-secondary btn-sm">
-              <i class="fas fa-table"></i> View Climate Data Table
-            </a>
-          </div>
         </div>
       </div>
     </div>
 
     <!-- TAB 3: NDVI DATA -->
     <div class="tab-panel" id="tabNDVI">
-      <div class="alert-box warning mb-16">
-        <i class="fas fa-info-circle alert-icon"></i>
+      <div class="alert-box info mb-16">
+        <i class="fas fa-satellite alert-icon"></i>
         <div class="alert-text">
-          <div class="alert-title">NDVI Pipeline — 4 Steps Required</div>
-          NDVI data requires a 4-step processing pipeline. Complete all steps in order.
+          <div class="alert-title">MODIS NDVI — Upload Two GeoTIFF Files per Month</div>
+          Download the two 16-day composite files for the target month from
+          <strong>NASA NEO</strong> (<code>MOD_NDVI_16_YYYY-MM-DD.TIFF</code>).
+          Upload both files below — the system will extract NDVI values per regency and
+          compute the monthly average automatically.
         </div>
       </div>
 
-      <div class="pipeline-steps">
-        <div class="pipeline-step">
-          <div class="pipeline-step-num">1</div>
-          <div class="pipeline-step-content">
-            <div class="pipeline-step-title">Upload GeoTIFF Files</div>
-            <div class="pipeline-step-desc">Download NDVI .TIFF files from NASA NEO or using <code>get_ndvi_kabupaten.py</code>, then upload here.</div>
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadNDVIModal">
-              <i class="fas fa-upload"></i> Upload GeoTIFF
-            </button>
+      <!-- How It Works (full width, above upload form) -->
+      <div style="margin-bottom:20px;">
+        <h6 style="font-weight:600;margin-bottom:12px;">How It Works</h6>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:180px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">1</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Download from NASA NEO</div>
+              <div style="font-size:12px;color:var(--text-muted);">Go to <code>https://neo.gsfc.nasa.gov/ <br> archive/geotiff/MOD_NDVI_16/</code> and download the 2 files for the selected month.</div>
+            </div>
           </div>
-        </div>
-
-        <div class="pipeline-step">
-          <div class="pipeline-step-num">2</div>
-          <div class="pipeline-step-content">
-            <div class="pipeline-step-title">Process TIFF → Values</div>
-            <div class="pipeline-step-desc">Extract NDVI values per regency from uploaded GeoTIFFs using <code>ndvi_epi_week_kabupaten.py</code>.</div>
-            <button class="btn btn-outline-secondary btn-sm" onclick="showToast('NDVI processing started', 'info', 'Processing')">
-              <i class="fas fa-cogs"></i> Run Processing
-            </button>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:180px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">2</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Extract NDVI per Regency</div>
+              <div style="font-size:12px;color:var(--text-muted);">The system reads each pixel at each regency's latitude/longitude and applies the MODIS scaling factor (×0.0001).</div>
+            </div>
           </div>
-        </div>
-
-        <div class="pipeline-step">
-          <div class="pipeline-step-num">3</div>
-          <div class="pipeline-step-content">
-            <div class="pipeline-step-title">Impute Missing Weeks</div>
-            <div class="pipeline-step-desc">Fill in missing epi-week values using interpolation via <code>ndvi_imputation.py</code>.</div>
-            <button class="btn btn-outline-secondary btn-sm" onclick="imputeNDVI()" id="imputeBtn">
-              <i class="fas fa-magic"></i> Run Imputation
-            </button>
-          </div>
-        </div>
-
-        <div class="pipeline-step">
-          <div class="pipeline-step-num">4</div>
-          <div class="pipeline-step-content">
-            <div class="pipeline-step-title">Convert Weekly → Monthly</div>
-            <div class="pipeline-step-desc">Aggregate weekly NDVI values to monthly averages via <code>convert_weekly_to_monthly.py</code>.</div>
-            <button class="btn btn-success btn-sm" onclick="showToast('Conversion started', 'info', 'Processing')">
-              <i class="fas fa-calendar"></i> Convert to Monthly
-            </button>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:180px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">3</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Average → Monthly NDVI</div>
+              <div style="font-size:12px;color:var(--text-muted);">The two 16-day values are averaged to produce a single monthly NDVI value per regency, saved directly to the database.</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div style="margin-top:16px;">
-        <a href="{{ url_for('admin.view_data', data_type='ndvi') }}" class="btn btn-outline-secondary">
-          <i class="fas fa-table"></i> View NDVI Data Table
-        </a>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <!-- Upload Form -->
+        <div>
+          <h6 style="font-weight:600;margin-bottom:16px;">Upload GeoTIFF Files</h6>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Year</label>
+              <input type="number" id="ndviYear" class="form-control"
+                     value="{{ now.year }}" min="2000" max="2100">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Month</label>
+              <select id="ndviMonth" class="form-select">
+                {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),
+                                   (5,'May'),(6,'June'),(7,'July'),(8,'August'),
+                                   (9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
+                <option value="{{ m }}" {% if m == now.month %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-file-upload" style="color:var(--primary);margin-right:4px;"></i>
+              File 1 — First 16-day composite
+            </label>
+            <input type="file" id="ndviFile1" class="form-control" accept=".tif,.tiff">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+              e.g. <code>MOD_NDVI_16_2024-01-01.TIFF</code>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fas fa-file-upload" style="color:var(--primary);margin-right:4px;"></i>
+              File 2 — Second 16-day composite
+            </label>
+            <input type="file" id="ndviFile2" class="form-control" accept=".tif,.tiff">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+              e.g. <code>MOD_NDVI_16_2024-01-17.TIFF</code>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="uploadNDVI()" id="ndviUploadBtn">
+            <i class="fas fa-satellite-dish"></i> Upload &amp; Process
+          </button>
+          <div id="ndviResult" class="mt-12"></div>
+        </div>
+
+        <!-- Data Completeness per regency -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h6 style="font-weight:600;margin:0;">Data Completeness</h6>
+            <a href="{{ url_for('admin.view_data', data_type='ndvi') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-table"></i> View All
+            </a>
+          </div>
+          {% for stat in data_stats %}
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-label">
+              <span class="label-name" style="font-size:12.5px;">{{ stat.regency }}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="label-value">
+                  {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}{{ stat.latest_ndvi }}{% else %}No data{% endif %}
+                </span>
+                <a href="{{ url_for('admin.view_data', data_type='ndvi', regency_id=stat.regency_id) }}"
+                   class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;line-height:1.4;">
+                  <i class="fas fa-eye"></i> View
+                </a>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}success{% else %}danger{% endif %}"
+                   style="width:{% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}100{% else %}0{% endif %}%;"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
       </div>
     </div>
 
@@ -364,33 +430,6 @@
   </div>
 </div>
 
-<!-- NDVI Upload Modal -->
-<div class="modal fade" id="uploadNDVIModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
-      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
-        <h5 class="modal-title"><i class="fas fa-satellite" style="color:var(--success);margin-right:8px;"></i>Upload NDVI GeoTIFF</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="alert-box warning">
-          <i class="fas fa-exclamation-triangle alert-icon"></i>
-          <div class="alert-text">Upload .TIFF files downloaded from NASA NEO for all 5 regencies boundaries.</div>
-        </div>
-        <div class="form-group mt-12">
-          <label class="form-label">Select TIFF File(s)</label>
-          <input type="file" class="form-control" accept=".tif,.tiff" multiple>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-success" onclick="showToast('Upload feature coming soon','info','Info')">
-          <i class="fas fa-upload"></i> Upload
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 {% endblock %}
 
@@ -507,14 +546,57 @@ function fetchClimateData() {
   });
 }
 
-function imputeNDVI() {
-  const btn = document.getElementById('imputeBtn');
-  setButtonLoading(btn, true, 'Running...');
-  showToast('NDVI imputation started', 'info', 'Processing');
-  setTimeout(function() {
+function uploadNDVI() {
+  const year   = document.getElementById('ndviYear').value;
+  const month  = document.getElementById('ndviMonth').value;
+  const file1  = document.getElementById('ndviFile1').files[0];
+  const file2  = document.getElementById('ndviFile2').files[0];
+  const result = document.getElementById('ndviResult');
+
+  if (!year || !month) {
+    result.innerHTML = '<div class="alert-box warning mt-12"><i class="fas fa-exclamation-triangle alert-icon"></i><div class="alert-text">Please select year and month.</div></div>';
+    return;
+  }
+  if (!file1 || !file2) {
+    result.innerHTML = '<div class="alert-box warning mt-12"><i class="fas fa-exclamation-triangle alert-icon"></i><div class="alert-text">Please select both GeoTIFF files.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('ndviUploadBtn');
+  setButtonLoading(btn, true, 'Processing...');
+  showLoader('Processing NDVI Files', 'Extracting NDVI values per regency — this may take a moment...');
+  result.innerHTML = '';
+
+  const formData = new FormData();
+  formData.append('file1', file1);
+  formData.append('file2', file2);
+  formData.append('year', year);
+  formData.append('month', month);
+
+  fetch('/admin/data/ndvi/upload', {
+    method: 'POST',
+    body: formData
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    hideLoader();
     setButtonLoading(btn, false);
-    showToast('NDVI imputation completed', 'success', 'Done');
-  }, 2000);
+    if (data.errors && data.errors.length > 0 && data.success === 0) {
+      result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">' + (data.errors[0] || 'Processing failed') + '</div></div>';
+      showToast('NDVI processing failed', 'danger', 'Error');
+    } else {
+      result.innerHTML = '<div class="alert-box success mt-12"><i class="fas fa-check-circle alert-icon"></i><div class="alert-text">Processed ' + data.success + ' regencies successfully.' + (data.failed > 0 ? ' Failed: ' + data.failed + '.' : '') + '</div></div>';
+      showToast('NDVI data saved for ' + data.success + ' regencies', 'success', 'NDVI Processed');
+      document.getElementById('ndviFile1').value = '';
+      document.getElementById('ndviFile2').value = '';
+    }
+  })
+  .catch(function(err) {
+    hideLoader();
+    setButtonLoading(btn, false);
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+    showToast('Upload failed', 'danger', 'Error');
+  });
 }
 
 function exportData() {
