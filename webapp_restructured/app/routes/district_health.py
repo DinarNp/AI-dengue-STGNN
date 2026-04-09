@@ -62,56 +62,118 @@ def dashboard():
 @district_health.route('/update-cases')
 @district_health_required
 def update_cases():
-    """Form to update dengue cases"""
+    """View, add, and edit dengue cases for user's regency"""
     regency = Regency.query.filter_by(name=current_user.regency).first()
-    
+
     if not regency:
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
         return redirect(url_for('main.index'))
-    
-    # Get existing cases for this year
+
     current_year = datetime.now().year
-    existing_cases = DengueCase.query.filter_by(
+    selected_year = request.args.get('year', current_year, type=int)
+
+    # Cases for selected year
+    cases = DengueCase.query.filter_by(
         regency_id=regency.id,
-        year=current_year
+        year=selected_year
     ).order_by(DengueCase.month).all()
-    
+
+    # All years that have data (plus current year always available)
+    year_rows = (
+        db.session.query(DengueCase.year)
+        .filter_by(regency_id=regency.id)
+        .distinct()
+        .order_by(DengueCase.year.desc())
+        .all()
+    )
+    available_years = [y[0] for y in year_rows]
+    if current_year not in available_years:
+        available_years.insert(0, current_year)
+
+    # Summary stats
+    total_selected_year = sum(c.cases for c in cases)
+    total_all_time = db.session.query(
+        db.func.sum(DengueCase.cases)
+    ).filter_by(regency_id=regency.id).scalar() or 0
+
     return render_template('district_health/update_cases.html',
-                         regency=regency,
-                         existing_cases=existing_cases,
-                         current_year=current_year)
+                           regency=regency,
+                           cases=cases,
+                           selected_year=selected_year,
+                           available_years=available_years,
+                           total_selected_year=total_selected_year,
+                           total_all_time=total_all_time,
+                           now=datetime.now())
 
 
 @district_health.route('/cases/add', methods=['POST'])
 @district_health_required
 def add_cases():
-    """Add or update dengue cases"""
+    """Add or update dengue cases — direct DB write, no pipeline dependency"""
     try:
         data = request.get_json()
-        
-        # Get user's regency
         regency = Regency.query.filter_by(name=current_user.regency).first()
-        
+
         if not regency:
             return jsonify({'success': False, 'message': 'Invalid regency assignment'}), 403
-        
-        # Verify user can only update their own regency
-        if not check_regency_access(regency.id):
-            return jsonify({'success': False, 'message': 'Access denied'}), 403
-        
-        pipeline = DataPipelineService(request.app.config)
-        result = pipeline.add_dengue_cases(
-            regency_id=regency.id,
-            year=int(data['year']),
-            month=int(data['month']),
-            cases=int(data['cases']),
-            user_id=current_user.id,
-            notes=data.get('notes', '')
-        )
-        
-        return jsonify(result)
-        
+
+        year  = int(data['year'])
+        month = int(data['month'])
+        cases_count = int(data['cases'])
+        notes = data.get('notes', '')
+
+        existing = DengueCase.query.filter_by(
+            regency_id=regency.id, year=year, month=month
+        ).first()
+
+        if existing:
+            existing.cases = cases_count
+            existing.notes = notes
+            existing.updated_at = datetime.utcnow()
+            existing.reported_by_id = current_user.id
+            action = 'updated'
+        else:
+            db.session.add(DengueCase(
+                regency_id=regency.id,
+                year=year,
+                month=month,
+                cases=cases_count,
+                notes=notes,
+                data_source='manual',
+                reported_by_id=current_user.id
+            ))
+            action = 'added'
+
+        db.session.commit()
+        return jsonify({'success': True, 'action': action,
+                        'message': f'Dengue cases {action} successfully'})
+
     except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@district_health.route('/cases/<int:case_id>/edit', methods=['PATCH'])
+@district_health_required
+def edit_case(case_id):
+    """Edit an existing dengue case — only allowed for user's own regency"""
+    try:
+        case = DengueCase.query.get_or_404(case_id)
+        regency = Regency.query.filter_by(name=current_user.regency).first()
+
+        if not regency or case.regency_id != regency.id:
+            return jsonify({'success': False, 'message': 'Access denied'}), 403
+
+        data = request.get_json()
+        case.cases = int(data['cases'])
+        case.updated_at = datetime.utcnow()
+        case.reported_by_id = current_user.id
+        db.session.commit()
+
+        return jsonify({'success': True, 'cases': case.cases})
+
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
 
 
