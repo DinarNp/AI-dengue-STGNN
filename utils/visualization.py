@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')  # non-interactive backend — must be set before importing pyplot
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np

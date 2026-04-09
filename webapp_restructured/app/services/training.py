@@ -162,7 +162,7 @@ class TrainingService:
             
             # Run training pipeline
             print("Running training pipeline...")
-            model, metrics, info = prediction_system.run_complete_pipeline(
+            model, metrics, info, history = prediction_system.run_complete_pipeline(
                 data_path=data_csv_path
             )
             
