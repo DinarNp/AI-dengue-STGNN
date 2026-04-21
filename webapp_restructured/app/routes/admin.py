@@ -787,6 +787,25 @@ def predictions_manage():
                          active_model=active_model)
 
 
+@admin.route('/predictions/generate-next-months', methods=['POST'])
+@admin_required
+def generate_next_months():
+    """Generate predictions for the next N months from the latest data month"""
+    try:
+        data = request.get_json()
+        from_year  = int(data['from_year'])
+        from_month = int(data['from_month'])
+        n_months   = int(data.get('n_months', 3))
+
+        prediction_service = PredictionService(current_app.config)
+        result = prediction_service.predict_next_n_months(from_year, from_month, n_months)
+
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
 @admin.route('/predictions/generate-batch', methods=['POST'])
 @admin_required
 def generate_batch_predictions():
@@ -819,6 +838,29 @@ def generate_batch_predictions():
         })
         
     except Exception as e:
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@admin.route('/predictions/delete', methods=['DELETE'])
+@admin_required
+def delete_predictions():
+    """Delete all predictions for a given year/month"""
+    try:
+        from ..models import Prediction
+        data = request.get_json()
+        year  = int(data['year'])
+        month = int(data['month'])
+
+        deleted = Prediction.query.filter_by(year=year, month=month).delete()
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'Deleted {deleted} prediction(s) for {year}-{month:02d}'
+        })
+
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 400
 
 

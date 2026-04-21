@@ -53,73 +53,115 @@ class PredictionService:
             print(f"Error loading model: {str(e)}")
             return False
     
-    def prepare_input_data(self, regency_id: int, year: int, month: int, 
-                          window_size: int = 4) -> Optional[pd.DataFrame]:
+    def prepare_input_data(self, regency_id: int, year: int, month: int,
+                          window_size: int = 4) -> tuple:
         """
-        Prepare input data for prediction
-        Requires historical data for the past window_size months
-        
-        Args:
-            regency_id: ID of the regency
-            year: Target year
-            month: Target month
-            window_size: Number of historical months needed
-            
+        Prepare input data for prediction.
+        Requires historical data for the past window_size months.
+
+        For months where actual dengue cases are missing, falls back to the
+        Prediction table (used when chaining multi-step future predictions).
+        For months where climate/NDVI data are missing, falls back to the
+        same calendar month from the previous year.
+
         Returns:
-            DataFrame with features or None if insufficient data
+            (DataFrame, None)       on success
+            (None, error_message)   on failure
         """
         try:
             regency = Regency.query.get(regency_id)
             if not regency:
-                return None
-            
+                return None, 'Regency not found'
+
             # Calculate start month for historical window
             start_year = year
             start_month = month - window_size
-            
+
             while start_month <= 0:
                 start_month += 12
                 start_year -= 1
-            
-            # Collect historical data
+
             records = []
-            
             current_year = start_year
             current_month = start_month
-            
+
             for _ in range(window_size):
-                # Get dengue cases
+                period = f"{current_year}-{current_month:02d}"
+
+                # ── Dengue cases ──────────────────────────────────────────
                 dengue = DengueCase.query.filter_by(
                     regency_id=regency_id,
                     year=current_year,
                     month=current_month
                 ).first()
-                
-                # Get climate data
+
+                if dengue:
+                    cases_value = dengue.cases
+                else:
+                    # Fall back to already-generated prediction for this month
+                    pred_fallback = Prediction.query.filter_by(
+                        regency_id=regency_id,
+                        year=current_year,
+                        month=current_month
+                    ).first()
+                    if pred_fallback:
+                        cases_value = pred_fallback.predicted_cases
+                    else:
+                        return None, (
+                            f"Missing dengue data for {period}. "
+                            "Generate the prediction for that month first, "
+                            "or upload the actual case data."
+                        )
+
+                # ── Climate data ──────────────────────────────────────────
                 climate = ClimateData.query.filter_by(
                     regency_id=regency_id,
                     year=current_year,
                     month=current_month
                 ).first()
-                
-                # Get NDVI data
+
+                if not climate:
+                    # Fall back to same month of previous year
+                    climate = ClimateData.query.filter_by(
+                        regency_id=regency_id,
+                        year=current_year - 1,
+                        month=current_month
+                    ).first()
+
+                if not climate:
+                    return None, (
+                        f"Missing climate data for {period} "
+                        f"(and no previous-year fallback for month {current_month:02d})."
+                    )
+
+                # ── NDVI data ─────────────────────────────────────────────
                 ndvi = NDVIData.query.filter_by(
                     regency_id=regency_id,
                     year=current_year,
                     month=current_month
                 ).first()
-                
-                if not dengue or not climate or not ndvi:
-                    # Insufficient historical data
-                    return None
-                
-                record = {
+
+                if not ndvi:
+                    # Fall back to same month of previous year
+                    ndvi = NDVIData.query.filter_by(
+                        regency_id=regency_id,
+                        year=current_year - 1,
+                        month=current_month
+                    ).first()
+
+                if not ndvi:
+                    return None, (
+                        f"Missing NDVI data for {period} "
+                        f"(and no previous-year fallback for month {current_month:02d})."
+                    )
+
+                records.append({
                     'Year': current_year,
                     'Month': current_month,
                     'Region': regency.name,
                     'Latitude': regency.latitude,
                     'Longitude': regency.longitude,
-                    'Cases': dengue.cases,
+                    'Cases': cases_value,
                     'NDVI': ndvi.ndvi_value,
                     'Cloud_Cover': climate.cloud_cover,
                     'Humidity': climate.humidity,
@@ -130,22 +172,18 @@ class PredictionService:
                     'Pressure': climate.pressure,
                     'Wind_Speed': climate.wind_speed,
                     'Wind_Direction': climate.wind_direction
-                }
-                
-                records.append(record)
-                
-                # Move to next month
+                })
+
                 current_month += 1
                 if current_month > 12:
                     current_month = 1
                     current_year += 1
-            
-            df = pd.DataFrame(records)
-            return df
-            
+
+            return pd.DataFrame(records), None
+
         except Exception as e:
             print(f"Error preparing input data: {str(e)}")
-            return None
+            return None, str(e)
     
     def predict_single_regency(self, regency_id: int, year: int, month: int) -> Dict:
         """
@@ -168,12 +206,14 @@ class PredictionService:
                 }
             
             # Prepare input data
-            input_data = self.prepare_input_data(regency_id, year, month)
-            
+            input_data, data_error = self.prepare_input_data(regency_id, year, month)
+
             if input_data is None:
                 return {
                     'success': False,
-                    'message': f'Insufficient historical data. Need {self.config.get("WINDOW_SIZE_MONTHLY", 4)} months of data.'
+                    'message': data_error or (
+                        f'Insufficient historical data. Need {self.config.get("WINDOW_SIZE_MONTHLY", 4)} months of data.'
+                    )
                 }
             
             # Make prediction
@@ -285,6 +325,57 @@ class PredictionService:
                 'errors': [str(e)]
             }
     
+    def predict_next_n_months(self, from_year: int, from_month: int, n: int = 3) -> Dict:
+        """
+        Generate predictions for the next n months starting from the month
+        AFTER (from_year, from_month).
+
+        Each month is predicted in order so that the saved prediction for
+        month T can serve as the dengue-cases fallback for month T+1 when
+        actual case data does not yet exist.
+
+        Args:
+            from_year:  Year of the last month with actual data
+            from_month: Month of the last month with actual data
+            n:          Number of future months to predict (default 3)
+
+        Returns:
+            Dictionary with per-month results
+        """
+        month_results = []
+        current_year = from_year
+        current_month = from_month
+
+        for _ in range(n):
+            # Advance to the next month
+            current_month += 1
+            if current_month > 12:
+                current_month = 1
+                current_year += 1
+
+            result = self.predict_all_regencies(current_year, current_month)
+            month_results.append({
+                'year': current_year,
+                'month': current_month,
+                'result': result
+            })
+
+        total_success = sum(r['result']['success'] for r in month_results)
+        total_predictions = sum(
+            len(r['result'].get('predictions', [])) for r in month_results
+        )
+
+        return {
+            'success': True,
+            'months_processed': len(month_results),
+            'total_predictions': total_predictions,
+            'results': month_results,
+            'message': (
+                f'Generated {total_predictions} predictions '
+                f'for {len(month_results)} months'
+            )
+        }
+
     def _calculate_risk_level(self, predicted_cases: float) -> str:
         """
         Calculate risk level based on predicted cases

@@ -52,6 +52,9 @@
       <button class="tab-btn active" data-tab-target="tabSingle">
         <i class="fas fa-calendar-day"></i> Single Month
       </button>
+      <button class="tab-btn" data-tab-target="tabNextMonths">
+        <i class="fas fa-forward"></i> Next 3 Months
+      </button>
       <button class="tab-btn" data-tab-target="tabBatch">
         <i class="fas fa-bolt"></i> Batch (Multiple Months)
       </button>
@@ -59,21 +62,21 @@
 
     <!-- Single Month -->
     <div class="tab-panel active" id="tabSingle">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;max-width:680px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;max-width:520px;">
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label">Year</label>
-          <input type="number" id="singleYear" class="form-control" value="2025" min="2020" max="2030">
+          <input type="number" id="singleYear" class="form-control" value="2026" min="2020" max="2030">
         </div>
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label">Month</label>
           <select id="singleMonth" class="form-select">
             {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),
                                (7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
-            <option value="{{ m }}" {% if m == 5 %}selected{% endif %}>{{ name }}</option>
+            <option value="{{ m }}" {% if m == 4 %}selected{% endif %}>{{ name }}</option>
             {% endfor %}
           </select>
         </div>
-        <div style="padding-bottom:1px;">
+        <div>
           <label class="form-label">&nbsp;</label>
           <button class="btn btn-primary btn-w" id="singleBtn" onclick="generateSingle()">
             <i class="fas fa-play"></i> Generate
@@ -81,6 +84,37 @@
         </div>
       </div>
       <div id="singleResult" class="mt-16"></div>
+    </div>
+
+    <!-- Next 3 Months -->
+    <div class="tab-panel" id="tabNextMonths">
+      <p class="text-muted" style="font-size:13px;margin-bottom:12px;">
+        Enter the <strong>last month with actual data</strong>. The system will generate
+        predictions for the following 3 months in sequence, using each prediction as
+        input for the next month automatically.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;max-width:520px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Latest Data Year</label>
+          <input type="number" id="nextYear" class="form-control" value="2026" min="2020" max="2030">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Latest Data Month</label>
+          <select id="nextMonth" class="form-select">
+            {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),
+                               (7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
+            <option value="{{ m }}" {% if m == 3 %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-success" id="nextBtn" onclick="generateNextMonths()">
+            <i class="fas fa-forward"></i> Generate Next 3 Months
+          </button>
+        </div>
+      </div>
+      <div id="nextResult" class="mt-16"></div>
     </div>
 
     <!-- Batch -->
@@ -130,15 +164,23 @@
             <th>Period</th>
             <th>Regencies</th>
             <th>Avg Predicted Cases</th>
+            <th style="width:80px;text-align:center;">Action</th>
           </tr>
         </thead>
         <tbody>
           {% for pred in recent_predictions %}
-          <tr>
+          <tr id="pred-row-{{ pred.year }}-{{ pred.month }}">
             <td><strong>{{ pred.year }}-{{ "%02d"|format(pred.month) }}</strong></td>
             <td>{{ pred.count }}/5</td>
             <td>
               <span style="font-weight:600;font-size:15px;">{{ "%.1f"|format(pred.avg_predicted) }}</span>
+            </td>
+            <td style="text-align:center;">
+              <button class="btn btn-sm btn-danger"
+                      onclick="confirmDelete({{ pred.year }}, {{ pred.month }})"
+                      title="Delete predictions for {{ pred.year }}-{{ '%02d'|format(pred.month) }}">
+                <i class="fas fa-trash"></i>
+              </button>
             </td>
           </tr>
           {% endfor %}
@@ -148,6 +190,33 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-body" style="padding:32px 28px 24px;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="width:52px;height:52px;background:var(--danger-light,#fef2f2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i class="fas fa-trash" style="color:var(--danger,#ef4444);font-size:20px;"></i>
+          </div>
+          <h5 style="font-weight:700;margin-bottom:6px;">Delete Predictions</h5>
+          <p class="text-muted" style="font-size:13px;margin:0;">
+            Are you sure you want to delete all predictions for
+            <strong id="deleteLabel"></strong>?
+            This cannot be undone.
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDelete()">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Loading Modal -->
 <div class="modal fade" id="loadingModal" data-bs-backdrop="static" tabindex="-1">
@@ -166,11 +235,60 @@
 
 {% block extra_js %}
 <script>
-let loadingModal;
+let loadingModal, deleteModal;
+let deletePendingYear = null, deletePendingMonth = null;
+
+const MONTH_NAMES = ['January','February','March','April','May','June',
+                     'July','August','September','October','November','December'];
 
 document.addEventListener('DOMContentLoaded', function () {
   loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+  deleteModal  = new bootstrap.Modal(document.getElementById('deleteModal'));
 });
+
+function confirmDelete(year, month) {
+  deletePendingYear  = year;
+  deletePendingMonth = month;
+  document.getElementById('deleteLabel').textContent =
+    MONTH_NAMES[month - 1] + ' ' + year;
+  deleteModal.show();
+}
+
+function executeDelete() {
+  if (deletePendingYear === null) return;
+  const year  = deletePendingYear;
+  const month = deletePendingMonth;
+
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+
+  fetch('/admin/predictions/delete', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ year: year, month: month })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    deleteModal.hide();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+
+    if (data.success) {
+      const row = document.getElementById('pred-row-' + year + '-' + month);
+      if (row) row.remove();
+      showToast(data.message, 'success', 'Deleted');
+    } else {
+      showToast('Delete failed: ' + data.message, 'danger');
+    }
+  })
+  .catch(function(err) {
+    deleteModal.hide();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-trash"></i> Delete';
+    showToast('Error: ' + err, 'danger');
+  });
+}
 
 function generateSingle() {
   const year  = document.getElementById('singleYear').value;
@@ -215,6 +333,69 @@ function generateSingle() {
         `<div class="alert-box danger"><i class="fas fa-times-circle alert-icon"></i>
          <div class="alert-text"><div class="alert-title">Generation Failed</div>${errMsg}</div></div>`;
       showToast('Generation failed: ' + errMsg, 'danger');
+    }
+  })
+  .catch(function(err) {
+    loadingModal.hide();
+    setButtonLoading(btn, false);
+    showToast('Error: ' + err, 'danger');
+  });
+}
+
+function generateNextMonths() {
+  const fromYear  = document.getElementById('nextYear').value;
+  const fromMonth = document.getElementById('nextMonth').value;
+  if (!fromYear || !fromMonth) { showToast('Please select year and month', 'warning'); return; }
+
+  const btn = document.getElementById('nextBtn');
+  setButtonLoading(btn, true, 'Generating...');
+  loadingModal.show();
+
+  fetch('/admin/predictions/generate-next-months', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from_year: parseInt(fromYear), from_month: parseInt(fromMonth), n_months: 3 })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    loadingModal.hide();
+    setButtonLoading(btn, false);
+
+    if (data.success) {
+      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      let html = `<div class="alert-box success"><i class="fas fa-check-circle alert-icon"></i>
+        <div class="alert-text"><div class="alert-title">${data.message}</div>`;
+
+      data.results.forEach(function(mr) {
+        const label = monthNames[mr.month - 1] + ' ' + mr.year;
+        const preds = mr.result.predictions || [];
+        html += `<div style="margin-top:12px;"><strong>${label}</strong>`;
+        if (preds.length > 0) {
+          html += '<table class="data-table" style="margin-top:6px;"><thead><tr><th>Kabupaten</th><th>Predicted Cases</th><th>Risk Level</th></tr></thead><tbody>';
+          preds.forEach(function(p) {
+            html += `<tr>
+              <td>${p.regency}</td>
+              <td><strong>${parseFloat(p.predicted_cases).toFixed(0)}</strong></td>
+              <td><span class="risk-badge risk-${p.risk_level.replace('_','-')}">${p.risk_level.toUpperCase()}</span></td>
+            </tr>`;
+          });
+          html += '</tbody></table>';
+        } else {
+          const errs = mr.result.errors || [];
+          html += `<p class="text-muted" style="font-size:12px;margin-top:4px;">${errs.join(' | ') || 'No predictions generated'}</p>`;
+        }
+        html += '</div>';
+      });
+
+      html += '</div></div>';
+      document.getElementById('nextResult').innerHTML = html;
+      showToast(data.message, 'success', 'Done');
+      setTimeout(function () { location.reload(); }, 3000);
+    } else {
+      document.getElementById('nextResult').innerHTML =
+        `<div class="alert-box danger"><i class="fas fa-times-circle alert-icon"></i>
+         <div class="alert-text">${data.message}</div></div>`;
+      showToast('Failed: ' + data.message, 'danger');
     }
   })
   .catch(function(err) {
