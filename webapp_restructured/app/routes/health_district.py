@@ -460,32 +460,43 @@ def view_reports():
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
         return redirect(url_for('main.index'))
     
-    # Get yearly statistics
     current_year = datetime.now().year
-    years = range(current_year - 3, current_year + 1)
-    
+
+    # All years that have data
+    year_rows = (
+        db.session.query(DengueCase.year)
+        .filter_by(regency_id=regency.id)
+        .distinct()
+        .order_by(DengueCase.year.desc())
+        .all()
+    )
+    available_years = [y[0] for y in year_rows]
+    if current_year not in available_years:
+        available_years.insert(0, current_year)
+
+    selected_year = request.args.get('year', current_year, type=int)
+
+    # Yearly statistics (all years with data)
     yearly_stats = []
-    for year in years:
+    for year in sorted(set(available_years)):
         total_cases = db.session.query(
             db.func.sum(DengueCase.cases)
         ).filter(
             DengueCase.regency_id == regency.id,
             DengueCase.year == year
         ).scalar() or 0
-        
-        yearly_stats.append({
-            'year': year,
-            'total_cases': total_cases
-        })
-    
-    # Get monthly breakdown for current year
+        yearly_stats.append({'year': year, 'total_cases': total_cases})
+
+    # Monthly breakdown for selected year
     monthly_breakdown = DengueCase.query.filter_by(
         regency_id=regency.id,
-        year=current_year
+        year=selected_year
     ).order_by(DengueCase.month).all()
-    
+
     return render_template('health_district/reports.html',
                          regency=regency,
                          yearly_stats=yearly_stats,
                          monthly_breakdown=monthly_breakdown,
+                         available_years=available_years,
+                         selected_year=selected_year,
                          current_year=current_year)

@@ -18,7 +18,6 @@
     </h1>
     <p class="page-subtitle">Statistical reports and analysis for your regency</p>
   </div>
-  <span class="pill"><i class="fas fa-calendar" style="margin-right:5px;"></i>{{ current_year }}</span>
 </div>
 
 <!-- Yearly Statistics Chart -->
@@ -39,10 +38,17 @@
 <div class="card">
   <div class="card-header">
     <h5 class="card-header-title">
-      <i class="fas fa-chart-bar" style="color:var(--secondary);margin-right:8px;"></i>Monthly Breakdown — {{ current_year }}
+      <i class="fas fa-chart-bar" style="color:var(--secondary);margin-right:8px;"></i>Monthly Breakdown — {{ selected_year }}
     </h5>
-    <div class="card-header-actions">
+    <div class="card-header-actions" style="display:flex;align-items:center;gap:10px;">
       <span class="pill">{{ monthly_breakdown | length }} months</span>
+      <label for="yearSelect" style="font-size:13px;color:var(--text-muted);margin:0;">Year:</label>
+      <select id="yearSelect" class="form-select form-select-sm" style="width:auto;"
+              onchange="window.location.href='{{ url_for('health_district.view_reports') }}?year=' + this.value">
+        {% for y in available_years %}
+        <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
     </div>
   </div>
   <div class="card-body" style="padding:0;">
@@ -79,17 +85,15 @@
                 <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low</span>
               {% elif case.cases < 60 %}
                 <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium</span>
-              {% elif case.cases < 100 %}
-                <span class="risk-badge risk-high"><span class="risk-dot high"></span>High</span>
               {% else %}
-                <span class="risk-badge risk-very-high"><span class="risk-dot very-high"></span>Very High</span>
+                <span class="risk-badge risk-high"><span class="risk-dot high"></span>High</span>
               {% endif %}
             </td>
           </tr>
           {% else %}
           <tr>
             <td colspan="4" class="table-empty">
-              <i class="fas fa-database"></i> No data available for {{ current_year }}
+              <i class="fas fa-database"></i> No data available for {{ selected_year }}
             </td>
           </tr>
           {% endfor %}
