@@ -386,16 +386,14 @@ class PredictionService:
         Returns:
             Risk level string
         """
-        thresholds = self.config.get('RISK_THRESHOLDS', {'low': 30, 'medium': 60, 'high': 100, 'very_high': 150})
-        
+        thresholds = self.config.get('RISK_THRESHOLDS', {'low': 30, 'medium': 60, 'high': 100})
+
         if predicted_cases < thresholds['low']:
             return 'low'
         elif predicted_cases < thresholds['medium']:
             return 'medium'
-        elif predicted_cases < thresholds['high']:
-            return 'high'
         else:
-            return 'very_high'
+            return 'high'
     
     def get_recommendation(self, predicted_cases: float, risk_level: str) -> str:
         """
@@ -410,36 +408,29 @@ class PredictionService:
         """
         recommendations = {
             'low': (
-                "Risk level is LOW. Continue routine dengue prevention activities:\n"
-                "- Maintain regular fogging schedules\n"
-                "- Continue public health education\n"
-                "- Monitor mosquito breeding sites weekly"
+                "Risk level is LOW. Maintain routine dengue prevention activities:\n"
+                "- Continuation of routine vector control and household inspections\n",
+                "- Regular health promotion and school-based education\n",
+                "- Surveillance system maintenance for early warning detection\n",
+                "- Seasonal preparedness activities during pre-wet season transition\n",
+                "- Community engagement in long-term environmental management"
             ),
             'medium': (
-                "Risk level is MEDIUM. Increase prevention efforts:\n"
-                "- Intensify fogging in high-risk areas\n"
-                "- Conduct community campaigns about 3M (Drain, Cover, Bury)\n"
-                "- Increase surveillance for fever cases\n"
-                "- Distribute mosquito repellent to vulnerable populations"
+                "Risk level is MEDIUM. Strengthen prevention and early detection:\n"
+                "- Strengthened routine vector control (larval source management, community clean-up)\n",
+                "- Enhanced community-based surveillance through trained volunteers\n",
+                "- Response protocol preparation and resource stockpiling\n",
+                "- Intensified environmental condition monitoring\n",
+                "- Healthcare provider communication on case management readiness"
             ),
             'high': (
-                "Risk level is HIGH. Implement enhanced control measures:\n"
-                "- Daily fogging in affected areas\n"
-                "- Mobilize health teams for active case finding\n"
-                "- Set up fever clinics in community health centers\n"
-                "- Coordinate with local government for emergency response\n"
-                "- Distribute educational materials door-to-door"
-            ),
-            'very_high': (
-                "Risk level is VERY HIGH. Activate emergency response:\n"
-                "- Declare dengue outbreak status\n"
-                "- Implement mass fogging campaign\n"
-                "- Deploy additional medical staff to health centers\n"
-                "- Coordinate with hospitals for bed availability\n"
-                "- Activate rapid response team\n"
-                "- Intensive media campaign for public awareness\n"
-                "- Request provincial/national support if needed"
+                "Risk level is HIGH. Activate emergency dengue response:\n"
+                "- Immediate intensive vector control (indoor residual spraying, outdoor treatment in high-density areas)\n",
+                "- Rapid response team deployment for active case detection and contact tracing\n",
+                "- Urgent multi-channel community education campaigns (radio, social media, community meetings)\n",
+                "- Inter-health center coordination for regional outbreak response\n",
+                "- Healthcare facility preparation (isolation units, treatment supplies, diagnostic capacity)"
             )
         }
-        
+
         return recommendations.get(risk_level, "No recommendation available")

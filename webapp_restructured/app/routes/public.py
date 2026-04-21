@@ -91,14 +91,14 @@ def dashboard():
         DengueCase.year.desc(),
         DengueCase.month.desc()
     ).limit(12).all()
-    
+
     overall_trend = []
     for item in reversed(monthly_trend):
         overall_trend.append({
             'month': f"{item.year}-{item.month:02d}",
             'cases': item.total_cases
         })
-    
+
     return render_template('public/dashboard.html',
                          regency_data=regency_data,
                          provincial_total=provincial_total,

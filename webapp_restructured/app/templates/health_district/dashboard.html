@@ -18,11 +18,14 @@
     <p class="page-subtitle">Health District Office Dashboard — {{ current_year }}</p>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{{ url_for('health_district.view_risk_monitor') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-shield-alt"></i> Risk Monitor
+    </a>
+    <a href="{{ url_for('health_district.view_reports') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-file-alt"></i> Reports
+    </a>
     <a href="{{ url_for('health_district.update_cases') }}" class="btn btn-primary btn-sm">
       <i class="fas fa-edit"></i> Input Cases
-    </a>
-    <a href="{{ url_for('health_district.view_predictions') }}" class="btn btn-outline-secondary btn-sm">
-      <i class="fas fa-chart-line"></i> Predictions
     </a>
   </div>
 </div>
@@ -67,72 +70,44 @@
   </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="card mb-20">
-  <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>Quick Actions</h5>
-  </div>
-  <div class="card-body" style="display:flex;gap:12px;flex-wrap:wrap;">
-    <a href="{{ url_for('health_district.update_cases') }}" class="btn btn-primary">
-      <i class="fas fa-edit"></i> Input / Update Cases
-    </a>
-    <a href="{{ url_for('health_district.view_predictions') }}" class="btn btn-outline-secondary">
-      <i class="fas fa-chart-line"></i> View Predictions
-    </a>
-    <a href="{{ url_for('health_district.view_reports') }}" class="btn btn-outline-secondary">
-      <i class="fas fa-file-alt"></i> View Reports
-    </a>
-  </div>
-</div>
 
 <!-- Trend Chart -->
 <div class="card mb-20">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>Monthly Trend — Last 12 Months</h5>
+    <h5 class="card-header-title">
+      <i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>
+      Monthly Trend — Last 24 Months &amp; 3-Month Forecast
+    </h5>
     <div class="card-header-actions">
       <span class="badge badge-primary">{{ regency.name }}</span>
     </div>
   </div>
+
+  <!-- legend -->
+  <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:28px;height:3px;background:#ef4444;border-radius:2px;"></span>
+      Actual cases
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:28px;height:3px;background:#94a3b8;border-radius:2px;border-top:2px dashed #94a3b8;"></span>
+      Predicted cases
+    </span>
+    {% if monthly_trend %}
+    <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
+      Actual up to <strong>{{ monthly_trend[-1].month }}</strong>
+      {% set pred_available = [] %}
+      {% for p in prediction_trend %}{% if p.cases is not none %}{% set _ = pred_available.append(p) %}{% endif %}{% endfor %}
+      {% if pred_available %}
+        &nbsp;· Forecast: {{ pred_available[0].month }}{% if pred_available|length > 1 %} – {{ pred_available[-1].month }}{% endif %}
+      {% endif %}
+    </span>
+    {% endif %}
+  </div>
+
   <div class="card-body">
     <div class="chart-container" style="height:260px;">
       <canvas id="trendChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- Recent Cases -->
-<div class="card">
-  <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-list" style="color:var(--text-muted);margin-right:8px;"></i>Recent Monthly Data</h5>
-  </div>
-  <div class="card-body" style="padding:0;">
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Month</th>
-            <th>Cases</th>
-            <th>Data Source</th>
-            <th>Updated At</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for case in recent_cases %}
-          <tr>
-            <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
-            <td><span style="font-weight:600;font-size:15px;">{{ case.cases }}</span></td>
-            <td><span class="pill">{{ case.data_source }}</span></td>
-            <td style="color:var(--text-muted);">{{ case.updated_at.strftime('%Y-%m-%d') if case.updated_at else 'N/A' }}</td>
-          </tr>
-          {% else %}
-          <tr>
-            <td colspan="4" class="table-empty">
-              <i class="fas fa-database"></i> No data available yet
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
     </div>
   </div>
 </div>
@@ -141,35 +116,81 @@
 
 {% block extra_js %}
 <script>
-const trendCtx = document.getElementById('trendChart');
-if (trendCtx) {
-  new Chart(trendCtx, {
+(function () {
+  var ctx = document.getElementById('trendChart');
+  if (!ctx) return;
+
+  var actualPoints = {{ monthly_trend    | tojson }};
+  var predPoints   = {{ prediction_trend | tojson }};
+  var nActual = actualPoints.length;
+
+  var allLabels = [];
+  var allData   = [];
+  for (var i = 0; i < actualPoints.length; i++) {
+    allLabels.push(actualPoints[i].month);
+    allData.push(actualPoints[i].cases);
+  }
+  for (var j = 0; j < predPoints.length; j++) {
+    allLabels.push(predPoints[j].month);
+    allData.push(predPoints[j].cases);  // null when no prediction yet
+  }
+
+  new Chart(ctx, {
     type: 'line',
     data: {
-      labels: {{ monthly_trend | map(attribute='month') | list | tojson }},
+      labels: allLabels,
       datasets: [{
-        label: 'Dengue Cases',
-        data: {{ monthly_trend | map(attribute='cases') | list | tojson }},
-        borderColor: '#0ea5e9',
-        backgroundColor: 'rgba(14,165,233,0.08)',
+        label: 'Cases',
+        data: allData,
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.07)',
         borderWidth: 2.5,
-        tension: 0.4,
+        tension: 0.3,
         fill: true,
-        pointBackgroundColor: '#0ea5e9',
+        spanGaps: false,
         pointRadius: 4,
-        pointHoverRadius: 7
+        pointHoverRadius: 6,
+        pointBackgroundColor: function(ctx) {
+          return ctx.dataIndex >= nActual ? '#94a3b8' : '#ef4444';
+        },
+        pointBorderColor: function(ctx) {
+          return ctx.dataIndex >= nActual ? '#94a3b8' : '#ef4444';
+        },
+        segment: {
+          borderColor: function(ctx) {
+            return ctx.p0DataIndex >= nActual - 1 ? '#94a3b8' : '#ef4444';
+          },
+          borderDash: function(ctx) {
+            return ctx.p0DataIndex >= nActual - 1 ? [6, 4] : [];
+          }
+        }
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              var type = item.dataIndex >= nActual ? 'Predicted' : 'Actual';
+              return type + ': ' + item.raw + ' cases';
+            }
+          }
+        }
+      },
       scales: {
-        x: { grid: { display: false } },
+        x: {
+          grid: { display: false },
+          ticks: { maxTicksLimit: 14, maxRotation: 45, font: { size: 11 } }
+        },
         y: { beginAtZero: true, ticks: { precision: 0 } }
       }
     }
   });
-}
+})();
 </script>
 {% endblock %}

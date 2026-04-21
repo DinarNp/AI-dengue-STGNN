@@ -1267,7 +1267,8 @@ textarea.form-control { resize: vertical; min-height: 90px; }
   width: 100%;
 }
 
-.chart-container canvas { max-width: 100%; }
+/* Do NOT constrain canvas width/height — Chart.js manages it */
+.chart-container canvas { display: block; }
 
 /* =========================================================
    LOADING / SKELETON

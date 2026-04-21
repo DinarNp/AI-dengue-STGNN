@@ -1,0 +1,549 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Monitor — {{ regency.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('health_district.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">Risk Monitor</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1 class="page-title">
+      <i class="fas fa-shield-alt" style="color:var(--primary);margin-right:8px;"></i>
+      Risk Monitor — {{ regency.name }}
+    </h1>
+    <p class="page-subtitle">
+      3-Month Dengue Risk Forecast &nbsp;·&nbsp;
+      Based on data up to <strong>{{ ['January','February','March','April','May','June','July','August','September','October','November','December'][latest_month-1] }} {{ latest_year }}</strong>
+    </p>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span class="pill" style="background:rgba(14,165,233,0.1);color:var(--primary);">
+      <i class="fas fa-brain" style="margin-right:5px;"></i>AI-STGNN Powered
+    </span>
+  </div>
+</div>
+
+<!-- ===== SUMMARY STAT CARDS ===== -->
+<div class="grid-4" style="margin-bottom:24px;">
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-calendar-alt"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">3</div>
+      <div class="stat-label">Months Forecast</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-danger">
+    <div class="stat-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ risk_counts.get('high', 0) }}</div>
+      <div class="stat-label">High Risk</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-warning">
+    <div class="stat-icon" style="background:rgba(245,158,11,0.15);"><i class="fas fa-minus-circle" style="color:#f59e0b;"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ risk_counts.get('medium', 0) }}</div>
+      <div class="stat-label">Medium Risk</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-success">
+    <div class="stat-icon icon-success"><i class="fas fa-check-circle"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ risk_counts.get('low', 0) }}</div>
+      <div class="stat-label">Low Risk</div>
+    </div>
+  </div>
+</div>
+
+<!-- Trend Chart -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>
+      Monthly Trend — Last 24 Months &amp; 3-Month Forecast
+    </h5>
+    <div class="card-header-actions">
+      <span class="badge badge-primary">{{ regency.name }}</span>
+    </div>
+  </div>
+
+  <!-- legend -->
+  <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:28px;height:3px;background:#ef4444;border-radius:2px;"></span>
+      Actual cases
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:28px;height:3px;background:#94a3b8;border-radius:2px;border-top:2px dashed #94a3b8;"></span>
+      Predicted cases
+    </span>
+    {% if monthly_trend %}
+    <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
+      Actual up to <strong>{{ monthly_trend[-1].month }}</strong>
+      {% set pred_available = [] %}
+      {% for p in prediction_trend %}{% if p.cases is not none %}{% set _ = pred_available.append(p) %}{% endif %}{% endfor %}
+      {% if pred_available %}
+        &nbsp;· Forecast: {{ pred_available[0].month }}{% if pred_available|length > 1 %} – {{ pred_available[-1].month }}{% endif %}
+      {% endif %}
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="card-body">
+    <div class="chart-container" style="height:260px;">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RISK LEVEL LEGEND ===== -->
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:12px 20px;">
+    <span style="font-size:12px;font-weight:600;color:var(--text-muted);">Risk Levels:</span>
+    <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low (&lt;30 cases)</span>
+    <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium (30–60)</span>
+    <span class="risk-badge risk-high"><span class="risk-dot high"></span>High (&gt;60)</span>
+    <span style="margin-left:auto;font-size:11.5px;color:#94a3b8;">
+      <i class="fas fa-info-circle"></i> Environmental data uses same calendar month from previous year as proxy
+    </span>
+  </div>
+</div>
+
+<!-- ===== 3-MONTH FORECAST CARDS ===== -->
+{% if forecast_months %}
+<div class="grid-3" style="margin-bottom:24px;">
+  {% for fm in forecast_months %}
+
+  {% set has_pred = fm.prediction is not none %}
+  {% set rl = fm.prediction.risk_level if has_pred else 'unknown' %}
+  {% set rl_dash = rl.replace('_', '-') %}
+
+  <!-- Risk colour tokens -->
+  {% if rl == 'high' %}
+    {% set rl_color = '#ef4444' %}
+    {% set rl_bg    = 'rgba(239,68,68,0.08)' %}
+    {% set rl_icon  = 'fa-exclamation-triangle' %}
+  {% elif rl == 'medium' %}
+    {% set rl_color = '#f59e0b' %}
+    {% set rl_bg    = 'rgba(245,158,11,0.08)' %}
+    {% set rl_icon  = 'fa-minus-circle' %}
+  {% elif rl == 'low' %}
+    {% set rl_color = '#10b981' %}
+    {% set rl_bg    = 'rgba(16,185,129,0.08)' %}
+    {% set rl_icon  = 'fa-check-circle' %}
+  {% else %}
+    {% set rl_color = '#94a3b8' %}
+    {% set rl_bg    = 'rgba(148,163,184,0.08)' %}
+    {% set rl_icon  = 'fa-question-circle' %}
+  {% endif %}
+
+  <div class="card" style="margin-bottom:0;border-top:3px solid {{ rl_color }};">
+
+    <!-- Card Header -->
+    <div class="card-header" style="background:var(--sidebar-bg);">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;">
+        <i class="fas {{ rl_icon }}" style="color:{{ rl_color }};"></i>
+        <span style="color:white;font-weight:700;font-size:15px;">{{ fm.month_name }} {{ fm.year }}</span>
+      </div>
+      {% if has_pred %}
+      <span class="risk-badge risk-{{ rl_dash }}">
+        <span class="risk-dot {{ rl_dash }}"></span>
+        {{ rl.replace('_',' ').upper() }}
+      </span>
+      {% else %}
+      <span class="pill" style="font-size:11px;">No Data</span>
+      {% endif %}
+    </div>
+
+    <div class="card-body" style="padding:20px;">
+
+      {% if has_pred %}
+      <!-- Predicted Cases (big) -->
+      <div style="text-align:center;padding:16px 0 12px;">
+        <div style="font-size:48px;font-weight:800;line-height:1;color:{{ rl_color }};">
+          {{ "%.0f"|format(fm.prediction.predicted_cases) }}
+        </div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Predicted Cases</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:2px;">
+          Range: {{ "%.0f"|format(fm.prediction.confidence_lower) }} – {{ "%.0f"|format(fm.prediction.confidence_upper) }}
+        </div>
+      </div>
+
+      <!-- Trend indicators -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;">
+        <div style="background:var(--body-bg);border-radius:8px;padding:10px;text-align:center;">
+          {% if fm.yoy_change is not none %}
+            {% if fm.yoy_change > 10 %}
+              <div style="color:#ef4444;font-weight:700;font-size:14px;">
+                <i class="fas fa-arrow-up"></i> {{ fm.yoy_change }}%
+              </div>
+            {% elif fm.yoy_change < -10 %}
+              <div style="color:#10b981;font-weight:700;font-size:14px;">
+                <i class="fas fa-arrow-down"></i> {{ fm.yoy_change | abs }}%
+              </div>
+            {% else %}
+              <div style="color:#f59e0b;font-weight:700;font-size:14px;">
+                <i class="fas fa-minus"></i> {{ fm.yoy_change }}%
+              </div>
+            {% endif %}
+          {% else %}
+            <div style="color:#94a3b8;font-size:13px;">—</div>
+          {% endif %}
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">vs Last Year</div>
+        </div>
+
+        <div style="background:var(--body-bg);border-radius:8px;padding:10px;text-align:center;">
+          {% if fm.mom_change is not none %}
+            {% if fm.mom_change > 10 %}
+              <div style="color:#ef4444;font-weight:700;font-size:14px;">
+                <i class="fas fa-arrow-up"></i> {{ fm.mom_change }}%
+              </div>
+            {% elif fm.mom_change < -10 %}
+              <div style="color:#10b981;font-weight:700;font-size:14px;">
+                <i class="fas fa-arrow-down"></i> {{ fm.mom_change | abs }}%
+              </div>
+            {% else %}
+              <div style="color:#f59e0b;font-weight:700;font-size:14px;">
+                <i class="fas fa-minus"></i> {{ fm.mom_change }}%
+              </div>
+            {% endif %}
+          {% else %}
+            <div style="color:#94a3b8;font-size:13px;">—</div>
+          {% endif %}
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">vs Prev. Month</div>
+        </div>
+      </div>
+
+      <!-- Environmental indicators -->
+      {% if fm.climate %}
+      <div style="background:{{ rl_bg }};border-radius:8px;padding:12px;margin-top:8px;">
+        <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">
+          Environmental Context
+          <span style="font-weight:400;font-style:italic;">({{ fm.year - 1 }}-{{ "%02d"|format(fm.month) }})</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
+          <div>
+            <div style="font-size:15px;">🌡️</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">{{ "%.1f"|format(fm.climate.temperature_avg) }}°C</div>
+            <div style="font-size:10px;color:var(--text-muted);">Temp</div>
+          </div>
+          <div>
+            <div style="font-size:15px;">🌧️</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">{{ "%.0f"|format(fm.climate.precipitation_total) }} mm</div>
+            <div style="font-size:10px;color:var(--text-muted);">Rain</div>
+          </div>
+          <div>
+            <div style="font-size:15px;">💧</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-primary);">{{ "%.0f"|format(fm.climate.humidity) }}%</div>
+            <div style="font-size:10px;color:var(--text-muted);">Humidity</div>
+          </div>
+        </div>
+        {% if fm.ndvi and fm.ndvi.ndvi_value %}
+        <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-muted);">
+          <span>🌿 NDVI</span>
+          <span style="font-weight:600;color:var(--text-primary);">{{ "%.3f"|format(fm.ndvi.ndvi_value) }}</span>
+        </div>
+        {% endif %}
+      </div>
+      {% else %}
+      <div style="background:var(--body-bg);border-radius:8px;padding:10px;margin-top:8px;text-align:center;">
+        <span style="font-size:12px;color:#94a3b8;"><i class="fas fa-info-circle"></i> No prior-year climate data available</span>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <!-- No prediction state -->
+      <div style="text-align:center;padding:32px 16px;">
+        <i class="fas fa-chart-line" style="font-size:36px;color:#cbd5e1;display:block;margin-bottom:12px;"></i>
+        <p style="color:var(--text-muted);font-size:13px;margin:0;">No prediction generated yet</p>
+        <p style="color:#94a3b8;font-size:12px;margin-top:4px;">Ask admin to run predictions for {{ fm.month_name }} {{ fm.year }}</p>
+      </div>
+      {% endif %}
+
+    </div>
+
+    {% if has_pred %}
+    <div class="card-footer" style="padding:10px 16px;">
+      <button class="btn btn-primary btn-sm btn-w"
+              data-bs-toggle="modal" data-bs-target="#analysisModal{{ loop.index }}">
+        <i class="fas fa-search-plus"></i> View Full Analysis
+      </button>
+    </div>
+    {% endif %}
+
+  </div><!-- end card -->
+  {% endfor %}
+</div><!-- end grid -->
+
+
+
+{% else %}
+<!-- No predictions at all -->
+<div class="card">
+  <div class="card-body" style="text-align:center;padding:60px 20px;">
+    <i class="fas fa-shield-alt" style="font-size:48px;color:#cbd5e1;margin-bottom:16px;display:block;"></i>
+    <h5 style="color:var(--text-muted);">No predictions available yet</h5>
+    <p style="color:#94a3b8;font-size:14px;">Contact the admin to generate predictions for your health district.</p>
+  </div>
+</div>
+{% endif %}
+
+
+<!-- ===== ANALYSIS MODALS ===== -->
+{% for fm in forecast_months %}
+{% if fm.prediction %}
+{% set rl = fm.prediction.risk_level %}
+{% set rl_dash = rl.replace('_','-') %}
+{% if rl == 'high' %}{% set modal_accent = '#ef4444' %}{% set modal_bg = '#fef2f2' %}
+{% elif rl == 'medium' %}{% set modal_accent = '#f59e0b' %}{% set modal_bg = '#fffbeb' %}
+{% else %}{% set modal_accent = '#10b981' %}{% set modal_bg = '#f0fdf4' %}{% endif %}
+
+<div class="modal fade" id="analysisModal{{ loop.index }}" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+
+      <!-- Modal Header -->
+      <div class="modal-header" style="background:var(--sidebar-bg);border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <i class="fas fa-shield-alt" style="color:{{ modal_accent }};font-size:18px;"></i>
+          <div>
+            <h5 class="modal-title" style="color:white;margin:0;font-size:15px;">
+              Risk Analysis — {{ fm.month_name }} {{ fm.year }}
+            </h5>
+            <div style="font-size:11px;color:rgba(255,255,255,0.6);">{{ regency.name }}</div>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body" style="padding:24px;">
+
+        <!-- Top metrics row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
+          <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
+            <div style="font-size:36px;font-weight:800;color:{{ modal_accent }};">
+              {{ "%.0f"|format(fm.prediction.predicted_cases) }}
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Predicted Cases</div>
+          </div>
+          <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
+            <div style="margin-top:6px;">
+              <span class="risk-badge risk-{{ rl_dash }}" style="font-size:13px;">
+                <span class="risk-dot {{ rl_dash }}"></span>
+                {{ rl.replace('_',' ').upper() }}
+              </span>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Risk Level</div>
+          </div>
+          <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
+            <div style="font-size:15px;font-weight:600;color:var(--text-primary);">
+              {{ "%.0f"|format(fm.prediction.confidence_lower) }}–{{ "%.0f"|format(fm.prediction.confidence_upper) }}
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Confidence Range</div>
+          </div>
+        </div>
+
+        <!-- Risk Analysis -->
+        <div style="background:{{ modal_bg }};border:1px solid {{ modal_accent }}30;border-left:4px solid {{ modal_accent }};border-radius:8px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <i class="fas fa-info-circle" style="color:{{ modal_accent }};"></i>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Risk Analysis</span>
+          </div>
+          <p style="font-size:13px;color:var(--text-primary);line-height:1.7;margin:0;">
+            {{ fm.explanation or 'Analysis not available.' }}
+          </p>
+        </div>
+
+        <!-- Environmental Data -->
+        {% if fm.climate %}
+        <div style="background:var(--body-bg);border-radius:8px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <i class="fas fa-thermometer-half" style="color:var(--primary);"></i>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Environmental Data</span>
+            <span style="font-size:11px;color:#94a3b8;margin-left:4px;">({{ fm.year - 1 }}-{{ "%02d"|format(fm.month) }})</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--card-bg);border-radius:6px;align-items:center;">
+              <span style="font-size:12px;color:var(--text-muted);">🌡️ Temperature</span>
+              <div style="text-align:right;">
+                <span style="font-weight:600;font-size:13px;">{{ "%.1f"|format(fm.climate.temperature_avg) }}°C</span>
+                {% if fm.climate.temperature_avg and 25 <= fm.climate.temperature_avg <= 30 %}
+                <div style="font-size:10px;color:#ef4444;">Optimal for breeding</div>
+                {% endif %}
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--card-bg);border-radius:6px;align-items:center;">
+              <span style="font-size:12px;color:var(--text-muted);">🌧️ Rainfall</span>
+              <div style="text-align:right;">
+                <span style="font-weight:600;font-size:13px;">{{ "%.0f"|format(fm.climate.precipitation_total) }} mm</span>
+                {% if fm.climate.precipitation_total and fm.climate.precipitation_total > 100 %}
+                <div style="font-size:10px;color:#ef4444;">High breeding risk</div>
+                {% elif fm.climate.precipitation_total and fm.climate.precipitation_total > 50 %}
+                <div style="font-size:10px;color:#f59e0b;">Moderate</div>
+                {% endif %}
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--card-bg);border-radius:6px;align-items:center;">
+              <span style="font-size:12px;color:var(--text-muted);">💧 Humidity</span>
+              <div style="text-align:right;">
+                <span style="font-weight:600;font-size:13px;">{{ "%.0f"|format(fm.climate.humidity) }}%</span>
+                {% if fm.climate.humidity and fm.climate.humidity > 80 %}
+                <div style="font-size:10px;color:#ef4444;">Ideal for mosquitoes</div>
+                {% endif %}
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--card-bg);border-radius:6px;align-items:center;">
+              <span style="font-size:12px;color:var(--text-muted);">🌬️ Wind Speed</span>
+              <span style="font-weight:600;font-size:13px;">{{ "%.1f"|format(fm.climate.wind_speed) if fm.climate.wind_speed else '—' }} m/s</span>
+            </div>
+            {% if fm.ndvi and fm.ndvi.ndvi_value %}
+            <div style="display:flex;justify-content:space-between;padding:8px 10px;background:var(--card-bg);border-radius:6px;align-items:center;grid-column:1/-1;">
+              <span style="font-size:12px;color:var(--text-muted);">🌿 NDVI (Vegetation Index)</span>
+              <div style="text-align:right;">
+                <span style="font-weight:600;font-size:13px;">{{ "%.3f"|format(fm.ndvi.ndvi_value) }}</span>
+                {% if fm.ndvi.ndvi_value > 0.4 %}
+                <div style="font-size:10px;color:#f59e0b;">Dense vegetation — potential habitat</div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Regional Analysis -->
+        <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-left:4px solid #6366f1;border-radius:8px;padding:16px;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <i class="fas fa-map" style="color:#6366f1;"></i>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Regional Analysis</span>
+          </div>
+          <p style="font-size:13px;color:var(--text-primary);line-height:1.7;margin:0;">
+            {{ fm.regional_analysis or 'Regional data not available.' }}
+          </p>
+          {% if fm.prov_avg %}
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:#94a3b8;">DIY Provincial Average:</span>
+            <span style="font-weight:700;font-size:13px;color:#6366f1;">{{ fm.prov_avg }} cases</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Recommended Actions -->
+        {% if fm.recommendations %}
+        <div style="background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.2);border-left:4px solid #8b5cf6;border-radius:8px;padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <i class="fas fa-tasks" style="color:#8b5cf6;"></i>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Recommended Actions</span>
+          </div>
+          <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
+            {% for rec in fm.recommendations %}
+            <li style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-primary);line-height:1.6;">
+              <i class="fas fa-check-circle" style="color:#8b5cf6;margin-top:2px;flex-shrink:0;"></i>
+              <span>{{ rec }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var ctx = document.getElementById('trendChart');
+  if (!ctx) return;
+
+  var actualPoints = {{ monthly_trend    | tojson }};
+  var predPoints   = {{ prediction_trend | tojson }};
+  var nActual = actualPoints.length;
+
+  var allLabels = [];
+  var allData   = [];
+  for (var i = 0; i < actualPoints.length; i++) {
+    allLabels.push(actualPoints[i].month);
+    allData.push(actualPoints[i].cases);
+  }
+  for (var j = 0; j < predPoints.length; j++) {
+    allLabels.push(predPoints[j].month);
+    allData.push(predPoints[j].cases);  // null when no prediction yet
+  }
+
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: allLabels,
+      datasets: [{
+        label: 'Cases',
+        data: allData,
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.07)',
+        borderWidth: 2.5,
+        tension: 0.3,
+        fill: true,
+        spanGaps: false,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: function(ctx) {
+          return ctx.dataIndex >= nActual ? '#94a3b8' : '#ef4444';
+        },
+        pointBorderColor: function(ctx) {
+          return ctx.dataIndex >= nActual ? '#94a3b8' : '#ef4444';
+        },
+        segment: {
+          borderColor: function(ctx) {
+            return ctx.p0DataIndex >= nActual - 1 ? '#94a3b8' : '#ef4444';
+          },
+          borderDash: function(ctx) {
+            return ctx.p0DataIndex >= nActual - 1 ? [6, 4] : [];
+          }
+        }
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              var type = item.dataIndex >= nActual ? 'Predicted' : 'Actual';
+              return type + ': ' + item.raw + ' cases';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { maxTicksLimit: 14, maxRotation: 45, font: { size: 11 } }
+        },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

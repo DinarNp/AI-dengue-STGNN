@@ -84,8 +84,7 @@ class Config:
     RISK_THRESHOLDS = {
         'low': 30,
         'medium': 60,
-        'high': 100,
-        'very_high': 150
+        'high': 100
     }
     
     # Data processing settings

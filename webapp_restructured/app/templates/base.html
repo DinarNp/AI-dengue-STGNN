@@ -128,27 +128,27 @@
         </a>
       </div>
       <div class="nav-item-wrapper">
+        <a class="nav-link-item {% if request.endpoint == 'health_district.view_risk_monitor' %}active{% endif %}"
+           href="{{ url_for('health_district.view_risk_monitor') }}">
+          <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
+          <span class="nav-text">Risk Monitor</span>
+        </a>
+      </div>
+      <div class="nav-item-wrapper">
+        <a class="nav-link-item {% if request.endpoint == 'health_district.view_reports' %}active{% endif %}"
+           href="{{ url_for('health_district.view_reports') }}">
+          <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+          <span class="nav-text">Reports</span>
+        </a>
+      </div>
+      <div class="nav-item-wrapper">
         <a class="nav-link-item {% if request.endpoint == 'health_district.update_cases' %}active{% endif %}"
            href="{{ url_for('health_district.update_cases') }}">
           <span class="nav-icon"><i class="fas fa-edit"></i></span>
           <span class="nav-text">Input Cases</span>
         </a>
       </div>
-      <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'health_district.view_predictions' %}active{% endif %}"
-           href="{{ url_for('health_district.view_predictions') }}">
-          <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
-          <span class="nav-text">Predictions</span>
-        </a>
-      </div>
-      <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'health_district.view_reports' %}active{% endif %}"
-           href="{{ url_for('health_district.view_reports') }}">
-          <span class="nav-icon"><i class="fas fa-file-chart-column"></i></span>
-          <span class="nav-text">Reports</span>
-        </a>
-      </div>
-
+    
       <div class="nav-section-label">Public</div>
       <div class="nav-item-wrapper">
         <a class="nav-link-item {% if request.endpoint == 'public.dashboard' %}active{% endif %}"
