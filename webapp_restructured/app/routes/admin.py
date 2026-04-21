@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
-from ..models import db, Regency, DengueCase, ClimateData, NDVIData, ModelVersion, DataProcessingLog
+from ..models import db, Regency, DengueCase, ClimateData, NDVIData, ModelVersion, DataProcessingLog, Prediction
 from ..services.auth import admin_required
 from ..services.data_pipeline import DataPipelineService
 from ..services.prediction import PredictionService
@@ -903,6 +903,254 @@ def export_predictions():
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 400
+
+
+RISK_RECOMMENDATIONS = {
+    'low': [
+        "Continue regular inspection and elimination of mosquito breeding sites (3M Plus)",
+        "Maintain routine community health education on dengue prevention",
+        "Ensure weekly monitoring of potential breeding sites",
+        "Keep vector surveillance active through Jumantik program",
+    ],
+    'medium': [
+        "Intensify Jumantik activities and increase monitoring frequency",
+        "Conduct targeted fogging in areas with reported cases",
+        "Strengthen community awareness campaigns (3M Plus)",
+        "Increase fever surveillance and encourage early health facility visits",
+        "Coordinate with community leaders for clean-up campaigns",
+    ],
+    'high': [
+        "Immediately implement mass fogging in affected and surrounding areas",
+        "Deploy rapid response teams for active case finding and contact tracing",
+        "Set up additional fever screening posts at community health centres",
+        "Ensure adequate blood and platelet supplies at local hospitals",
+        "Issue public health alerts through all available media channels",
+        "Coordinate with local government and provincial health office",
+        "Escalate to outbreak status if case count continues to rise",
+    ],
+}
+
+MONTH_NAMES_LIST = ['January','February','March','April','May','June',
+                    'July','August','September','October','November','December']
+
+
+def _build_regency_forecast(regency):
+    """Build full 3-month forecast data for a single regency."""
+    from sqlalchemy import func as _func
+
+    latest_case = DengueCase.query.filter_by(regency_id=regency.id)\
+        .order_by(DengueCase.year.desc(), DengueCase.month.desc()).first()
+    if latest_case:
+        latest_year, latest_month = latest_case.year, latest_case.month
+    else:
+        now = datetime.now()
+        latest_year, latest_month = now.year, now.month
+
+    forecast_months = []
+    py, pm = latest_year, latest_month
+    for _ in range(3):
+        pm += 1
+        if pm > 12:
+            pm = 1
+            py += 1
+
+        pred = Prediction.query.filter_by(regency_id=regency.id, year=py, month=pm).first()
+        climate = ClimateData.query.filter_by(regency_id=regency.id, year=py - 1, month=pm).first()
+        ndvi = NDVIData.query.filter_by(regency_id=regency.id, year=py - 1, month=pm).first()
+        last_year_case = DengueCase.query.filter_by(regency_id=regency.id, year=py - 1, month=pm).first()
+        prev_pm = pm - 1 if pm > 1 else 12
+        prev_py = py if pm > 1 else py - 1
+        prev_case = DengueCase.query.filter_by(regency_id=regency.id, year=prev_py, month=prev_pm).first()
+
+        prov_total = db.session.query(_func.sum(Prediction.predicted_cases)).filter(
+            Prediction.year == py, Prediction.month == pm).scalar()
+        prov_count = db.session.query(_func.count(Prediction.id)).filter(
+            Prediction.year == py, Prediction.month == pm).scalar()
+        prov_avg = round(float(prov_total) / prov_count, 1) if (prov_total and prov_count) else None
+
+        if pred:
+            recommendations = RISK_RECOMMENDATIONS.get(pred.risk_level, [])
+            yoy = round(((pred.predicted_cases - last_year_case.cases) / last_year_case.cases) * 100, 1) \
+                if (last_year_case and last_year_case.cases > 0) else None
+            mom = round(((pred.predicted_cases - prev_case.cases) / prev_case.cases) * 100, 1) \
+                if (prev_case and prev_case.cases > 0) else None
+            explanation = _risk_explanation_admin(pred.predicted_cases, last_year_case, climate, ndvi)
+            regional    = _regional_analysis_admin(regency.name, pred.predicted_cases, prov_avg, last_year_case)
+        else:
+            recommendations = []
+            yoy = mom = explanation = regional = None
+
+        forecast_months.append({
+            'year': py, 'month': pm,
+            'month_name': MONTH_NAMES_LIST[pm - 1],
+            'prediction': pred, 'climate': climate, 'ndvi': ndvi,
+            'last_year_cases': last_year_case.cases if last_year_case else None,
+            'prev_cases': prev_case.cases if prev_case else None,
+            'prov_avg': prov_avg,
+            'yoy_change': yoy, 'mom_change': mom,
+            'recommendations': recommendations,
+            'explanation': explanation,
+            'regional_analysis': regional,
+        })
+
+    risk_counts = {'low': 0, 'medium': 0, 'high': 0}
+    for fm in forecast_months:
+        if fm['prediction']:
+            risk_counts[fm['prediction'].risk_level] = risk_counts.get(fm['prediction'].risk_level, 0) + 1
+
+    risk_level = 'high' if risk_counts['high'] > 0 else \
+                 ('medium' if risk_counts['medium'] > 0 else
+                 ('low' if risk_counts['low'] > 0 else None))
+
+    recent_cases = DengueCase.query.filter_by(regency_id=regency.id)\
+        .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
+    monthly_trend = [{'month': f"{c.year}-{c.month:02d}", 'cases': c.cases} for c in reversed(recent_cases)]
+    prediction_trend = [
+        {'month': f"{fm['year']}-{fm['month']:02d}",
+         'cases': round(float(fm['prediction'].predicted_cases), 1) if fm['prediction'] else None}
+        for fm in forecast_months
+    ]
+
+    return {
+        'regency': regency,
+        'latest_year': latest_year,
+        'latest_month': latest_month,
+        'forecast_months': forecast_months,
+        'risk_counts': risk_counts,
+        'risk_level': risk_level,
+        'monthly_trend': monthly_trend,
+        'prediction_trend': prediction_trend,
+    }
+
+
+@admin.route('/risk-monitor')
+@admin_required
+def risk_monitor():
+    """Provincial risk monitor overview — compact card per regency"""
+    regencies = Regency.query.filter_by(is_active=True).order_by(Regency.id).all()
+    regency_forecasts = []
+
+    for regency in regencies:
+        latest_case = DengueCase.query.filter_by(regency_id=regency.id)\
+            .order_by(DengueCase.year.desc(), DengueCase.month.desc()).first()
+        if latest_case:
+            latest_year, latest_month = latest_case.year, latest_case.month
+        else:
+            now = datetime.now()
+            latest_year, latest_month = now.year, now.month
+
+        # Only need 3-month risk summary + trend for overview
+        forecast_months_summary = []
+        py, pm = latest_year, latest_month
+        for _ in range(3):
+            pm += 1
+            if pm > 12:
+                pm = 1
+                py += 1
+            pred = Prediction.query.filter_by(regency_id=regency.id, year=py, month=pm).first()
+            forecast_months_summary.append({
+                'year': py, 'month': pm,
+                'month_name': MONTH_NAMES_LIST[pm - 1],
+                'prediction': pred,
+            })
+
+        risk_counts = {'low': 0, 'medium': 0, 'high': 0}
+        for fm in forecast_months_summary:
+            if fm['prediction']:
+                risk_counts[fm['prediction'].risk_level] = risk_counts.get(fm['prediction'].risk_level, 0) + 1
+
+        risk_level = 'high' if risk_counts['high'] > 0 else \
+                     ('medium' if risk_counts['medium'] > 0 else
+                     ('low' if risk_counts['low'] > 0 else None))
+
+        recent_cases = DengueCase.query.filter_by(regency_id=regency.id)\
+            .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
+        monthly_trend = [{'month': f"{c.year}-{c.month:02d}", 'cases': c.cases} for c in reversed(recent_cases)]
+        prediction_trend = [
+            {'month': f"{fm['year']}-{fm['month']:02d}",
+             'cases': round(float(fm['prediction'].predicted_cases), 1) if fm['prediction'] else None}
+            for fm in forecast_months_summary
+        ]
+
+        regency_forecasts.append({
+            'regency': regency,
+            'latest_year': latest_year,
+            'latest_month': latest_month,
+            'forecast_months': forecast_months_summary,
+            'risk_counts': risk_counts,
+            'risk_level': risk_level,
+            'monthly_trend': monthly_trend,
+            'prediction_trend': prediction_trend,
+        })
+
+    province_risk = {'low': 0, 'medium': 0, 'high': 0}
+    for rf in regency_forecasts:
+        if rf['risk_level']:
+            province_risk[rf['risk_level']] = province_risk.get(rf['risk_level'], 0) + 1
+
+    return render_template('admin/risk_monitor.html',
+                           regency_forecasts=regency_forecasts,
+                           province_risk=province_risk,
+                           month_names=MONTH_NAMES_LIST)
+
+
+@admin.route('/risk-monitor/<int:regency_id>')
+@admin_required
+def risk_monitor_detail(regency_id):
+    """Full 3-month risk analysis for a single regency"""
+    regency = Regency.query.get_or_404(regency_id)
+    rf = _build_regency_forecast(regency)
+    return render_template('admin/risk_monitor_detail.html',
+                           rf=rf,
+                           month_names=MONTH_NAMES_LIST)
+
+
+def _risk_explanation_admin(predicted_cases, last_year_case, climate, ndvi):
+    parts = [f"The AI model predicts {predicted_cases:.0f} dengue cases for this month."]
+    if last_year_case and last_year_case.cases > 0:
+        chg = ((predicted_cases - last_year_case.cases) / last_year_case.cases) * 100
+        if chg > 20:
+            parts.append(f"This is {chg:.0f}% higher than the same month last year "
+                         f"({last_year_case.cases} cases), indicating an elevated risk trend.")
+        elif chg < -20:
+            parts.append(f"This is {abs(chg):.0f}% lower than the same month last year "
+                         f"({last_year_case.cases} cases), suggesting improving conditions.")
+        else:
+            parts.append(f"This is comparable to the same month last year ({last_year_case.cases} cases).")
+    env = []
+    if climate:
+        if climate.temperature_avg and 25 <= climate.temperature_avg <= 30:
+            env.append(f"temperature ({climate.temperature_avg:.1f}°C) in the optimal range for mosquito breeding")
+        if climate.precipitation_total and climate.precipitation_total > 100:
+            env.append(f"high rainfall ({climate.precipitation_total:.0f} mm) creating breeding sites")
+        elif climate.precipitation_total and climate.precipitation_total > 50:
+            env.append(f"moderate rainfall ({climate.precipitation_total:.0f} mm)")
+        if climate.humidity and climate.humidity > 80:
+            env.append(f"high humidity ({climate.humidity:.0f}%) favouring mosquito survival")
+    if ndvi and ndvi.ndvi_value and ndvi.ndvi_value > 0.4:
+        env.append(f"dense vegetation (NDVI {ndvi.ndvi_value:.3f}) providing larval habitat")
+    if env:
+        parts.append("Contributing environmental factors: " + "; ".join(env) + ".")
+    elif not climate:
+        parts.append("Environmental context is based on the same calendar month from the previous year.")
+    return " ".join(parts)
+
+
+def _regional_analysis_admin(regency_name, predicted_cases, prov_avg, last_year_case):
+    parts = [f"{regency_name} is forecast at {predicted_cases:.0f} cases."]
+    if prov_avg:
+        ratio = predicted_cases / prov_avg
+        if ratio > 1.2:
+            parts.append(f"This is {((ratio-1)*100):.0f}% above the DIY provincial average "
+                         f"({prov_avg:.0f} cases), indicating a higher-than-average burden.")
+        elif ratio < 0.8:
+            parts.append(f"This is {((1-ratio)*100):.0f}% below the DIY provincial average "
+                         f"({prov_avg:.0f} cases), suggesting relatively lower risk.")
+        else:
+            parts.append(f"This aligns with the DIY provincial average of {prov_avg:.0f} cases.")
+    if last_year_case:
+        parts.append(f"For reference, the same month last year recorded {last_year_case.cases} actual cases.")
+    return " ".join(parts)
 
 
 # Import pandas for exports

@@ -97,6 +97,13 @@
           <span class="nav-text">Predictions</span>
         </a>
       </div>
+      <div class="nav-item-wrapper">
+        <a class="nav-link-item {% if request.endpoint == 'admin.risk_monitor' %}active{% endif %}"
+           href="{{ url_for('admin.risk_monitor') }}">
+          <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
+          <span class="nav-text">Risk Monitor</span>
+        </a>
+      </div>
 
       <div class="nav-section-label">System</div>
       <div class="nav-item-wrapper">
