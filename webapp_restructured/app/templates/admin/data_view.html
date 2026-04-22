@@ -132,7 +132,7 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="10" class="text-center text-muted">No data available</td>
+                            <td colspan="10" class="text-center text-muted">{{ t('common.no_data_available') }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -536,34 +536,52 @@ function openNDVIDetail(e) {
 
     // Determine category, color, and interpretation based on NDVI range
     let category, color, bgColor, textColor, interpText;
+    const _ndviLabels = {
+      nodata:    {{ t('common.no_data') | tojson }},
+      water:     'Water / Non-Vegetated',
+      bare:      {{ t('ndvi.bare_soil') | tojson }},
+      sparse:    {{ t('ndvi.sparse') | tojson }},
+      moderate:  {{ t('ndvi.moderate') | tojson }},
+      dense:     {{ t('ndvi.dense') | tojson }},
+      very_dense:{{ t('ndvi.very_dense') | tojson }}
+    };
+    const _ndviDesc = {
+      nodata:    {{ t('common.no_data_available') | tojson }},
+      water:     'Negative NDVI typically indicates water bodies, clouds, or highly reflective non-vegetated surfaces.',
+      bare:      {{ t('ndvi.bare_soil_desc') | tojson }},
+      sparse:    {{ t('ndvi.sparse_desc') | tojson }},
+      moderate:  {{ t('ndvi.moderate_desc') | tojson }},
+      dense:     {{ t('ndvi.dense_desc') | tojson }},
+      very_dense:{{ t('ndvi.very_dense_desc') | tojson }}
+    };
     if (v === null || v === undefined) {
-        category = 'No Data';
+        category = _ndviLabels.nodata;
         color = '#6b7280'; bgColor = '#f3f4f6'; textColor = '#374151';
-        interpText = 'No NDVI value is available for this record.';
+        interpText = _ndviDesc.nodata;
     } else if (v < 0) {
-        category = 'Water / Non-Vegetated';
+        category = _ndviLabels.water;
         color = '#1d4ed8'; bgColor = '#dbeafe'; textColor = '#1e40af';
-        interpText = 'Negative NDVI typically indicates water bodies, clouds, or highly reflective non-vegetated surfaces such as snow or built-up areas.';
+        interpText = _ndviDesc.water;
     } else if (v < 0.1) {
-        category = 'Bare Soil / Built-up';
+        category = _ndviLabels.bare;
         color = '#78716c'; bgColor = '#f5f5f4'; textColor = '#44403c';
-        interpText = 'Very low NDVI indicates bare soil, rock, sand, or urban surfaces with little to no vegetation cover.';
+        interpText = _ndviDesc.bare;
     } else if (v < 0.2) {
-        category = 'Sparse Vegetation';
+        category = _ndviLabels.sparse;
         color = '#b45309'; bgColor = '#fef3c7'; textColor = '#92400e';
-        interpText = 'Low NDVI indicates sparse or stressed vegetation, such as dry grasslands or areas in the dry season with limited plant growth.';
+        interpText = _ndviDesc.sparse;
     } else if (v < 0.4) {
-        category = 'Moderate Vegetation';
+        category = _ndviLabels.moderate;
         color = '#65a30d'; bgColor = '#ecfccb'; textColor = '#3f6212';
-        interpText = 'Moderate NDVI indicates shrublands, grasslands, or agricultural land with moderate vegetation cover and reasonable health.';
+        interpText = _ndviDesc.moderate;
     } else if (v < 0.6) {
-        category = 'Dense Vegetation';
+        category = _ndviLabels.dense;
         color = '#16a34a'; bgColor = '#dcfce7'; textColor = '#14532d';
-        interpText = 'High NDVI indicates dense, healthy vegetation such as broadleaf forests or well-irrigated cropland with strong photosynthetic activity.';
+        interpText = _ndviDesc.dense;
     } else {
-        category = 'Very Dense Vegetation';
+        category = _ndviLabels.very_dense;
         color = '#14532d'; bgColor = '#bbf7d0'; textColor = '#052e16';
-        interpText = 'Very high NDVI indicates tropical rainforest or very dense, highly productive vegetation — typical for lush tropical regions.';
+        interpText = _ndviDesc.very_dense;
     }
 
     // Header

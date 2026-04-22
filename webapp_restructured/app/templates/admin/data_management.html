@@ -40,7 +40,7 @@
                 {% if stat.latest_dengue and stat.latest_dengue != 'N/A' %}
                   <span class="status-dot green"></span>{{ stat.latest_dengue }}
                 {% else %}
-                  <span class="status-dot red"></span><span style="color:var(--text-muted);">Missing</span>
+                  <span class="status-dot red"></span><span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
                 {% endif %}
               </div>
             </td>
@@ -49,7 +49,7 @@
                 {% if stat.latest_climate and stat.latest_climate != 'N/A' %}
                   <span class="status-dot green"></span>{{ stat.latest_climate }}
                 {% else %}
-                  <span class="status-dot yellow"></span><span style="color:var(--text-muted);">Missing</span>
+                  <span class="status-dot yellow"></span><span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
                 {% endif %}
               </div>
             </td>
@@ -58,7 +58,7 @@
                 {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}
                   <span class="status-dot green"></span>{{ stat.latest_ndvi }}
                 {% else %}
-                  <span class="status-dot red"></span><span style="color:var(--text-muted);">Missing</span>
+                  <span class="status-dot red"></span><span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
                 {% endif %}
               </div>
             </td>
@@ -118,7 +118,7 @@
           <div>
             <div style="font-weight:600;font-size:14px;">{{ stat.regency }}</div>
             <div style="font-size:12px;color:var(--text-muted);">
-              Latest: {{ stat.latest_dengue if stat.latest_dengue else 'No data' }}
+              {{ t('common.latest') }}: {{ stat.latest_dengue if stat.latest_dengue else t('common.no_data') }}
             </div>
           </div>
           <div style="display:flex;gap:8px;">
@@ -132,7 +132,7 @@
         </div>
         {% else %}
         <div style="grid-column:1/-1;" class="table-empty">
-          <i class="fas fa-database"></i>No regency data available
+          <i class="fas fa-database"></i>{{ t('page.data_management.no_regency_data') }}
         </div>
         {% endfor %}
       </div>
@@ -165,11 +165,11 @@
         <div>
           <h6 style="font-weight:600;margin-bottom:16px;">{{ t('page.data_management.manual_fetch') }}</h6>
           <div class="form-group">
-            <label class="form-label">Year</label>
+            <label class="form-label">{{ t('common.year') }}</label>
             <input type="number" id="climateYear" class="form-control" value="2026" min="2020" max="2050">
           </div>
           <div class="form-group">
-            <label class="form-label">Month</label>
+            <label class="form-label">{{ t('common.month') }}</label>
             <select id="climateMonth" class="form-select">
               {% for m in range(1, 13) %}
               <option value="{{ m }}">{{ t('month.' + ['january','february','march','april','may','june','july','august','september','october','november','december'][m-1]) }}</option>
@@ -177,9 +177,9 @@
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Regency</label>
+            <label class="form-label">{{ t('common.regency') }}</label>
             <select id="climateRegency" class="form-select">
-              <option value="all">All Regencies</option>
+              <option value="all">{{ t('common.all_regencies') }}</option>
               {% for stat in data_stats %}
               <option value="{{ stat.regency }}">{{ stat.regency }}</option>
               {% endfor %}
@@ -205,11 +205,11 @@
               <span class="label-name" style="font-size:12.5px;">{{ stat.regency }}</span>
               <div style="display:flex;align-items:center;gap:8px;">
                 <span class="label-value">
-                  {% if stat.latest_climate and stat.latest_climate != 'N/A' %}{{ stat.latest_climate }}{% else %}No data{% endif %}
+                  {% if stat.latest_climate and stat.latest_climate != 'N/A' %}{{ stat.latest_climate }}{% else %}{{ t('common.no_data') }}{% endif %}
                 </span>
                 <a href="{{ url_for('admin.view_data', data_type='climate', regency_id=stat.regency_id) }}"
                    class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;line-height:1.4;">
-                  <i class="fas fa-eye"></i> View
+                  <i class="fas fa-eye"></i> {{ t('common.view') }}
                 </a>
               </div>
             </div>
@@ -270,12 +270,12 @@
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Year</label>
+              <label class="form-label">{{ t('common.year') }}</label>
               <input type="number" id="ndviYear" class="form-control"
                      value="{{ now.year }}" min="2000" max="2100">
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Month</label>
+              <label class="form-label">{{ t('common.month') }}</label>
               <select id="ndviMonth" class="form-select">
                 {% for m, key in [(1,'january'),(2,'february'),(3,'march'),(4,'april'),(5,'may'),(6,'june'),(7,'july'),(8,'august'),(9,'september'),(10,'october'),(11,'november'),(12,'december')] %}
                 <option value="{{ m }}" {% if m == now.month %}selected{% endif %}>{{ t('month.' + key) }}</option>
@@ -326,11 +326,11 @@
               <span class="label-name" style="font-size:12.5px;">{{ stat.regency }}</span>
               <div style="display:flex;align-items:center;gap:8px;">
                 <span class="label-value">
-                  {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}{{ stat.latest_ndvi }}{% else %}No data{% endif %}
+                  {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}{{ stat.latest_ndvi }}{% else %}{{ t('common.no_data') }}{% endif %}
                 </span>
                 <a href="{{ url_for('admin.view_data', data_type='ndvi', regency_id=stat.regency_id) }}"
                    class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;line-height:1.4;">
-                  <i class="fas fa-eye"></i> View
+                  <i class="fas fa-eye"></i> {{ t('common.view') }}
                 </a>
               </div>
             </div>
@@ -357,11 +357,11 @@
       <div style="max-width:480px;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Start Year</label>
+            <label class="form-label">{{ t('common.start_year') }}</label>
             <input type="number" id="exportYearStart" class="form-control" value="2021" min="2018" max="2050">
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">End Year</label>
+            <label class="form-label">{{ t('common.end_year') }}</label>
             <input type="number" id="exportYearEnd" class="form-control" value="2025" min="2018" max="2050">
           </div>
         </div>
@@ -386,7 +386,7 @@
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Regency</label>
+          <label class="form-label">{{ t('common.regency') }}</label>
           <select id="addCaseRegency" class="form-select">
             {% for r in regencies %}
             <option value="{{ r.id }}">{{ r.name }}</option>
@@ -395,11 +395,11 @@
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group">
-            <label class="form-label">Year</label>
+            <label class="form-label">{{ t('common.year') }}</label>
             <input type="number" id="addCaseYear" class="form-control" min="2000" max="2100" value="{{ now.year if now else 2024 }}">
           </div>
           <div class="form-group">
-            <label class="form-label">Month</label>
+            <label class="form-label">{{ t('common.month') }}</label>
             <select id="addCaseMonth" class="form-select">
               {% for m, key in [(1,'january'),(2,'february'),(3,'march'),(4,'april'),(5,'may'),(6,'june'),(7,'july'),(8,'august'),(9,'september'),(10,'october'),(11,'november'),(12,'december')] %}
               <option value="{{ m }}">{{ t('month.' + key) }}</option>
@@ -408,11 +408,11 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Cases</label>
-          <input type="number" id="addCaseCases" class="form-control" min="0" placeholder="Number of dengue cases">
+          <label class="form-label">{{ t('common.cases') }}</label>
+          <input type="number" id="addCaseCases" class="form-control" min="0" placeholder="{{ t('common.number_of_cases') }}">
         </div>
         <div class="form-group">
-          <label class="form-label">Notes <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          <label class="form-label">{{ t('common.notes') }} <span style="color:var(--text-muted);font-weight:400;">{{ t('common.optional') }}</span></label>
           <input type="text" id="addCaseNotes" class="form-control" placeholder="e.g. from SKDR">
         </div>
         <div id="addCaseResult"></div>

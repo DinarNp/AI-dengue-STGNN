@@ -124,6 +124,9 @@
   var actualPoints = {{ monthly_trend    | tojson }};
   var predPoints   = {{ prediction_trend | tojson }};
   var nActual = actualPoints.length;
+  var _tPredicted = {{ t('page.hd_dashboard.predicted_cases') | tojson }};
+  var _tActual    = {{ t('page.hd_dashboard.actual_cases') | tojson }};
+  var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
 
   var allLabels = [];
   var allData   = [];
@@ -141,7 +144,7 @@
     data: {
       labels: allLabels,
       datasets: [{
-        label: 'Cases',
+        label: {{ t('common.cases') | tojson }},
         data: allData,
         borderColor: '#ef4444',
         backgroundColor: 'rgba(239,68,68,0.07)',
@@ -177,8 +180,8 @@
           callbacks: {
             label: function(item) {
               if (item.raw === null || item.raw === undefined) return '';
-              var type = item.dataIndex >= nActual ? 'Predicted' : 'Actual';
-              return type + ': ' + item.raw + ' cases';
+              var type = item.dataIndex >= nActual ? _tPredicted : _tActual;
+              return type + ': ' + item.raw + ' ' + _tCases;
             }
           }
         }

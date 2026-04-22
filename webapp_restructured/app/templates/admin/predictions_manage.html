@@ -25,7 +25,7 @@
   <i class="fas fa-brain alert-icon"></i>
   <div class="alert-text">
     <div class="alert-title">{{ t('page.predictions.active_model_banner') }} {{ active_model.version_name }}</div>
-    {% if active_model.training_date %}{% set _d = active_model.training_date %}{% set _mn = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] %}{{ t('page.admin_dashboard.trained_on') }} {{ _d.day }} {{ _mn[_d.month] }} {{ _d.year }}{% else %}N/A{% endif %}
+    {% if active_model.training_date %}{% set _d = active_model.training_date %}{% set _mk = ['','january','february','march','april','may','june','july','august','september','october','november','december'] %}{{ t('page.admin_dashboard.trained_on') }} {{ _d.day }} {{ t('month.' + _mk[_d.month]) }} {{ _d.year }}{% else %}N/A{% endif %}
     &nbsp;·&nbsp; MAE: {{ "%.3f"|format(active_model.mae) if active_model.mae else 'N/A' }}
     &nbsp;·&nbsp; RMSE: {{ "%.3f"|format(active_model.rmse) if active_model.rmse else 'N/A' }}
     &nbsp;·&nbsp; R²: {{ "%.3f"|format(active_model.r2_score) if active_model.r2_score else 'N/A' }}
@@ -123,13 +123,13 @@
         <div class="form-group">
           <label class="form-label">{{ t('page.predictions.select_months') }}</label>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-            {% for m, name in [(1,'Jan'),(2,'Feb'),(3,'Mar'),(4,'Apr'),(5,'May'),(6,'Jun'),
-                               (7,'Jul'),(8,'Aug'),(9,'Sep'),(10,'Oct'),(11,'Nov'),(12,'Dec')] %}
+            {% for m, key in [(1,'jan'),(2,'feb'),(3,'mar'),(4,'apr'),(5,'may_short'),(6,'jun'),
+                               (7,'jul'),(8,'aug'),(9,'sep'),(10,'oct'),(11,'nov'),(12,'dec')] %}
             <label style="display:flex;align-items:center;gap:5px;font-size:12.5px;cursor:pointer;">
               <input type="checkbox" class="month-check form-check-input" value="{{ m }}"
                      {% if m in [5,6,7] %}checked{% endif %}
                      style="margin:0;">
-              {{ name }}
+              {{ t('month.' + key) }}
             </label>
             {% endfor %}
           </div>
@@ -220,8 +220,8 @@
     <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
       <div class="modal-body" style="text-align:center;padding:40px 32px;">
         <div style="width:56px;height:56px;border:4px solid var(--border-color);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;"></div>
-        <h5 style="font-weight:700;margin-bottom:6px;">Generating Predictions...</h5>
-        <p class="text-muted" style="font-size:13px;">Running STGNN model inference</p>
+        <h5 style="font-weight:700;margin-bottom:6px;">{{ t('page.predictions.generating_modal') }}</h5>
+        <p class="text-muted" style="font-size:13px;">{{ t('page.predictions.running_model') }}</p>
       </div>
     </div>
   </div>
@@ -234,8 +234,11 @@
 let loadingModal, deleteModal;
 let deletePendingYear = null, deletePendingMonth = null;
 
-const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni',
-                     'Juli','Agustus','September','Oktober','November','Desember'];
+const MONTH_NAMES = [
+  {% for key in ['january','february','march','april','may','june','july','august','september','october','november','december'] %}
+  {{ t('month.' + key) | tojson }}{% if not loop.last %},{% endif %}
+  {% endfor %}
+];
 
 document.addEventListener('DOMContentLoaded', function () {
   loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
@@ -358,7 +361,7 @@ function generateNextMonths() {
     setButtonLoading(btn, false);
 
     if (data.success) {
-      const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      const monthNames = MONTH_NAMES;
       let html = `<div class="alert-box success"><i class="fas fa-check-circle alert-icon"></i>
         <div class="alert-text"><div class="alert-title">${data.message}</div>`;
 
@@ -378,7 +381,7 @@ function generateNextMonths() {
           html += '</tbody></table>';
         } else {
           const errs = mr.result.errors || [];
-          html += `<p class="text-muted" style="font-size:12px;margin-top:4px;">${errs.join(' | ') || 'No predictions generated'}</p>`;
+          html += `<p class="text-muted" style="font-size:12px;margin-top:4px;">${errs.join(' | ') || {{ t('common.no_predictions') | tojson }}}</p>`;
         }
         html += '</div>';
       });

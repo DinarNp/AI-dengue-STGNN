@@ -58,7 +58,7 @@
           <tr>
             <th>{{ t('page.hd_reports.month_col') }}</th>
             <th>{{ t('page.hd_reports.cases_col') }}</th>
-            <th>Proportion</th>
+            <th>{{ t('common.proportion') }}</th>
             <th>{{ t('common.status') }}</th>
           </tr>
         </thead>
@@ -82,18 +82,18 @@
             </td>
             <td>
               {% if case.cases < 30 %}
-                <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low</span>
+                <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }}</span>
               {% elif case.cases < 60 %}
-                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium</span>
+                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }}</span>
               {% else %}
-                <span class="risk-badge risk-high"><span class="risk-dot high"></span>High</span>
+                <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }}</span>
               {% endif %}
             </td>
           </tr>
           {% else %}
           <tr>
             <td colspan="4" class="table-empty">
-              <i class="fas fa-database"></i> No data available for {{ selected_year }}
+              <i class="fas fa-database"></i> {{ t('page.hd_reports.no_data') }}
             </td>
           </tr>
           {% endfor %}
@@ -114,7 +114,7 @@ if (yearlyCtx) {
     data: {
       labels: {{ yearly_stats | map(attribute='year') | list | tojson }},
       datasets: [{
-        label: 'Total Cases',
+        label: {{ t('page.hd_reports.total_cases') | tojson }},
         data: {{ yearly_stats | map(attribute='total_cases') | list | tojson }},
         backgroundColor: 'rgba(14,165,233,0.7)',
         borderColor: '#0ea5e9',

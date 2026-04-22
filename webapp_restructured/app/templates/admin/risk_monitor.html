@@ -217,7 +217,7 @@ var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
         tooltip: { callbacks: {
           label: function(item) {
             if (item.raw === null || item.raw === undefined) return '';
-            return (item.dataIndex >= nActual ? 'Predicted' : 'Actual') + ': ' + item.raw + ' cases';
+            return (item.dataIndex >= nActual ? _tPredicted : _tActual) + ': ' + item.raw + ' ' + _tCases;
           }
         }}
       },

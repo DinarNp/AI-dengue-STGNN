@@ -226,7 +226,7 @@ const regencyColors = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444'];
       maintainAspectRatio: true,
       plugins: { legend: { display: false }, tooltip: { callbacks: {
         title: function(items) { return items[0].label; },
-        label: function(item) { return item.raw + ' cases'; }
+        label: function(item) { return item.raw + ' ' + {{ t('page.risk_monitor.cases_suffix') | tojson }}; }
       }}},
       scales: {
         x: { display: false },
