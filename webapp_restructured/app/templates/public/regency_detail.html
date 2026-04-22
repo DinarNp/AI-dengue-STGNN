@@ -1,57 +1,57 @@
 {% extends "base.html" %}
 
-{% block title %}{{ regency.name }} - Details{% endblock %}
+{% block title %}{{ regency.name }} - {{ t('public.regency_detail_title') }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="row mb-3">
         <div class="col-12">
             <a href="{{ url_for('public.dashboard') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                <i class="fas fa-arrow-left"></i> {{ t('public.back_to_dashboard') }}
             </a>
         </div>
     </div>
-    
+
     <h2><i class="fas fa-map-marker-alt"></i> {{ regency.name }}</h2>
     <hr>
-    
+
     <!-- Regency Info -->
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5>Information</h5>
-                    <p><strong>Population:</strong> {{ "{:,}".format(regency.population) if regency.population else 'N/A' }}</p>
-                    <p><strong>Area:</strong> {{ regency.area_km2 }} km²</p>
-                    <p><strong>Coordinates:</strong> {{ "%.4f"|format(regency.latitude) }}, {{ "%.4f"|format(regency.longitude) }}</p>
+                    <h5>{{ t('public.information') }}</h5>
+                    <p><strong>{{ t('common.population') }}:</strong> {{ "{:,}".format(regency.population) if regency.population else 'N/A' }}</p>
+                    <p><strong>{{ t('public.area') }}:</strong> {{ regency.area_km2 }} km²</p>
+                    <p><strong>{{ t('common.coordinates') }}:</strong> {{ "%.4f"|format(regency.latitude) }}, {{ "%.4f"|format(regency.longitude) }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <h5>Monthly Trend</h5>
+                    <h5>{{ t('public.monthly_trend_chart') }}</h5>
                     <canvas id="monthlyTrendChart" height="100"></canvas>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Yearly Statistics -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5>Yearly Statistics</h5>
+                    <h5>{{ t('public.yearly_stats') }}</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Year</th>
-                                <th>Total Cases</th>
-                                <th>Average per Month</th>
-                                <th>Peak Cases</th>
+                                <th>{{ t('common.year') }}</th>
+                                <th>{{ t('public.total_cases') }}</th>
+                                <th>{{ t('common.avg_per_month') }}</th>
+                                <th>{{ t('common.peak_cases') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -75,14 +75,14 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>Recent Dengue Cases</h5>
+                    <h5>{{ t('public.recent_cases_table') }}</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Cases</th>
+                                <th>{{ t('common.date') }}</th>
+                                <th>{{ t('common.cases') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -101,15 +101,15 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>Predictions</h5>
+                    <h5>{{ t('common.predictions') }}</h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Predicted</th>
-                                <th>Risk</th>
+                                <th>{{ t('common.date') }}</th>
+                                <th>{{ t('public.predicted_short') }}</th>
+                                <th>{{ t('risk.level') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -118,14 +118,15 @@
                                 <td>{{ pred.year }}-{{ "%02d"|format(pred.month) }}</td>
                                 <td><strong>{{ "%.0f"|format(pred.predicted_cases) }}</strong></td>
                                 <td>
-                                    <span class="risk-badge risk-{{ pred.risk_level.replace('_', '-') }}">
-                                        {{ pred.risk_level.replace('_', ' ').upper() }}
+                                    {% set rl = pred.risk_level %}
+                                    <span class="risk-badge risk-{{ rl.replace('_', '-') }}">
+                                        {{ t('risk.' + rl) if rl in ('low','medium','high') else rl.replace('_',' ').upper() }}
                                     </span>
                                 </td>
                             </tr>
                             {% else %}
                             <tr>
-                                <td colspan="3" class="text-center text-muted">No predictions available</td>
+                                <td colspan="3" class="text-center text-muted">{{ t('public.no_predictions_available') }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Statistics — Explain Dengue{% endblock %}
+{% block title %}{{ t('public.statistics_title') }} — Explain Dengue{% endblock %}
 
 {% block breadcrumb %}
-<li class="breadcrumb-item active">Statistics</li>
+<li class="breadcrumb-item active">{{ t('nav.statistics') }}</li>
 {% endblock %}
 
 {% block content %}
@@ -12,11 +12,11 @@
 <!-- Page Header -->
 <div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
   <div>
-    <h1 class="page-title"><i class="fas fa-chart-pie" style="color:var(--secondary);margin-right:8px;"></i>Provincial Statistics</h1>
-    <p class="page-subtitle">Comprehensive dengue statistics for Yogyakarta Special Region</p>
+    <h1 class="page-title"><i class="fas fa-chart-pie" style="color:var(--secondary);margin-right:8px;"></i>{{ t('public.statistics_title') }}</h1>
+    <p class="page-subtitle">{{ t('public.statistics_subtitle') }}</p>
   </div>
   <div>
-    <span class="pill"><i class="fas fa-calendar" style="margin-right:5px;"></i>Year: {{ current_year }}</span>
+    <span class="pill"><i class="fas fa-calendar" style="margin-right:5px;"></i>{{ t('common.year') }}: {{ current_year }}</span>
   </div>
 </div>
 
@@ -26,15 +26,15 @@
     <div class="stat-icon icon-primary"><i class="fas fa-virus"></i></div>
     <div class="stat-content">
       <div class="stat-value" data-counter="{{ total_cases_this_year }}">{{ total_cases_this_year }}</div>
-      <div class="stat-label">Total Cases {{ current_year }}</div>
+      <div class="stat-label">{{ t('public.total_cases') }} {{ current_year }}</div>
     </div>
   </div>
 
   <div class="stat-card border-left-warning">
-    <div class="stat-icon icon-warning"><i class="fas fa-calendar-exclamation"></i></div>
+    <div class="stat-icon icon-warning"><i class="fas fa-calendar-alt"></i></div>
     <div class="stat-content">
       <div class="stat-value" style="font-size:20px;">{{ highest_risk_month }}</div>
-      <div class="stat-label">Highest Risk Month</div>
+      <div class="stat-label">{{ t('public.highest_risk_month') }}</div>
     </div>
   </div>
 
@@ -42,7 +42,7 @@
     <div class="stat-icon icon-success"><i class="fas fa-city"></i></div>
     <div class="stat-content">
       <div class="stat-value">5</div>
-      <div class="stat-label">Regencies Monitored</div>
+      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
     </div>
   </div>
 </div>
@@ -50,7 +50,7 @@
 <!-- ===== CHARTS ROW 1: Yearly Comparison ===== -->
 <div class="card mb-20">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>Yearly Comparison</h5>
+    <h5 class="card-header-title"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>{{ t('public.yearly_comparison') }}</h5>
   </div>
   <div class="card-body">
     <div class="chart-container" style="height:260px;">
@@ -64,7 +64,7 @@
 
   <div class="card" style="margin-bottom:0;">
     <div class="card-header">
-      <h5 class="card-header-title"><i class="fas fa-chart-line" style="color:var(--success);margin-right:8px;"></i>Monthly Pattern (Average)</h5>
+      <h5 class="card-header-title"><i class="fas fa-chart-line" style="color:var(--success);margin-right:8px;"></i>{{ t('public.monthly_pattern') }}</h5>
     </div>
     <div class="card-body">
       <div class="chart-container" style="height:240px;">
@@ -75,7 +75,7 @@
 
   <div class="card" style="margin-bottom:0;">
     <div class="card-header">
-      <h5 class="card-header-title"><i class="fas fa-map" style="color:var(--secondary);margin-right:8px;"></i>Regency Comparison {{ current_year }}</h5>
+      <h5 class="card-header-title"><i class="fas fa-map" style="color:var(--secondary);margin-right:8px;"></i>{{ t('public.regency_comparison') }} {{ current_year }}</h5>
     </div>
     <div class="card-body">
       <div class="chart-container" style="height:240px;">
@@ -89,11 +89,11 @@
 <!-- ===== DATA TABLE ===== -->
 <div class="card">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>Regency Details — {{ current_year }}</h5>
+    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('public.regency_details') }} — {{ current_year }}</h5>
     <div class="card-header-actions">
       <div class="table-search">
         <i class="fas fa-search search-icon"></i>
-        <input type="text" class="form-control" id="tableSearch" placeholder="Search regency...">
+        <input type="text" class="form-control" id="tableSearch" placeholder="{{ t('public.search_regency') }}">
       </div>
     </div>
   </div>
@@ -103,10 +103,10 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Regency</th>
-            <th>Total Cases</th>
-            <th>Risk Status</th>
-            <th>Proportion</th>
+            <th>{{ t('common.regency') }}</th>
+            <th>{{ t('public.total_cases') }}</th>
+            <th>{{ t('common.risk_status') }}</th>
+            <th>{{ t('common.proportion') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -119,13 +119,13 @@
             <td><span style="font-weight:600;font-size:15px;">{{ item.total_cases | int }}</span></td>
             <td>
               {% if item.total_cases < 300 %}
-                <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low</span>
+                <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }}</span>
               {% elif item.total_cases < 600 %}
-                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium</span>
+                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }}</span>
               {% elif item.total_cases < 900 %}
-                <span class="risk-badge risk-high"><span class="risk-dot high"></span>High</span>
+                <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }}</span>
               {% else %}
-                <span class="risk-badge risk-very-high"><span class="risk-dot very-high"></span>Very High</span>
+                <span class="risk-badge risk-very-high"><span class="risk-dot very-high"></span>{{ t('risk.very_high') }}</span>
               {% endif %}
             </td>
             <td style="min-width:160px;">

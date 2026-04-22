@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Outbreak Dashboard — Explain Dengue{% endblock %}
+{% block title %}{{ t('public.outbreak_title') }} — Explain Dengue{% endblock %}
 
 {% block breadcrumb %}
-<li class="breadcrumb-item active">Public Dashboard</li>
+<li class="breadcrumb-item active">{{ t('public.dashboard_title') }}</li>
 {% endblock %}
 
 {% block content %}
@@ -12,13 +12,13 @@
 <!-- Page Header -->
 <div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
   <div>
-    <h1 class="page-title"><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>Dengue Outbreak Dashboard</h1>
-    <p class="page-subtitle">Real-time dengue situation across Yogyakarta Special Region</p>
+    <h1 class="page-title"><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>{{ t('public.outbreak_title') }}</h1>
+    <p class="page-subtitle">{{ t('public.outbreak_subtitle') }}</p>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    <span class="pill"><i class="fas fa-clock" style="margin-right:5px;color:var(--success);"></i>Updated: {{ moment().format('D MMM YYYY') if moment else 'Today' }}</span>
+    <span class="pill"><i class="fas fa-clock" style="margin-right:5px;color:var(--success);"></i>{{ t('public.updated') }}: {{ moment().format('D MMM YYYY') if moment else t('public.today') }}</span>
     <a href="{{ url_for('public.statistics') }}" class="btn btn-outline-secondary btn-sm">
-      <i class="fas fa-chart-pie"></i> Statistics
+      <i class="fas fa-chart-pie"></i> {{ t('nav.statistics') }}
     </a>
   </div>
 </div>
@@ -29,7 +29,7 @@
     <div class="stat-icon icon-primary"><i class="fas fa-virus"></i></div>
     <div class="stat-content">
       <div class="stat-value" data-counter="{{ provincial_total }}">{{ provincial_total }}</div>
-      <div class="stat-label">Total Cases This Year</div>
+      <div class="stat-label">{{ t('public.total_cases_year') }}</div>
     </div>
   </div>
 
@@ -50,7 +50,7 @@
           N/A
         {% endif %}
       </div>
-      <div class="stat-label">Highest Case Load</div>
+      <div class="stat-label">{{ t('public.highest_case_load') }}</div>
     </div>
   </div>
 
@@ -62,7 +62,7 @@
         {% for d in regency_data %}{% if d.latest_prediction %}{% set pred_count.n = pred_count.n + 1 %}{% endif %}{% endfor %}
         {{ pred_count.n }}/5
       </div>
-      <div class="stat-label">Active Predictions</div>
+      <div class="stat-label">{{ t('public.active_predictions') }}</div>
     </div>
   </div>
 
@@ -70,7 +70,7 @@
     <div class="stat-icon icon-secondary"><i class="fas fa-city"></i></div>
     <div class="stat-content">
       <div class="stat-value">5</div>
-      <div class="stat-label">Regency Monitored</div>
+      <div class="stat-label">{{ t('public.regency_monitored') }}</div>
     </div>
   </div>
 </div>
@@ -78,9 +78,9 @@
 <!-- ===== PROVINCIAL TREND CHART ===== -->
 <div class="card mb-20">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-wave-square" style="color:var(--primary);margin-right:8px;"></i>Provincial Trend — Last 12 Months</h5>
+    <h5 class="card-header-title"><i class="fas fa-wave-square" style="color:var(--primary);margin-right:8px;"></i>{{ t('public.provincial_trend') }}</h5>
     <div class="card-header-actions">
-      <span class="badge badge-primary">All Regency</span>
+      <span class="badge badge-primary">{{ t('public.all_regency') }}</span>
     </div>
   </div>
   <div class="card-body">
@@ -92,7 +92,7 @@
 
 <!-- ===== REGENCY CARDS GRID ===== -->
 <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-  <h5 style="font-weight:600;margin:0;">Regency Status</h5>
+  <h5 style="font-weight:600;margin:0;">{{ t('public.regency_status') }}</h5>
   <span class="pill">{{ current_year }} data</span>
 </div>
 
@@ -108,8 +108,9 @@
         <h6 style="margin:0;color:white;font-size:12.5px;font-weight:600;">{{ data.regency.name }}</h6>
       </div>
       {% if data.latest_prediction %}
-        <span class="risk-badge risk-{{ data.latest_prediction.risk_level.replace('_', '-') }}">
-          {{ data.latest_prediction.risk_level.replace('_', ' ').upper() }}
+        {% set rl = data.latest_prediction.risk_level %}
+        <span class="risk-badge risk-{{ rl.replace('_', '-') }}">
+          {{ t('risk.' + rl) if rl in ('low','medium','high') else rl.replace('_',' ').upper() }}
         </span>
       {% endif %}
     </div>
@@ -121,7 +122,7 @@
           <div style="font-size:22px;font-weight:700;color:var(--text-primary);">
             {% if data.latest_case %}{{ data.latest_case.cases }}{% else %}<span style="color:#94a3b8;">—</span>{% endif %}
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Latest Cases</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ t('public.latest_cases') }}</div>
           {% if data.latest_case %}
           <div style="font-size:10px;color:#94a3b8;">{{ data.latest_case.year }}-{{ "%02d"|format(data.latest_case.month) }}</div>
           {% endif %}
@@ -130,7 +131,7 @@
           <div style="font-size:22px;font-weight:700;color:var(--primary);">
             {% if data.latest_prediction %}{{ "%.0f"|format(data.latest_prediction.predicted_cases) }}{% else %}<span style="color:#94a3b8;">—</span>{% endif %}
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Predicted</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ t('public.predicted_short') }}</div>
           {% if data.latest_prediction %}
           <div style="font-size:10px;color:#94a3b8;">{{ data.latest_prediction.year }}-{{ "%02d"|format(data.latest_prediction.month) }}</div>
           {% endif %}
@@ -139,20 +140,20 @@
 
       <!-- Year total -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span style="font-size:12px;color:var(--text-muted);">Year total ({{ current_year }})</span>
-        <span style="font-weight:700;font-size:14px;">{{ data.year_total }} cases</span>
+        <span style="font-size:12px;color:var(--text-muted);">{{ t('public.year_total_label') }} ({{ current_year }})</span>
+        <span style="font-weight:700;font-size:14px;">{{ data.year_total }} {{ t('common.cases') }}</span>
       </div>
 
       <!-- Mini sparkline -->
       <div style="margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">6-Month Trend</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">{{ t('public.six_month_trend') }}</div>
         <canvas id="trendChart{{ loop.index }}" height="60"></canvas>
       </div>
     </div>
 
     <div class="card-footer" style="padding:10px 16px;">
       <a href="{{ url_for('public.regency_detail', regency_id=data.regency.id) }}" class="btn btn-primary btn-sm btn-w">
-        <i class="fas fa-eye"></i> View Details
+        <i class="fas fa-eye"></i> {{ t('public.view_details') }}
       </a>
     </div>
   </div>

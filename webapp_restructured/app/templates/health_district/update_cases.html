@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Case Data — {{ regency.name }}{% endblock %}
+{% block title %}{{ t('page.hd_update_cases.title') }} — {{ regency.name }}{% endblock %}
 
 {% block breadcrumb %}
-<li class="breadcrumb-item"><a href="{{ url_for('health_district.dashboard') }}">Dashboard</a></li>
-<li class="breadcrumb-item active">Case Data</li>
+<li class="breadcrumb-item"><a href="{{ url_for('health_district.dashboard') }}">{{ t('nav.dashboard') }}</a></li>
+<li class="breadcrumb-item active">{{ t('page.hd_update_cases.title') }}</li>
 {% endblock %}
 
 {% block content %}
@@ -14,12 +14,12 @@
   <div>
     <h1 class="page-title">
       <i class="fas fa-notes-medical" style="color:var(--primary);margin-right:8px;"></i>
-      Dengue Case Data — {{ regency.name }}
+      {{ t('page.hd_update_cases.title') }} — {{ regency.name }}
     </h1>
-    <p class="page-subtitle">View, add, and edit monthly dengue case data for your regency</p>
+    <p class="page-subtitle">{{ t('page.hd_update_cases.subtitle') }}</p>
   </div>
   <button class="btn btn-success" onclick="openAddModal()">
-    <i class="fas fa-plus"></i> Add Case Data
+    <i class="fas fa-plus"></i> {{ t('page.hd_update_cases.add_case') }}
   </button>
 </div>
 
@@ -28,28 +28,28 @@
   <div class="card" style="margin-bottom:0;">
     <div class="card-body" style="padding:16px 20px;">
       <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-        <i class="fas fa-calendar-alt" style="margin-right:4px;"></i> {{ selected_year }} Total Cases
+        <i class="fas fa-calendar-alt" style="margin-right:4px;"></i> {{ selected_year }} {{ t('page.hd_update_cases.year_total_label') }}
       </div>
       <div style="font-size:28px;font-weight:700;color:var(--primary);">{{ '{:,}'.format(total_selected_year) }}</div>
-      <div style="font-size:12px;color:var(--text-muted);">{{ cases|length }} month(s) recorded</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ cases|length }} {{ t('page.hd_update_cases.months_recorded') }}</div>
     </div>
   </div>
   <div class="card" style="margin-bottom:0;">
     <div class="card-body" style="padding:16px 20px;">
       <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-        <i class="fas fa-database" style="margin-right:4px;"></i> All-Time Total
+        <i class="fas fa-database" style="margin-right:4px;"></i> {{ t('page.hd_update_cases.all_time_total') }}
       </div>
       <div style="font-size:28px;font-weight:700;color:var(--text-primary);">{{ '{:,}'.format(total_all_time) }}</div>
-      <div style="font-size:12px;color:var(--text-muted);">across all recorded years</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ t('page.hd_update_cases.across_years') }}</div>
     </div>
   </div>
   <div class="card" style="margin-bottom:0;">
     <div class="card-body" style="padding:16px 20px;">
       <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
-        <i class="fas fa-map-marker-alt" style="margin-right:4px;"></i> Regency
+        <i class="fas fa-map-marker-alt" style="margin-right:4px;"></i> {{ t('common.regency') }}
       </div>
       <div style="font-size:18px;font-weight:700;color:var(--text-primary);">{{ regency.name }}</div>
-      <div style="font-size:12px;color:var(--text-muted);">{{ available_years|length }} year(s) of data</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ available_years|length }} {{ t('page.hd_update_cases.years_of_data') }}</div>
     </div>
   </div>
 </div>
@@ -59,19 +59,18 @@
   <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
     <h5 class="card-header-title">
       <i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>
-      Case Records — {{ selected_year }}
+      {{ t('page.hd_update_cases.case_records') }} — {{ selected_year }}
     </h5>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <!-- Year selector -->
       <form method="get" style="display:flex;align-items:center;gap:8px;margin:0;">
-        <label style="font-size:13px;color:var(--text-muted);white-space:nowrap;">View Year:</label>
+        <label style="font-size:13px;color:var(--text-muted);white-space:nowrap;">{{ t('page.hd_update_cases.year_filter') }}</label>
         <select name="year" class="form-select" style="width:auto;min-width:100px;" onchange="this.form.submit()">
           {% for y in available_years %}
           <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
           {% endfor %}
         </select>
       </form>
-      <span class="pill">{{ cases|length }} records</span>
+      <span class="pill">{{ cases|length }} {{ t('page.hd_update_cases.records') }}</span>
     </div>
   </div>
 
@@ -80,17 +79,19 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Period</th>
-            <th>Month</th>
-            <th>Cases</th>
-            <th>Notes</th>
-            <th>Last Updated</th>
-            <th style="width:100px;">Action</th>
+            <th>{{ t('common.period') }}</th>
+            <th>{{ t('common.month') }}</th>
+            <th>{{ t('common.cases') }}</th>
+            <th>{{ t('common.notes') }}</th>
+            <th>{{ t('common.last_updated') }}</th>
+            <th style="width:100px;">{{ t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          {% set month_names = ['','January','February','March','April','May','June',
-                                'July','August','September','October','November','December'] %}
+          {% set month_names = ['',
+            t('month.january'),t('month.february'),t('month.march'),t('month.april'),
+            t('month.may'),t('month.june'),t('month.july'),t('month.august'),
+            t('month.september'),t('month.october'),t('month.november'),t('month.december')] %}
           {% for case in cases %}
           <tr>
             <td><strong>{{ case.year }}-{{ "%02d"|format(case.month) }}</strong></td>
@@ -109,16 +110,16 @@
             <td>
               <button class="btn btn-sm btn-outline-primary"
                       onclick="openEditModal({{ case.id }}, {{ case.year }}, {{ case.month }}, {{ case.cases }})">
-                <i class="fas fa-edit"></i> Edit
+                <i class="fas fa-edit"></i> {{ t('common.edit') }}
               </button>
             </td>
           </tr>
           {% else %}
           <tr>
             <td colspan="6" class="table-empty">
-              <i class="fas fa-inbox"></i> No data for {{ selected_year }} yet.
+              <i class="fas fa-inbox"></i> {{ t('page.hd_update_cases.no_data_year') }}
               <button class="btn btn-sm btn-success ms-2" onclick="openAddModal()">
-                <i class="fas fa-plus"></i> Add now
+                <i class="fas fa-plus"></i> {{ t('page.hd_update_cases.add_now') }}
               </button>
             </td>
           </tr>
@@ -135,46 +136,46 @@
     <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
       <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
         <h5 class="modal-title">
-          <i class="fas fa-plus-circle" style="color:var(--success);margin-right:8px;"></i>Add Case Data
+          <i class="fas fa-plus-circle" style="color:var(--success);margin-right:8px;"></i>{{ t('page.hd_update_cases.add_case') }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="alert-box info mb-16">
           <i class="fas fa-map-marker-alt alert-icon"></i>
-          <div class="alert-text">Adding data for <strong>{{ regency.name }}</strong></div>
+          <div class="alert-text">{{ t('page.hd_update_cases.adding_for') }} <strong>{{ regency.name }}</strong></div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div class="form-group">
-            <label class="form-label">Year</label>
+            <label class="form-label">{{ t('common.year') }}</label>
             <input type="number" id="addYear" class="form-control"
                    value="{{ now.year }}" min="2000" max="2100">
           </div>
           <div class="form-group">
-            <label class="form-label">Month</label>
+            <label class="form-label">{{ t('common.month') }}</label>
             <select id="addMonth" class="form-select">
-              {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),
-                                 (5,'May'),(6,'June'),(7,'July'),(8,'August'),
-                                 (9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
-              <option value="{{ m }}" {% if m == now.month %}selected{% endif %}>{{ name }}</option>
+              {% for m, name in [(1,'month.january'),(2,'month.february'),(3,'month.march'),(4,'month.april'),
+                                 (5,'month.may'),(6,'month.june'),(7,'month.july'),(8,'month.august'),
+                                 (9,'month.september'),(10,'month.october'),(11,'month.november'),(12,'month.december')] %}
+              <option value="{{ m }}" {% if m == now.month %}selected{% endif %}>{{ t(name) }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Number of Cases</label>
+          <label class="form-label">{{ t('common.number_of_cases') }}</label>
           <input type="number" id="addCases" class="form-control" min="0" placeholder="e.g. 45">
         </div>
         <div class="form-group">
-          <label class="form-label">Notes <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+          <label class="form-label">{{ t('common.notes') }} <span style="color:var(--text-muted);font-weight:400;">{{ t('common.optional') }}</span></label>
           <input type="text" id="addNotes" class="form-control" placeholder="e.g. from SKDR report">
         </div>
         <div id="addResult"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
         <button type="button" class="btn btn-success" onclick="submitAdd()" id="addSubmitBtn">
-          <i class="fas fa-save"></i> Save
+          <i class="fas fa-save"></i> {{ t('common.save') }}
         </button>
       </div>
     </div>
@@ -187,22 +188,22 @@
     <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
       <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
         <h5 class="modal-title">
-          <i class="fas fa-edit" style="color:var(--primary);margin-right:8px;"></i>Edit Cases
+          <i class="fas fa-edit" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.hd_update_cases.edit_cases') }}
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <p class="text-muted mb-3" id="editInfo" style="font-size:14px;"></p>
         <div class="form-group">
-          <label class="form-label">Number of Cases</label>
+          <label class="form-label">{{ t('common.number_of_cases') }}</label>
           <input type="number" id="editCasesInput" class="form-control" min="0">
         </div>
         <div id="editResult"></div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
         <button type="button" class="btn btn-primary" onclick="submitEdit()" id="editSubmitBtn">
-          <i class="fas fa-save"></i> Update
+          <i class="fas fa-save"></i> {{ t('common.update') }}
         </button>
       </div>
     </div>

@@ -11,11 +11,11 @@
 
 <div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
   <div>
-    <h1 class="page-title"><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>Predictions Management</h1>
-    <p class="page-subtitle">Generate and manage dengue case predictions</p>
+    <h1 class="page-title"><i class="fas fa-chart-line" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.predictions.title') }}</h1>
+    <p class="page-subtitle">{{ t('page.predictions.subtitle') }}</p>
   </div>
   <a href="{{ url_for('admin.export_predictions') }}" class="btn btn-outline-secondary">
-    <i class="fas fa-file-csv"></i> Export All Predictions
+    <i class="fas fa-file-csv"></i> {{ t('page.predictions.export_all') }}
   </a>
 </div>
 
@@ -24,7 +24,7 @@
 <div class="alert-box success mb-20">
   <i class="fas fa-brain alert-icon"></i>
   <div class="alert-text">
-    <div class="alert-title">Active Model: {{ active_model.version_name }}</div>
+    <div class="alert-title">{{ t('page.predictions.active_model_banner') }} {{ active_model.version_name }}</div>
     Trained {{ active_model.training_date.strftime('%d %b %Y') if active_model.training_date else 'N/A' }}
     &nbsp;·&nbsp; MAE: {{ "%.3f"|format(active_model.mae) if active_model.mae else 'N/A' }}
     &nbsp;·&nbsp; RMSE: {{ "%.3f"|format(active_model.rmse) if active_model.rmse else 'N/A' }}
@@ -35,8 +35,8 @@
 <div class="alert-box warning mb-20">
   <i class="fas fa-exclamation-triangle alert-icon"></i>
   <div class="alert-text">
-    <div class="alert-title">No Active Model</div>
-    Please <a href="{{ url_for('admin.training') }}" style="color:var(--warning);font-weight:600;">train and activate a model</a> before generating predictions.
+    <div class="alert-title">{{ t('page.predictions.no_model_title') }}</div>
+    {{ t('page.predictions.no_model_desc') }}
   </div>
 </div>
 {% endif %}
@@ -44,19 +44,19 @@
 <!-- ===== GENERATE PREDICTIONS ===== -->
 <div class="card mb-20">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-play-circle" style="color:var(--success);margin-right:8px;"></i>Generate New Predictions</h5>
+    <h5 class="card-header-title"><i class="fas fa-play-circle" style="color:var(--success);margin-right:8px;"></i>{{ t('page.predictions.generate_title') }}</h5>
   </div>
   <div class="card-body">
 
     <div class="tab-nav" data-tabs="predTabs">
       <button class="tab-btn active" data-tab-target="tabSingle">
-        <i class="fas fa-calendar-day"></i> Single Month
+        <i class="fas fa-calendar-day"></i> {{ t('page.predictions.single_month') }}
       </button>
       <button class="tab-btn" data-tab-target="tabNextMonths">
-        <i class="fas fa-forward"></i> Next 3 Months
+        <i class="fas fa-forward"></i> {{ t('page.predictions.next_3_months') }}
       </button>
       <button class="tab-btn" data-tab-target="tabBatch">
-        <i class="fas fa-bolt"></i> Batch (Multiple Months)
+        <i class="fas fa-bolt"></i> {{ t('page.predictions.batch') }}
       </button>
     </div>
 
@@ -64,11 +64,11 @@
     <div class="tab-panel active" id="tabSingle">
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;max-width:520px;">
         <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Year</label>
+          <label class="form-label">{{ t('page.predictions.year') }}</label>
           <input type="number" id="singleYear" class="form-control" value="2026" min="2020" max="2030">
         </div>
         <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Month</label>
+          <label class="form-label">{{ t('page.predictions.month') }}</label>
           <select id="singleMonth" class="form-select">
             {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),
                                (7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
@@ -79,7 +79,7 @@
         <div>
           <label class="form-label">&nbsp;</label>
           <button class="btn btn-primary btn-w" id="singleBtn" onclick="generateSingle()">
-            <i class="fas fa-play"></i> Generate
+            <i class="fas fa-play"></i> {{ t('page.predictions.generate_btn') }}
           </button>
         </div>
       </div>
@@ -89,17 +89,15 @@
     <!-- Next 3 Months -->
     <div class="tab-panel" id="tabNextMonths">
       <p class="text-muted" style="font-size:13px;margin-bottom:12px;">
-        Enter the <strong>last month with actual data</strong>. The system will generate
-        predictions for the following 3 months in sequence, using each prediction as
-        input for the next month automatically.
+        {{ t('page.predictions.latest_desc1') }} <strong>{{ t('page.predictions.latest_desc2') }}</strong>. {{ t('page.predictions.latest_desc3') }}
       </p>
       <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;max-width:520px;">
         <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Latest Data Year</label>
+          <label class="form-label">{{ t('page.predictions.latest_data_year') }}</label>
           <input type="number" id="nextYear" class="form-control" value="2026" min="2020" max="2030">
         </div>
         <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Latest Data Month</label>
+          <label class="form-label">{{ t('page.predictions.latest_data_month') }}</label>
           <select id="nextMonth" class="form-select">
             {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),
                                (7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
@@ -110,7 +108,7 @@
         <div>
           <label class="form-label">&nbsp;</label>
           <button class="btn btn-success" id="nextBtn" onclick="generateNextMonths()">
-            <i class="fas fa-forward"></i> Generate Next 3 Months
+            <i class="fas fa-forward"></i> {{ t('page.predictions.generate_next_3') }}
           </button>
         </div>
       </div>
@@ -121,11 +119,11 @@
     <div class="tab-panel" id="tabBatch">
       <div style="display:grid;grid-template-columns:200px 1fr auto;gap:16px;align-items:start;max-width:760px;">
         <div class="form-group">
-          <label class="form-label">Year</label>
+          <label class="form-label">{{ t('page.predictions.year') }}</label>
           <input type="number" id="batchYear" class="form-control" value="2025" min="2020" max="2030">
         </div>
         <div class="form-group">
-          <label class="form-label">Select Months</label>
+          <label class="form-label">{{ t('page.predictions.select_months') }}</label>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
             {% for m, name in [(1,'Jan'),(2,'Feb'),(3,'Mar'),(4,'Apr'),(5,'May'),(6,'Jun'),
                                (7,'Jul'),(8,'Aug'),(9,'Sep'),(10,'Oct'),(11,'Nov'),(12,'Dec')] %}
@@ -140,7 +138,7 @@
         </div>
         <div style="margin-top:22px;">
           <button class="btn btn-success" id="batchBtn" onclick="generateBatch()">
-            <i class="fas fa-bolt"></i> Generate Batch
+            <i class="fas fa-bolt"></i> {{ t('page.predictions.generate_batch') }}
           </button>
         </div>
       </div>
@@ -154,17 +152,17 @@
 {% if recent_predictions %}
 <div class="card">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-list" style="color:var(--text-muted);margin-right:8px;"></i>Recent Predictions</h5>
+    <h5 class="card-header-title"><i class="fas fa-list" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('page.predictions.recent_predictions') }}</h5>
   </div>
   <div class="card-body" style="padding:0;">
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
           <tr>
-            <th>Period</th>
-            <th>Regencies</th>
-            <th>Avg Predicted Cases</th>
-            <th style="width:80px;text-align:center;">Action</th>
+            <th>{{ t('common.period') }}</th>
+            <th>{{ t('page.predictions.regencies_col') }}</th>
+            <th>{{ t('page.predictions.avg_predicted') }}</th>
+            <th style="width:80px;text-align:center;">{{ t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -200,17 +198,17 @@
           <div style="width:52px;height:52px;background:var(--danger-light,#fef2f2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
             <i class="fas fa-trash" style="color:var(--danger,#ef4444);font-size:20px;"></i>
           </div>
-          <h5 style="font-weight:700;margin-bottom:6px;">Delete Predictions</h5>
+          <h5 style="font-weight:700;margin-bottom:6px;">{{ t('page.predictions.delete_title') }}</h5>
           <p class="text-muted" style="font-size:13px;margin:0;">
-            Are you sure you want to delete all predictions for
+            {{ t('page.predictions.delete_confirm') }}
             <strong id="deleteLabel"></strong>?
-            This cannot be undone.
+            {{ t('page.predictions.delete_cannot_undo') }}
           </p>
         </div>
         <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
-          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
           <button class="btn btn-danger" id="confirmDeleteBtn" onclick="executeDelete()">
-            <i class="fas fa-trash"></i> Delete
+            <i class="fas fa-trash"></i> {{ t('common.delete') }}
           </button>
         </div>
       </div>

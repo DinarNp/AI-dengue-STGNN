@@ -1,24 +1,21 @@
 {% extends "base.html" %}
 
-{% block title %}About - Dengue Prediction System{% endblock %}
+{% block title %}{{ t('public.about_title') }} - Dengue Prediction System{% endblock %}
 
 {% block content %}
 <div class="public-content">
-    <h2><i class="fas fa-info-circle"></i> About the System</h2>
+    <h2><i class="fas fa-info-circle"></i> {{ t('public.about_title') }}</h2>
     <hr>
-    
+
     <!-- Overview -->
     <div class="row mb-5">
         <div class="col-md-8">
-            <h3>Dengue Prediction System</h3>
+            <h3>{{ t('public.about_overview') }}</h3>
             <p class="lead">
-                An AI-powered spatio-temporal prediction system for dengue fever cases 
-                in Yogyakarta Special Region, Indonesia.
+                {{ t('public.about_desc1') }}
             </p>
             <p>
-                This system leverages advanced machine learning techniques, specifically 
-                Spatio-Temporal Graph Neural Networks (STGNN), to predict dengue outbreaks 
-                by analyzing historical case data, climate variables, and environmental factors.
+                {{ t('public.about_desc2') }}
             </p>
         </div>
         <div class="col-md-4 text-center">
@@ -29,90 +26,76 @@
     <!-- How It Works -->
     <div class="row mb-5">
         <div class="col-12">
-            <h3><i class="fas fa-cogs"></i> How It Works</h3>
+            <h3><i class="fas fa-cogs"></i> {{ t('public.how_it_works') }}</h3>
             <div class="card">
                 <div class="card-body">
                     <ol class="fs-5">
                         <li class="mb-3">
-                            <strong>Data Collection:</strong> Historical dengue cases, climate data 
-                            (temperature, humidity, rainfall), and NDVI satellite vegetation indices
+                            <strong>{{ t('public.how_step1_title') }}</strong> {{ t('public.how_step1_desc') }}
                         </li>
                         <li class="mb-3">
-                            <strong>Spatial Analysis:</strong> Graph neural networks model relationships 
-                            between different regencies based on proximity and environmental similarity
+                            <strong>{{ t('public.how_step2_title') }}</strong> {{ t('public.how_step2_desc') }}
                         </li>
                         <li class="mb-3">
-                            <strong>Temporal Analysis:</strong> LSTM layers capture time-series patterns 
-                            and seasonal trends in dengue transmission
+                            <strong>{{ t('public.how_step3_title') }}</strong> {{ t('public.how_step3_desc') }}
                         </li>
                         <li class="mb-3">
-                            <strong>Prediction:</strong> The model generates monthly predictions with 
-                            confidence intervals and risk classifications
+                            <strong>{{ t('public.how_step4_title') }}</strong> {{ t('public.how_step4_desc') }}
                         </li>
                         <li>
-                            <strong>Recommendations:</strong> Automated health recommendations based on 
-                            predicted risk levels to support decision-making
+                            <strong>{{ t('public.how_step5_title') }}</strong> {{ t('public.how_step5_desc') }}
                         </li>
                     </ol>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Data Sources -->
     <div class="row mb-5">
         <div class="col-12">
-            <h3><i class="fas fa-database"></i> Data Sources</h3>
+            <h3><i class="fas fa-database"></i> {{ t('public.data_sources_title') }}</h3>
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5><i class="fas fa-hospital text-danger"></i> Dengue Cases</h5>
-                            <p>
-                                Monthly dengue case counts from health offices 
-                                across 5 regencies in Yogyakarta
-                            </p>
+                            <h5><i class="fas fa-hospital text-danger"></i> {{ t('public.dengue_cases_title') }}</h5>
+                            <p>{{ t('public.dengue_cases_desc') }}</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5><i class="fas fa-cloud-sun-rain text-primary"></i> Climate Data</h5>
-                            <p>
-                                Temperature, humidity, precipitation, and other 
-                                weather variables from NASA POWER and OpenWeather APIs
-                            </p>
+                            <h5><i class="fas fa-cloud-sun-rain text-primary"></i> {{ t('nav.climate_data') }}</h5>
+                            <p>{{ t('public.climate_data_desc') }}</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h5><i class="fas fa-satellite text-success"></i> NDVI Data</h5>
-                            <p>
-                                Normalized Difference Vegetation Index from 
-                                MODIS satellite imagery (NASA NEO)
-                            </p>
+                            <h5><i class="fas fa-satellite text-success"></i> {{ t('nav.ndvi_data') }}</h5>
+                            <p>{{ t('public.ndvi_data_desc') }}</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Coverage -->
     <div class="row mb-5">
         <div class="col-12">
-            <h3><i class="fas fa-map-marked-alt"></i> Coverage Area</h3>
-            <p>The system monitors dengue cases across all 5 regencies in Yogyakarta Special Region:</p>
+            <h3><i class="fas fa-map-marked-alt"></i> {{ t('public.coverage_area') }}</h3>
+            <p>{{ t('public.coverage_text') }}</p>
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead class="table-dark">
                         <tr>
-                            <th>Regency</th>
-                            <th>Population</th>
-                            <th>Area (km²)</th>
+                            <th>{{ t('public.regency_col') }}</th>
+                            <th>{{ t('common.population') }}</th>
+                            <th>{{ t('public.area_km2_col') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -150,19 +133,19 @@
     <!-- Technology -->
     <div class="row mb-5">
         <div class="col-12">
-            <h3><i class="fas fa-laptop-code"></i> Technology Stack</h3>
+            <h3><i class="fas fa-laptop-code"></i> {{ t('public.tech_stack') }}</h3>
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header bg-dark text-white">
-                            <strong>Backend</strong>
+                            <strong>{{ t('public.backend') }}</strong>
                         </div>
                         <div class="card-body">
                             <ul>
                                 <li>Flask 3.0 - Web framework</li>
                                 <li>PyTorch 2.1 - Deep learning</li>
                                 <li>SQLAlchemy - Database ORM</li>
-                                <li>Pandas & NumPy - Data processing</li>
+                                <li>Pandas &amp; NumPy - Data processing</li>
                             </ul>
                         </div>
                     </div>
@@ -170,7 +153,7 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header bg-dark text-white">
-                            <strong>Frontend</strong>
+                            <strong>{{ t('public.frontend') }}</strong>
                         </div>
                         <div class="card-body">
                             <ul>
@@ -185,58 +168,39 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Features -->
     <div class="row mb-5">
         <div class="col-12">
-            <h3><i class="fas fa-star"></i> Key Features</h3>
+            <h3><i class="fas fa-star"></i> {{ t('public.key_features') }}</h3>
             <div class="row">
                 <div class="col-md-6">
                     <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Real-time dengue monitoring
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> AI-powered predictions
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Risk level classification
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Interactive dashboards
-                        </li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.feature_realtime_title') }}</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.feature_ai_title') }}</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('risk.level') }}</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.outbreak_title') }}</li>
                     </ul>
                 </div>
                 <div class="col-md-6">
                     <ul class="list-group">
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Multi-user access control
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Automated data collection
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Health recommendations
-                        </li>
-                        <li class="list-group-item">
-                            <i class="fas fa-check text-success"></i> Public transparency
-                        </li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.feature_multi_role_title') }}</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.feature_climate_title') }}</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.feature_recommend_title') }}</li>
+                        <li class="list-group-item"><i class="fas fa-check text-success"></i> {{ t('public.about_title') }}</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Contact -->
     <div class="row">
         <div class="col-12">
             <div class="card bg-light">
                 <div class="card-body text-center">
-                    <h4>For More Information</h4>
-                    <p class="mb-0">
-                        This system is developed to support public health decision-making 
-                        in dengue prevention and control across Yogyakarta Special Region.
-                    </p>
+                    <h4>{{ t('public.contact_title') }}</h4>
+                    <p class="mb-0">{{ t('public.contact_desc') }}</p>
                 </div>
             </div>
         </div>

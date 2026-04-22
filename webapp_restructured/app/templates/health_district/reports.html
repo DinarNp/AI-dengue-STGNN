@@ -14,9 +14,9 @@
   <div>
     <h1 class="page-title">
       <i class="fas fa-file-alt" style="color:var(--primary);margin-right:8px;"></i>
-      Reports — {{ regency.name }}
+      {{ t('page.hd_reports.title') }} — {{ regency.name }}
     </h1>
-    <p class="page-subtitle">Statistical reports and analysis for your regency</p>
+    <p class="page-subtitle">{{ t('page.hd_reports.subtitle') }}</p>
   </div>
 </div>
 
@@ -24,7 +24,7 @@
 <div class="card mb-20">
   <div class="card-header">
     <h5 class="card-header-title">
-      <i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>Yearly Case Statistics
+      <i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.hd_reports.yearly_case_title') }}
     </h5>
   </div>
   <div class="card-body">
@@ -38,11 +38,11 @@
 <div class="card">
   <div class="card-header">
     <h5 class="card-header-title">
-      <i class="fas fa-chart-bar" style="color:var(--secondary);margin-right:8px;"></i>Monthly Breakdown — {{ selected_year }}
+      <i class="fas fa-chart-bar" style="color:var(--secondary);margin-right:8px;"></i>{{ t('page.hd_reports.title') }} — {{ selected_year }}
     </h5>
     <div class="card-header-actions" style="display:flex;align-items:center;gap:10px;">
-      <span class="pill">{{ monthly_breakdown | length }} months</span>
-      <label for="yearSelect" style="font-size:13px;color:var(--text-muted);margin:0;">Year:</label>
+      <span class="pill">{{ monthly_breakdown | length }} {{ t('page.hd_reports.months_label') }}</span>
+      <label for="yearSelect" style="font-size:13px;color:var(--text-muted);margin:0;">{{ t('page.hd_reports.year_label') }}</label>
       <select id="yearSelect" class="form-select form-select-sm" style="width:auto;"
               onchange="window.location.href='{{ url_for('health_district.view_reports') }}?year=' + this.value">
         {% for y in available_years %}
@@ -56,10 +56,10 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Month</th>
-            <th>Cases</th>
+            <th>{{ t('page.hd_reports.month_col') }}</th>
+            <th>{{ t('page.hd_reports.cases_col') }}</th>
             <th>Proportion</th>
-            <th>Status</th>
+            <th>{{ t('common.status') }}</th>
           </tr>
         </thead>
         <tbody>

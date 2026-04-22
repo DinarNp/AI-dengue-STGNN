@@ -10,8 +10,8 @@
 
 <!-- Page Header -->
 <div class="page-header">
-  <h1 class="page-title"><i class="fas fa-tachometer-alt" style="color:var(--primary);margin-right:8px;"></i>Admin Dashboard</h1>
-  <p class="page-subtitle">System overview and quick actions</p>
+  <h1 class="page-title"><i class="fas fa-tachometer-alt" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.admin_dashboard.title') }}</h1>
+  <p class="page-subtitle">{{ t('page.admin_dashboard.subtitle') }}</p>
 </div>
 
 <!-- ===== STAT CARDS ===== -->
@@ -21,7 +21,7 @@
     <div class="stat-icon icon-primary"><i class="fas fa-city"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ stats.total_regencies }}</div>
-      <div class="stat-label">Active Regency</div>
+      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
     </div>
   </div>
 
@@ -29,7 +29,7 @@
     <div class="stat-icon icon-danger"><i class="fas fa-notes-medical"></i></div>
     <div class="stat-content">
       <div class="stat-value" data-counter="{{ stats.total_cases }}">{{ stats.total_cases }}</div>
-      <div class="stat-label">Total Cases Recorded</div>
+      <div class="stat-label">{{ t('page.admin_dashboard.total_cases') }}</div>
     </div>
   </div>
 
@@ -48,13 +48,13 @@
     <div class="stat-content">
       <div class="stat-value" style="font-size:17px;">
         {% if active_model %}
-          <span style="color:var(--success);">Active</span>
+          <span style="color:var(--success);">{{ t('common.active') }}</span>
         {% else %}
-          <span style="color:var(--warning);">None</span>
+          <span style="color:var(--warning);">{{ t('page.admin_dashboard.no_model') }}</span>
         {% endif %}
       </div>
       <div class="stat-label">
-        {% if active_model %}{{ active_model.version_name | truncate(18, True) }}{% else %}No model loaded{% endif %}
+        {% if active_model %}{{ active_model.version_name | truncate(18, True) }}{% else %}{{ t('page.admin_dashboard.active_model') }}{% endif %}
       </div>
     </div>
   </div>
@@ -64,7 +64,7 @@
 <!-- ===== QUICK ACTIONS ===== -->
 <div class="card mb-20">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>Quick Actions</h5>
+    <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>{{ t('page.admin_dashboard.quick_actions') }}</h5>
   </div>
   <div class="card-body">
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
@@ -74,8 +74,8 @@
           <i class="fas fa-database" style="color:var(--primary);font-size:22px;"></i>
         </div>
         <div>
-          <div class="action-title">Manage Data</div>
-          <div class="action-desc">Cases, Climate, NDVI</div>
+          <div class="action-title">{{ t('nav.data_management') }}</div>
+          <div class="action-desc">{{ t('nav.case_data') }}, {{ t('nav.climate_data') }}, NDVI</div>
         </div>
       </a>
 
@@ -84,8 +84,8 @@
           <i class="fas fa-brain" style="color:var(--success);font-size:22px;"></i>
         </div>
         <div>
-          <div class="action-title">Train Model</div>
-          <div class="action-desc">Export data &amp; train STGNN</div>
+          <div class="action-title">{{ t('nav.model_training') }}</div>
+          <div class="action-desc">{{ t('page.training.step1_title') }}</div>
         </div>
       </a>
 
@@ -94,8 +94,8 @@
           <i class="fas fa-chart-line" style="color:var(--secondary);font-size:22px;"></i>
         </div>
         <div>
-          <div class="action-title">Predictions</div>
-          <div class="action-desc">Generate &amp; manage</div>
+          <div class="action-title">{{ t('nav.predictions') }}</div>
+          <div class="action-desc">{{ t('page.predictions.generate_title') }}</div>
         </div>
       </a>
 
@@ -104,8 +104,8 @@
           <i class="fas fa-file-alt" style="color:var(--warning);font-size:22px;"></i>
         </div>
         <div>
-          <div class="action-title">Activity Logs</div>
-          <div class="action-desc">View system operations</div>
+          <div class="action-title">{{ t('nav.activity_logs') }}</div>
+          <div class="action-desc">{{ t('page.admin_dashboard.recent_logs') }}</div>
         </div>
       </a>
 
@@ -117,10 +117,10 @@
 {% if data_stats %}
 <div class="card mb-20">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>Data Status by Kabupaten</h5>
+    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('page.admin_dashboard.data_status') }}</h5>
     <div class="card-header-actions">
       <a href="{{ url_for('admin.data_management') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="fas fa-external-link-alt"></i> Full View
+        <i class="fas fa-external-link-alt"></i> {{ t('common.view_all') }}
       </a>
     </div>
   </div>
@@ -129,11 +129,11 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Kabupaten</th>
-            <th>Cases Data</th>
-            <th>Climate Data</th>
-            <th>NDVI Data</th>
-            <th>Actions</th>
+            <th>{{ t('common.regency') }}</th>
+            <th>{{ t('page.data_management.latest_cases') }}</th>
+            <th>{{ t('page.data_management.latest_climate') }}</th>
+            <th>{{ t('page.data_management.latest_ndvi') }}</th>
+            <th>{{ t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -149,7 +149,7 @@
                   <span>{{ stat.latest_dengue }}</span>
                 {% else %}
                   <span class="status-dot red"></span>
-                  <span style="color:var(--text-muted);">No data</span>
+                  <span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
                 {% endif %}
               </div>
             </td>
@@ -160,7 +160,7 @@
                   <span>{{ stat.latest_climate }}</span>
                 {% else %}
                   <span class="status-dot yellow"></span>
-                  <span style="color:var(--text-muted);">No data</span>
+                  <span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
                 {% endif %}
               </div>
             </td>
@@ -171,20 +171,20 @@
                   <span>{{ stat.latest_ndvi }}</span>
                 {% else %}
                   <span class="status-dot red"></span>
-                  <span style="color:var(--text-muted);">No data</span>
+                  <span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
                 {% endif %}
               </div>
             </td>
             <td>
               <a href="{{ url_for('admin.data_management') }}" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-edit"></i> Update
+                <i class="fas fa-edit"></i> {{ t('common.edit') }}
               </a>
             </td>
           </tr>
           {% else %}
           <tr>
             <td colspan="5" class="table-empty">
-              <i class="fas fa-database"></i>No data statistics available
+              <i class="fas fa-database"></i>{{ t('common.no_data_available') }}
             </td>
           </tr>
           {% endfor %}
@@ -198,9 +198,9 @@
 <!-- ===== RECENT LOGS ===== -->
 <div class="card">
   <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-history" style="color:var(--text-muted);margin-right:8px;"></i>Recent Activity Logs</h5>
+    <h5 class="card-header-title"><i class="fas fa-history" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('page.admin_dashboard.recent_logs') }}</h5>
     <div class="card-header-actions">
-      <a href="{{ url_for('admin.view_logs') }}" class="btn btn-outline-secondary btn-sm">View All</a>
+      <a href="{{ url_for('admin.view_logs') }}" class="btn btn-outline-secondary btn-sm">{{ t('page.admin_dashboard.view_all_logs') }}</a>
     </div>
   </div>
   <div class="card-body" style="padding:0;">
@@ -208,11 +208,11 @@
       <table class="data-table">
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Process</th>
-            <th>Status</th>
+            <th>{{ t('common.date') }}</th>
+            <th>{{ t('common.type') }}</th>
+            <th>{{ t('common.status') }}</th>
             <th>Records</th>
-            <th>User</th>
+            <th>{{ t('page.logs.user_col') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -226,9 +226,9 @@
             </td>
             <td>
               {% if log.status == 'completed' %}
-                <span class="badge badge-success"><i class="fas fa-check-circle"></i> Completed</span>
+                <span class="badge badge-success"><i class="fas fa-check-circle"></i> {{ t('common.completed') }}</span>
               {% elif log.status == 'failed' %}
-                <span class="badge badge-danger"><i class="fas fa-times-circle"></i> Failed</span>
+                <span class="badge badge-danger"><i class="fas fa-times-circle"></i> {{ t('common.failed') }}</span>
               {% else %}
                 <span class="badge badge-warning"><i class="fas fa-clock"></i> {{ log.status }}</span>
               {% endif %}
@@ -239,7 +239,7 @@
           {% else %}
           <tr>
             <td colspan="5" class="table-empty">
-              <i class="fas fa-inbox"></i>No recent activity logs
+              <i class="fas fa-inbox"></i>{{ t('page.admin_dashboard.no_logs') }}
             </td>
           </tr>
           {% endfor %}

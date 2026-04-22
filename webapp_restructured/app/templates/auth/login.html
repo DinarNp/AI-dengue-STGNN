@@ -19,49 +19,47 @@
       <div class="auth-brand-icon"><i class="fas fa-virus"></i></div>
       <div>
         <div class="auth-brand-name">Explain Dengue</div>
-        <div class="auth-brand-sub">AI Prediction System</div>
+        <div class="auth-brand-sub">{{ t('auth.system') }}</div>
       </div>
     </div>
 
     <h1 class="auth-headline">
-      Predict. Monitor.<br>
-      <span style="color:var(--primary);">Protect.</span>
+      {{ t('auth.predict_monitor') }}<br>
+      <span style="color:var(--primary);">{{ t('auth.protect') }}</span>
     </h1>
 
     <p class="auth-desc">
-      AI-powered dengue prediction for Yogyakarta Special Region.
-      Supporting public health decisions across 5 regencies with
-      real-time outbreak risk monitoring.
+      {{ t('auth.description') }}
     </p>
 
     <div class="auth-features">
       <div class="auth-feature-item">
         <i class="fas fa-brain"></i>
-        Spatio-Temporal Graph Neural Network model
+        {{ t('auth.feature1') }}
       </div>
       <div class="auth-feature-item">
         <i class="fas fa-map-marked-alt"></i>
-        Full coverage: 5 regencies in DIY
+        {{ t('auth.feature2') }}
       </div>
       <div class="auth-feature-item">
         <i class="fas fa-cloud-sun-rain"></i>
-        Climate &amp; NDVI satellite data integration
+        {{ t('auth.feature3') }}
       </div>
       <div class="auth-feature-item">
         <i class="fas fa-shield-alt"></i>
-        Role-based access for health officers &amp; admins
+        {{ t('auth.feature4') }}
       </div>
     </div>
   </div>
 
   <!-- RIGHT: Login form -->
   <div class="auth-right">
-    <h2 class="auth-form-title">Welcome back</h2>
-    <p class="auth-form-subtitle">Sign in to your Explain Dengue account</p>
+    <h2 class="auth-form-title">{{ t('auth.login_title') }}</h2>
+    <p class="auth-form-subtitle">{{ t('auth.login_subtitle') }}</p>
 
     <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm">
       <div class="form-group">
-        <label class="form-label" for="username">Username</label>
+        <label class="form-label" for="username">{{ t('auth.username') }}</label>
         <div class="input-icon-wrapper">
           <i class="fas fa-user input-icon"></i>
           <input
@@ -69,7 +67,7 @@
             class="form-control"
             id="username"
             name="username"
-            placeholder="Enter your username"
+            placeholder="{{ t('auth.username') }}"
             autocomplete="username"
             required
             autofocus>
@@ -78,7 +76,7 @@
 
       <div class="form-group">
         <label class="form-label" for="password">
-          Password
+          {{ t('auth.password') }}
         </label>
         <div class="input-icon-wrapper" style="position:relative;">
           <i class="fas fa-lock input-icon"></i>
@@ -87,7 +85,7 @@
             class="form-control"
             id="password"
             name="password"
-            placeholder="Enter your password"
+            placeholder="{{ t('auth.password') }}"
             autocomplete="current-password"
             required
             style="padding-right:44px;">
@@ -99,21 +97,14 @@
         </div>
       </div>
 
-      <div class="form-group" style="display:flex;align-items:center;justify-content:space-between;">
-        <label class="form-check" style="margin:0;">
-          <input type="checkbox" class="form-check-input" id="remember" name="remember">
-          <span class="form-check-label">Remember me</span>
-        </label>
-      </div>
-
       <button type="submit" class="btn btn-primary btn-w" id="loginBtn" style="padding:12px;font-size:15px;border-radius:8px;margin-top:4px;">
-        <i class="fas fa-sign-in-alt"></i> Sign In
+        <i class="fas fa-sign-in-alt"></i> {{ t('auth.login_btn') }}
       </button>
     </form>
 
     <!-- Demo credentials -->
     <div class="demo-creds mt-16">
-      <div class="demo-creds-title"><i class="fas fa-info-circle"></i> Demo Credentials</div>
+      <div class="demo-creds-title"><i class="fas fa-info-circle"></i> {{ t('auth.demo_credentials') }}</div>
       <div class="demo-cred-row">
         <span>Admin</span>
         <span><code>admin</code> / <code>admin123</code></span>

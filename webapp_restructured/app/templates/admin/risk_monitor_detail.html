@@ -28,18 +28,18 @@
       {{ rf.regency.name }}
     </h1>
     <p class="page-subtitle">
-      3-Month Dengue Risk Forecast &nbsp;·&nbsp;
-      Based on data up to <strong>{{ month_names[rf.latest_month - 1] }} {{ rf.latest_year }}</strong>
+      {{ t('page.risk_monitor_detail.forecast_title') }} &nbsp;·&nbsp;
+      {{ t('common.data_up_to') }} <strong>{{ month_names[rf.latest_month - 1] }} {{ rf.latest_year }}</strong>
     </p>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
     {% if risk %}
     <span class="risk-badge risk-{{ risk }}" style="font-size:13px;padding:6px 14px;">
-      <span class="risk-dot {{ risk }}"></span>Risk: {{ risk.upper() }}
+      <span class="risk-dot {{ risk }}"></span>{{ t('risk.level') }}: {{ t('risk.' + risk) }}
     </span>
     {% endif %}
     <a href="{{ url_for('admin.risk_monitor') }}" class="btn btn-outline-secondary btn-sm">
-      <i class="fas fa-arrow-left"></i> Back to Overview
+      <i class="fas fa-arrow-left"></i> {{ t('page.risk_monitor_detail.back') }}
     </a>
   </div>
 </div>
@@ -50,28 +50,28 @@
     <div class="stat-icon icon-primary"><i class="fas fa-calendar-alt"></i></div>
     <div class="stat-content">
       <div class="stat-value">3</div>
-      <div class="stat-label">Months Forecast</div>
+      <div class="stat-label">{{ t('page.risk_monitor_detail.months_forecast') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-danger">
     <div class="stat-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ rf.risk_counts.get('high', 0) }}</div>
-      <div class="stat-label">High Risk</div>
+      <div class="stat-label">{{ t('risk.high') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-warning">
     <div class="stat-icon" style="background:rgba(245,158,11,0.15);"><i class="fas fa-minus-circle" style="color:#f59e0b;"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ rf.risk_counts.get('medium', 0) }}</div>
-      <div class="stat-label">Medium Risk</div>
+      <div class="stat-label">{{ t('risk.medium') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-success">
     <div class="stat-icon icon-success"><i class="fas fa-check-circle"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ rf.risk_counts.get('low', 0) }}</div>
-      <div class="stat-label">Low Risk</div>
+      <div class="stat-label">{{ t('risk.low') }}</div>
     </div>
   </div>
 </div>
@@ -81,7 +81,7 @@
   <div class="card-header">
     <h5 class="card-header-title">
       <i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>
-      Monthly Trend — Last 24 Months &amp; 3-Month Forecast
+      {{ t('page.risk_monitor_detail.trend_chart') }}
     </h5>
     <div class="card-header-actions">
       <span class="badge badge-primary">{{ rf.regency.name }}</span>
@@ -89,10 +89,10 @@
   </div>
   <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#ef4444;border-radius:2px;"></span>Actual cases
+      <span style="display:inline-block;width:28px;height:3px;background:#ef4444;border-radius:2px;"></span>{{ t('page.risk_monitor.actual') }}
     </span>
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#94a3b8;border-radius:2px;border-top:2px dashed #94a3b8;"></span>Predicted cases
+      <span style="display:inline-block;width:28px;height:3px;background:#94a3b8;border-radius:2px;border-top:2px dashed #94a3b8;"></span>{{ t('page.risk_monitor.predicted') }}
     </span>
     {% if rf.monthly_trend %}
     <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
@@ -113,13 +113,10 @@
 <!-- ===== RISK LEGEND ===== -->
 <div class="card" style="margin-bottom:24px;">
   <div class="card-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:12px 20px;">
-    <span style="font-size:12px;font-weight:600;color:var(--text-muted);">Risk Levels:</span>
-    <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low (&lt;30 cases)</span>
-    <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium (30–60)</span>
-    <span class="risk-badge risk-high"><span class="risk-dot high"></span>High (&gt;60)</span>
-    <span style="margin-left:auto;font-size:11.5px;color:#94a3b8;">
-      <i class="fas fa-info-circle"></i> Environmental data uses same calendar month from previous year as proxy
-    </span>
+    <span style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ t('risk.levels') }}</span>
+    <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }} (&lt;30)</span>
+    <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }} (30–60)</span>
+    <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }} (&gt;60)</span>
   </div>
 </div>
 
@@ -148,10 +145,10 @@
       </div>
       {% if has_pred %}
       <span class="risk-badge risk-{{ rl_dash }}">
-        <span class="risk-dot {{ rl_dash }}"></span>{{ rl.upper() }}
+        <span class="risk-dot {{ rl_dash }}"></span>{{ t('risk.' + rl) if rl in ('low','medium','high') else rl.upper() }}
       </span>
       {% else %}
-      <span class="pill" style="font-size:11px;">No Data</span>
+      <span class="pill" style="font-size:11px;">{{ t('risk.no_data') }}</span>
       {% endif %}
     </div>
 
@@ -161,7 +158,7 @@
         <div style="font-size:48px;font-weight:800;line-height:1;color:{{ rl_color }};">
           {{ "%.0f"|format(fm.prediction.predicted_cases) }}
         </div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Predicted Cases</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">{{ t('page.risk_monitor_detail.predicted_cases') }}</div>
         <div style="font-size:12px;color:#94a3b8;margin-top:2px;">
           Range: {{ "%.0f"|format(fm.prediction.confidence_lower) }} – {{ "%.0f"|format(fm.prediction.confidence_upper) }}
         </div>
@@ -191,7 +188,7 @@
       {% if fm.climate %}
       <div style="background:{{ rl_bg }};border-radius:8px;padding:12px;margin-top:8px;">
         <div style="font-size:11px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;">
-          Environmental Context <span style="font-weight:400;font-style:italic;">({{ fm.year - 1 }}-{{ "%02d"|format(fm.month) }})</span>
+          {{ t('page.risk_monitor_detail.environmental') }} <span style="font-weight:400;font-style:italic;">({{ fm.year - 1 }}-{{ "%02d"|format(fm.month) }})</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;">
           <div>
@@ -232,7 +229,7 @@
     <div class="card-footer" style="padding:10px 16px;">
       <button class="btn btn-primary btn-sm btn-w"
               data-bs-toggle="modal" data-bs-target="#analysisModal{{ loop.index }}">
-        <i class="fas fa-search-plus"></i> View Full Analysis
+        <i class="fas fa-search-plus"></i> {{ t('page.risk_monitor_detail.view_analysis') }}
       </button>
     </div>
     {% endif %}
@@ -257,7 +254,7 @@
           <i class="fas fa-shield-alt" style="color:{{ modal_accent }};font-size:18px;"></i>
           <div>
             <h5 class="modal-title" style="color:white;margin:0;font-size:15px;">
-              Risk Analysis — {{ fm.month_name }} {{ fm.year }}
+              {{ t('page.risk_monitor_detail.analysis_title') }} — {{ fm.month_name }} {{ fm.year }}
             </h5>
             <div style="font-size:11px;color:rgba(255,255,255,0.6);">{{ rf.regency.name }}</div>
           </div>
@@ -269,13 +266,13 @@
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;">
           <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
             <div style="font-size:36px;font-weight:800;color:{{ modal_accent }};">{{ "%.0f"|format(fm.prediction.predicted_cases) }}</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Predicted Cases</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ t('page.risk_monitor_detail.predicted_cases') }}</div>
           </div>
           <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
             <div style="margin-top:6px;">
-              <span class="risk-badge risk-{{ rl }}" style="font-size:13px;"><span class="risk-dot {{ rl }}"></span>{{ rl.upper() }}</span>
+              <span class="risk-badge risk-{{ rl }}" style="font-size:13px;"><span class="risk-dot {{ rl }}"></span>{{ t('risk.' + rl) if rl in ('low','medium','high') else rl.upper() }}</span>
             </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">Risk Level</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">{{ t('risk.level') }}</div>
           </div>
           <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
             <div style="font-size:15px;font-weight:600;color:var(--text-primary);">
@@ -288,7 +285,7 @@
         <div style="background:{{ modal_bg }};border:1px solid {{ modal_accent }}30;border-left:4px solid {{ modal_accent }};border-radius:8px;padding:16px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <i class="fas fa-info-circle" style="color:{{ modal_accent }};"></i>
-            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Risk Analysis</span>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">{{ t('page.risk_monitor_detail.analysis_title') }}</span>
           </div>
           <p style="font-size:13px;color:var(--text-primary);line-height:1.7;margin:0;">{{ fm.explanation or 'Analysis not available.' }}</p>
         </div>
@@ -297,7 +294,7 @@
         <div style="background:var(--body-bg);border-radius:8px;padding:16px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <i class="fas fa-thermometer-half" style="color:var(--primary);"></i>
-            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Environmental Data</span>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">{{ t('page.risk_monitor_detail.environmental') }}</span>
             <span style="font-size:11px;color:#94a3b8;margin-left:4px;">({{ fm.year - 1 }}-{{ "%02d"|format(fm.month) }})</span>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -347,7 +344,7 @@
         <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-left:4px solid #6366f1;border-radius:8px;padding:16px;margin-bottom:16px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
             <i class="fas fa-map" style="color:#6366f1;"></i>
-            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Regional Analysis</span>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">{{ t('page.risk_monitor_detail.regional_analysis') }}</span>
           </div>
           <p style="font-size:13px;color:var(--text-primary);line-height:1.7;margin:0;">{{ fm.regional_analysis or 'Regional data not available.' }}</p>
           {% if fm.prov_avg %}
@@ -362,7 +359,7 @@
         <div style="background:rgba(139,92,246,0.07);border:1px solid rgba(139,92,246,0.2);border-left:4px solid #8b5cf6;border-radius:8px;padding:16px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
             <i class="fas fa-tasks" style="color:#8b5cf6;"></i>
-            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">Recommended Actions</span>
+            <span style="font-weight:700;font-size:13px;color:var(--text-primary);">{{ t('page.risk_monitor_detail.recommendations') }}</span>
           </div>
           <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
             {% for rec in fm.recommendations %}
@@ -377,7 +374,7 @@
       </div>
 
       <div class="modal-footer" style="border-top:1px solid var(--border-color);">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
       </div>
     </div>
   </div>

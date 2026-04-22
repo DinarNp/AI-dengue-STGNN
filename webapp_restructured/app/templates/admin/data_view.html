@@ -10,32 +10,32 @@
             {% if regency %}<span class="badge bg-primary ms-2" style="font-size:0.6em;vertical-align:middle;">{{ regency.name }}</span>{% endif %}
         </h2>
         <a href="{{ url_for('admin.data_management', _anchor='tabCases') }}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Data Management
+            <i class="fas fa-arrow-left"></i> {{ t('page.data_view.back') }}
         </a>
     </div>
     <hr>
-    
+
     <!-- Action Buttons -->
     <div class="row mb-4">
         <div class="col-12">
             <div class="btn-group" role="group">
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">
-                    <i class="fas fa-upload"></i> Import CSV
+                    <i class="fas fa-upload"></i> {{ t('page.data_view.import_csv') }}
                 </button>
                 <a href="{{ url_for('admin.export_csv', data_type=data_type) }}" class="btn btn-success">
-                    <i class="fas fa-download"></i> Export CSV
+                    <i class="fas fa-download"></i> {{ t('page.data_view.export_csv') }}
                 </a>
                 <button class="btn btn-info" onclick="downloadTemplate()">
-                    <i class="fas fa-file-download"></i> Download Template
+                    <i class="fas fa-file-download"></i> {{ t('page.data_view.download_template') }}
                 </button>
             </div>
         </div>
     </div>
-    
+
     <!-- Data Table -->
     <div class="card">
         <div class="card-header">
-            <h5>Total Records: {{ records.total }}</h5>
+            <h5>{{ t('page.data_view.total_records') }}: {{ records.total }}</h5>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -43,28 +43,28 @@
                     <thead class="table-dark">
                         <tr>
                             {% if data_type == 'dengue' %}
-                                <th>Year</th>
-                                <th>Month</th>
-                                <th>Region</th>
-                                <th>Cases</th>
-                                <th>Updated</th>
-                                <th>Action</th>
+                                <th>{{ t('common.year') }}</th>
+                                <th>{{ t('common.month') }}</th>
+                                <th>{{ t('common.region') }}</th>
+                                <th>{{ t('common.cases') }}</th>
+                                <th>{{ t('common.last_updated') }}</th>
+                                <th>{{ t('common.actions') }}</th>
                             {% elif data_type == 'climate' %}
-                                <th>Year</th>
-                                <th>Month</th>
-                                <th>Region</th>
-                                <th>Temp Avg</th>
-                                <th>Humidity</th>
-                                <th>Precipitation</th>
-                                <th>Updated</th>
-                                <th>Action</th>
+                                <th>{{ t('common.year') }}</th>
+                                <th>{{ t('common.month') }}</th>
+                                <th>{{ t('common.region') }}</th>
+                                <th>{{ t('common.temp_avg') }}</th>
+                                <th>{{ t('page.risk_monitor_detail.humidity') }}</th>
+                                <th>{{ t('page.risk_monitor_detail.rainfall') }}</th>
+                                <th>{{ t('common.last_updated') }}</th>
+                                <th>{{ t('common.actions') }}</th>
                             {% elif data_type == 'ndvi' %}
-                                <th>Year</th>
-                                <th>Month</th>
-                                <th>Region</th>
-                                <th>NDVI</th>
-                                <th>Updated</th>
-                                <th>Action</th>
+                                <th>{{ t('common.year') }}</th>
+                                <th>{{ t('common.month') }}</th>
+                                <th>{{ t('common.region') }}</th>
+                                <th>{{ t('nav.ndvi_data') }}</th>
+                                <th>{{ t('common.last_updated') }}</th>
+                                <th>{{ t('common.actions') }}</th>
                             {% endif %}
                         </tr>
                     </thead>
@@ -80,7 +80,7 @@
                                 <td>
                                     <button class="btn btn-sm btn-outline-primary"
                                             onclick="openEditModal({{ record.id }}, '{{ record.regency.name }}', {{ record.year }}, {{ record.month }}, {{ record.cases }})">
-                                        <i class="fas fa-edit"></i> Edit
+                                        <i class="fas fa-edit"></i> {{ t('common.edit') }}
                                     </button>
                                 </td>
                             {% elif data_type == 'climate' %}
@@ -92,7 +92,7 @@
                                 <td>{{ "%.1f"|format(record.precipitation_total) if record.precipitation_total else 'N/A' }} mm</td>
                                 <td>{{ record.fetched_at.strftime('%Y-%m-%d') if record.fetched_at else 'N/A' }}</td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="openClimateDetail({
+                                    <button class="btn btn-sm btn-outline-primary" title="{{ t('common.view') }}" onclick="openClimateDetail({
                                         region: '{{ record.regency.name }}',
                                         period: '{{ record.year }}-{{ '%02d' % record.month }}',
                                         temp_min:    {{ record.temperature_min   or 'null' }},
@@ -145,7 +145,7 @@
                 <ul class="pagination justify-content-center">
                     {% if records.has_prev %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.prev_num, regency_id=regency_id) }}">Previous</a>
+                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.prev_num, regency_id=regency_id) }}">{{ t('page.data_view.previous') }}</a>
                     </li>
                     {% endif %}
 
@@ -161,7 +161,7 @@
 
                     {% if records.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.next_num, regency_id=regency_id) }}">Next</a>
+                        <a class="page-link" href="{{ url_for('admin.view_data', data_type=data_type, page=records.next_num, regency_id=regency_id) }}">{{ t('page.data_view.next') }}</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -177,21 +177,21 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Dengue Cases</h5>
+                <h5 class="modal-title"><i class="fas fa-edit"></i> {{ t('page.data_view.edit_case') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <p class="text-muted mb-3" id="editCaseInfo"></p>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Cases</label>
+                    <label class="form-label fw-semibold">{{ t('common.cases') }}</label>
                     <input type="number" id="editCasesInput" class="form-control" min="0">
                 </div>
                 <div id="editCaseResult"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
                 <button type="button" class="btn btn-primary" onclick="submitEditCase()">
-                    <i class="fas fa-save"></i> Save
+                    <i class="fas fa-save"></i> {{ t('common.save') }}
                 </button>
             </div>
         </div>
@@ -208,7 +208,7 @@
             <div class="modal-header" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;padding:20px 24px;">
                 <div>
                     <h5 class="modal-title mb-0" style="font-weight:700;">
-                        <i class="fas fa-cloud-sun-rain me-2"></i> Climate Detail
+                        <i class="fas fa-cloud-sun-rain me-2"></i> {{ t('page.data_view.climate_detail') }}
                     </h5>
                     <div style="font-size:13px;opacity:0.85;margin-top:4px;">
                         <span id="cdRegion"></span>
@@ -322,7 +322,7 @@
 
             </div>
             <div class="modal-footer" style="border-top:1px solid #e5e7eb;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
             </div>
         </div>
     </div>
@@ -337,7 +337,7 @@
             <div class="modal-header" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;padding:20px 24px;">
                 <div>
                     <h5 class="modal-title mb-0" style="font-weight:700;">
-                        <i class="fas fa-leaf me-2"></i> NDVI Detail
+                        <i class="fas fa-leaf me-2"></i> {{ t('page.data_view.ndvi_detail') }}
                     </h5>
                     <div style="font-size:13px;opacity:0.85;margin-top:4px;">
                         <span id="ndCdRegion"></span>
@@ -397,7 +397,7 @@
 
             </div>
             <div class="modal-footer" style="border-top:1px solid #e5e7eb;">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.close') }}</button>
             </div>
         </div>
     </div>
@@ -409,24 +409,24 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Import {{ data_type.title() }} Data from CSV</h5>
+                <h5 class="modal-title">{{ t('page.data_view.import_title') }} ({{ data_type.title() }})</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="importForm" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="csvFile" class="form-label">Select CSV File</label>
+                        <label for="csvFile" class="form-label">{{ t('page.data_view.select_csv') }}</label>
                         <input type="file" class="form-control" id="csvFile" accept=".csv" required>
                     </div>
                     <div class="alert alert-info">
-                        <strong>Note:</strong> The CSV file will update existing records and add new ones.
+                        {{ t('page.data_view.import_note') }}
                     </div>
                 </form>
                 <div id="importResult"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="importCSV()">Import</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+                <button type="button" class="btn btn-primary" onclick="importCSV()">{{ t('page.data_view.import_btn') }}</button>
             </div>
         </div>
     </div>

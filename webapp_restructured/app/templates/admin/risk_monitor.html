@@ -13,12 +13,12 @@
   <div>
     <h1 class="page-title">
       <i class="fas fa-shield-alt" style="color:var(--primary);margin-right:8px;"></i>
-      Provincial Risk Monitor
+      {{ t('page.risk_monitor.title') }}
     </h1>
-    <p class="page-subtitle">3-Month Dengue Risk Forecast — All Regencies, Yogyakarta Special Region</p>
+    <p class="page-subtitle">{{ t('page.risk_monitor.subtitle') }}</p>
   </div>
   <span class="pill" style="background:rgba(14,165,233,0.1);color:var(--primary);">
-    <i class="fas fa-brain" style="margin-right:5px;"></i>AI-STGNN Powered
+    <i class="fas fa-brain" style="margin-right:5px;"></i>{{ t('page.risk_monitor.ai_powered') }}
   </span>
 </div>
 
@@ -28,28 +28,28 @@
     <div class="stat-icon icon-primary"><i class="fas fa-city"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ regency_forecasts | length }}</div>
-      <div class="stat-label">Regencies Monitored</div>
+      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-danger">
     <div class="stat-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ province_risk.get('high', 0) }}</div>
-      <div class="stat-label">High Risk Regencies</div>
+      <div class="stat-label">{{ t('common.high_risk_regencies') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-warning">
     <div class="stat-icon" style="background:rgba(245,158,11,0.15);"><i class="fas fa-minus-circle" style="color:#f59e0b;"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ province_risk.get('medium', 0) }}</div>
-      <div class="stat-label">Medium Risk Regencies</div>
+      <div class="stat-label">{{ t('common.medium_risk_regencies') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-success">
     <div class="stat-icon icon-success"><i class="fas fa-check-circle"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ province_risk.get('low', 0) }}</div>
-      <div class="stat-label">Low Risk Regencies</div>
+      <div class="stat-label">{{ t('common.low_risk_regencies') }}</div>
     </div>
   </div>
 </div>
@@ -57,12 +57,12 @@
 <!-- ===== RISK LEGEND ===== -->
 <div class="card" style="margin-bottom:24px;">
   <div class="card-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:12px 20px;">
-    <span style="font-size:12px;font-weight:600;color:var(--text-muted);">Risk Levels:</span>
-    <span class="risk-badge risk-low"><span class="risk-dot low"></span>Low (&lt;30 cases)</span>
-    <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>Medium (30–60)</span>
-    <span class="risk-badge risk-high"><span class="risk-dot high"></span>High (&gt;60)</span>
+    <span style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ t('risk.levels') }}</span>
+    <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }} (&lt;30)</span>
+    <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }} (30–60)</span>
+    <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }} (&gt;60)</span>
     <span style="margin-left:auto;font-size:11.5px;color:#94a3b8;">
-      <i class="fas fa-info-circle"></i> Badge shows highest risk level across next 3 months · Click a card to view full analysis
+      <i class="fas fa-info-circle"></i> {{ t('risk.badge_info') }}
     </span>
   </div>
 </div>
@@ -103,7 +103,7 @@
       <!-- Data up-to label -->
       <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">
         <i class="fas fa-clock" style="margin-right:4px;"></i>
-        Data up to <strong>{{ month_names[rf.latest_month - 1] }} {{ rf.latest_year }}</strong>
+        {{ t('common.data_up_to') }} <strong>{{ month_names[rf.latest_month - 1] }} {{ rf.latest_year }}</strong>
       </div>
 
       <!-- 3-month forecast pills -->
@@ -117,13 +117,13 @@
           <div style="background:{{ fbg }};border:1px solid {{ fc }}40;border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
             <div style="font-size:10px;color:var(--text-muted);">{{ fm.month_name[:3] }} {{ fm.year }}</div>
             <div style="font-size:18px;font-weight:800;color:{{ fc }};line-height:1.2;">{{ "%.0f"|format(fm.prediction.predicted_cases) }}</div>
-            <div style="font-size:9px;color:{{ fc }};font-weight:600;text-transform:uppercase;">{{ frl }}</div>
+            <div style="font-size:9px;color:{{ fc }};font-weight:600;text-transform:uppercase;">{{ t('risk.' + frl) }}</div>
           </div>
         {% else %}
           <div style="background:var(--body-bg);border:1px solid var(--border-color);border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
             <div style="font-size:10px;color:var(--text-muted);">{{ fm.month_name[:3] }} {{ fm.year }}</div>
             <div style="font-size:13px;color:#94a3b8;margin:4px 0;">—</div>
-            <div style="font-size:9px;color:#94a3b8;">No pred</div>
+            <div style="font-size:9px;color:#94a3b8;">{{ t('common.no_pred') }}</div>
           </div>
         {% endif %}
         {% endfor %}
@@ -147,13 +147,13 @@
         </span>
         {% endif %}
         {% if rf.risk_counts.high == 0 and rf.risk_counts.medium == 0 and rf.risk_counts.low == 0 %}
-        <span style="font-size:11px;color:#94a3b8;">No predictions available</span>
+        <span style="font-size:11px;color:#94a3b8;">{{ t('common.no_predictions') }}</span>
         {% endif %}
       </div>
 
       <!-- Sparkline chart -->
       <div style="margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">Trend (24 months + 3-month forecast)</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">{{ t('page.risk_monitor.trend_label') }}</div>
         <canvas id="trendChart{{ loop.index }}" height="70"></canvas>
       </div>
 
@@ -161,7 +161,7 @@
 
     <div class="card-footer" style="padding:10px 16px;">
       <a href="{{ url_for('admin.risk_monitor_detail', regency_id=rf.regency.id) }}" class="btn btn-primary btn-sm btn-w">
-        <i class="fas fa-search-plus"></i> View Full Analysis
+        <i class="fas fa-search-plus"></i> {{ t('common.view_full_analysis') }}
       </a>
     </div>
   </div>

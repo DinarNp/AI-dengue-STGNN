@@ -60,6 +60,9 @@ def create_app(config_name='development'):
     app.register_blueprint(public)
     app.register_blueprint(admin)
     app.register_blueprint(health_district)
+
+    from .i18n import register_i18n
+    register_i18n(app)
     
     # Create database tables
     with app.app_context():
