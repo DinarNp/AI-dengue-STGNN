@@ -320,7 +320,8 @@
   "page.risk_monitor_detail.predicted_cases": "Kasus Diprediksi",
   "page.risk_monitor_detail.risk_level": "Tingkat Risiko",
   "page.risk_monitor_detail.provincial_average": "Rata-Rata Provinsi",
-  "page.risk_monitor_detail.close": "Tutup",
+  "page.risk_monitor_detail.no_prediction": "Belum ada prediksi yang dihasilkan",
+  "page.risk_monitor_detail.run_prediction": "Jalankan prediksi untuk",
 
   "page.logs.title": "Log Aktivitas",
   "page.logs.subtitle": "Riwayat aktivitas sistem",
@@ -359,8 +360,6 @@
   "page.hd_risk_monitor.prev_month": "dibanding Bulan Lalu",
   "page.hd_risk_monitor.risk_analysis": "Analisis Risiko",
   "page.hd_risk_monitor.confidence_range": "Rentang Kepercayaan",
-
-
   "page.hd_risk_monitor.recommendations": "Rekomendasi",
   "page.hd_risk_monitor.trend_title": "Tren Kasus (24 bulan + prediksi 3 bulan)",
   "page.hd_risk_monitor.actual_label": "Aktual",

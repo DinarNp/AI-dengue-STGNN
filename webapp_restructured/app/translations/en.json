@@ -320,7 +320,8 @@
   "page.risk_monitor_detail.predicted_cases": "Predicted Cases",
   "page.risk_monitor_detail.risk_level": "Risk Level",
   "page.risk_monitor_detail.provincial_average": "Provincial Average",
-  "page.risk_monitor_detail.close": "Close",
+  "page.risk_monitor_detail.no_prediction": "No prediction generated yet",
+  "page.risk_monitor_detail.run_prediction": "Run predictions for",
 
   "page.logs.title": "Activity Logs",
   "page.logs.subtitle": "System activity history",
@@ -359,8 +360,6 @@
   "page.hd_risk_monitor.prev_month": "vs Prev. Month",
   "page.hd_risk_monitor.risk_analysis": "Risk Analysis",
   "page.hd_risk_monitor.confidence_range": "Confidence Range",
-
-
   "page.hd_risk_monitor.recommendations": "Recommendations",
   "page.hd_risk_monitor.trend_title": "Case Trend (24 months + 3-month predictions)",
   "page.hd_risk_monitor.actual_label": "Actual",
