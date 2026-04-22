@@ -109,6 +109,12 @@
   "common.temp_avg": "Temp Avg",
   "common.information": "Information",
   "common.predictions": "Predictions",
+  "common.records": "Records",
+  "common.system_user": "System",
+  "common.system_users": "System Users",
+  "common.to_label": "to",
+  "page.training.months_unit": "months",
+  "page.risk_monitor_detail.range_label": "Range",
 
   "risk.low": "Low",
   "risk.medium": "Medium",

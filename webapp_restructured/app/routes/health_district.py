@@ -8,6 +8,7 @@ from datetime import datetime
 
 from ..models import db, Regency, DengueCase, Prediction, ClimateData, NDVIData
 from ..services.auth import health_district_required, check_regency_access
+from ..i18n import get_lang, make_t
 from ..services.data_pipeline import DataPipelineService
 from ..services.prediction import PredictionService
 
@@ -218,8 +219,10 @@ def view_risk_monitor():
 
     prediction_service = PredictionService(_ca.config)
 
-    MONTH_NAMES = ['January','February','March','April','May','June',
-                   'July','August','September','October','November','December']
+    _month_keys = ['january','february','march','april','may','june',
+                   'july','august','september','october','november','december']
+    _lang = get_lang()
+    _t = make_t(_lang)
 
     # Latest actual data month for this regency
     latest_case = DengueCase.query.filter_by(regency_id=regency.id)\
@@ -273,31 +276,56 @@ def view_risk_monitor():
         prov_avg = round(float(prov_total) / prov_count, 1) if (prov_total and prov_count) else None
 
         RECOMMENDATIONS = {
-            'low': [
-                "Continuation of routine vector control and household inspections",
-                "Regular health promotion and school-based education",
-                "Surveillance system maintenance for early warning detection",
-                "Seasonal preparedness activities during pre-wet season transition",
-                "Community engagement in long-term environmental management"
-            ],
-            'medium': [
-                "Strengthened routine vector control (larval source management, community clean-up)",
-                "Enhanced community-based surveillance through trained volunteers",
-                "Response protocol preparation and resource stockpiling",
-                "Intensified environmental condition monitoring",
-                "Healthcare provider communication on case management readiness"
-            ],
-            'high': [
-                "Immediate intensive vector control (indoor residual spraying, outdoor treatment in high-density areas)",
-                "Rapid response team deployment for active case detection and contact tracing",
-                "Urgent multi-channel community education campaigns (radio, social media, community meetings)",
-                "Inter-health center coordination for regional outbreak response",
-                "Healthcare facility preparation (isolation units, treatment supplies, diagnostic capacity)"
-            ],
+            'id': {
+                'low': [
+                    "Lanjutkan pengendalian vektor rutin dan inspeksi rumah tangga",
+                    "Promosi kesehatan reguler dan edukasi berbasis sekolah",
+                    "Pemeliharaan sistem surveilans untuk deteksi dini",
+                    "Kegiatan kesiapsiagaan musiman menjelang transisi musim hujan",
+                    "Pelibatan masyarakat dalam pengelolaan lingkungan jangka panjang"
+                ],
+                'medium': [
+                    "Penguatan pengendalian vektor rutin (pengelolaan sumber larva, kerja bakti)",
+                    "Peningkatan surveilans berbasis masyarakat melalui kader terlatih",
+                    "Persiapan protokol respons dan penimbunan sumber daya",
+                    "Pemantauan intensif kondisi lingkungan",
+                    "Komunikasi kepada tenaga kesehatan tentang kesiapan penanganan kasus"
+                ],
+                'high': [
+                    "Pengendalian vektor intensif segera (fogging dalam ruangan, pengobatan luar ruangan di area padat)",
+                    "Pengerahan tim respons cepat untuk deteksi kasus aktif dan pelacakan kontak",
+                    "Kampanye edukasi masyarakat multi-saluran mendesak (radio, media sosial, pertemuan warga)",
+                    "Koordinasi antar puskesmas untuk respons wabah regional",
+                    "Persiapan fasilitas kesehatan (unit isolasi, perlengkapan perawatan, kapasitas diagnostik)"
+                ],
+            },
+            'en': {
+                'low': [
+                    "Continuation of routine vector control and household inspections",
+                    "Regular health promotion and school-based education",
+                    "Surveillance system maintenance for early warning detection",
+                    "Seasonal preparedness activities during pre-wet season transition",
+                    "Community engagement in long-term environmental management"
+                ],
+                'medium': [
+                    "Strengthened routine vector control (larval source management, community clean-up)",
+                    "Enhanced community-based surveillance through trained volunteers",
+                    "Response protocol preparation and resource stockpiling",
+                    "Intensified environmental condition monitoring",
+                    "Healthcare provider communication on case management readiness"
+                ],
+                'high': [
+                    "Immediate intensive vector control (indoor residual spraying, outdoor treatment in high-density areas)",
+                    "Rapid response team deployment for active case detection and contact tracing",
+                    "Urgent multi-channel community education campaigns (radio, social media, community meetings)",
+                    "Inter-health center coordination for regional outbreak response",
+                    "Healthcare facility preparation (isolation units, treatment supplies, diagnostic capacity)"
+                ],
+            },
         }
 
         if pred:
-            recommendations = RECOMMENDATIONS.get(pred.risk_level, [])
+            recommendations = RECOMMENDATIONS.get(_lang, RECOMMENDATIONS.get('id', {})).get(pred.risk_level, [])
 
             # Year-over-year change
             if last_year_case and last_year_case.cases > 0:
@@ -311,8 +339,8 @@ def view_risk_monitor():
             else:
                 mom = None
 
-            explanation = _risk_explanation(pred.predicted_cases, last_year_case, climate, ndvi)
-            regional    = _regional_analysis(regency.name, pred.predicted_cases, prov_avg, last_year_case)
+            explanation = _risk_explanation(pred.predicted_cases, last_year_case, climate, ndvi, _lang)
+            regional    = _regional_analysis(regency.name, pred.predicted_cases, prov_avg, last_year_case, _lang)
         else:
             recommendations = []
             yoy = mom = explanation = regional = None
@@ -320,7 +348,7 @@ def view_risk_monitor():
         forecast_months.append({
             'year': py,
             'month': pm,
-            'month_name': MONTH_NAMES[pm - 1],
+            'month_name': _t('month.' + _month_keys[pm - 1]),
             'prediction': pred,
             'climate': climate,
             'ndvi': ndvi,
@@ -368,51 +396,95 @@ def view_risk_monitor():
                            prediction_trend=prediction_trend)
 
 
-def _risk_explanation(predicted_cases, last_year_case, climate, ndvi):
-    parts = [f"The AI model predicts {predicted_cases:.0f} dengue cases for this month."]
-    if last_year_case and last_year_case.cases > 0:
-        chg = ((predicted_cases - last_year_case.cases) / last_year_case.cases) * 100
-        if chg > 20:
-            parts.append(f"This is {chg:.0f}% higher than the same month last year "
-                         f"({last_year_case.cases} cases), indicating an elevated risk trend.")
-        elif chg < -20:
-            parts.append(f"This is {abs(chg):.0f}% lower than the same month last year "
-                         f"({last_year_case.cases} cases), suggesting improving conditions.")
-        else:
-            parts.append(f"This is comparable to the same month last year ({last_year_case.cases} cases).")
-    env = []
-    if climate:
-        if climate.temperature_avg and 25 <= climate.temperature_avg <= 30:
-            env.append(f"temperature ({climate.temperature_avg:.1f}°C) in the optimal range for mosquito breeding")
-        if climate.precipitation_total and climate.precipitation_total > 100:
-            env.append(f"high rainfall ({climate.precipitation_total:.0f} mm) creating breeding sites")
-        elif climate.precipitation_total and climate.precipitation_total > 50:
-            env.append(f"moderate rainfall ({climate.precipitation_total:.0f} mm)")
-        if climate.humidity and climate.humidity > 80:
-            env.append(f"high humidity ({climate.humidity:.0f}%) favouring mosquito survival")
-    if ndvi and ndvi.ndvi_value and ndvi.ndvi_value > 0.4:
-        env.append(f"dense vegetation (NDVI {ndvi.ndvi_value:.3f}) providing larval habitat")
-    if env:
-        parts.append("Contributing environmental factors: " + "; ".join(env) + ".")
-    elif not climate:
-        parts.append("Environmental context is based on the same calendar month from the previous year.")
+def _risk_explanation(predicted_cases, last_year_case, climate, ndvi, lang='id'):
+    if lang == 'en':
+        parts = [f"The AI model predicts {predicted_cases:.0f} dengue cases for this month."]
+        if last_year_case and last_year_case.cases > 0:
+            chg = ((predicted_cases - last_year_case.cases) / last_year_case.cases) * 100
+            if chg > 20:
+                parts.append(f"This is {chg:.0f}% higher than the same month last year "
+                             f"({last_year_case.cases} cases), indicating an elevated risk trend.")
+            elif chg < -20:
+                parts.append(f"This is {abs(chg):.0f}% lower than the same month last year "
+                             f"({last_year_case.cases} cases), suggesting improving conditions.")
+            else:
+                parts.append(f"This is comparable to the same month last year ({last_year_case.cases} cases).")
+        env = []
+        if climate:
+            if climate.temperature_avg and 25 <= climate.temperature_avg <= 30:
+                env.append(f"temperature ({climate.temperature_avg:.1f}°C) in the optimal range for mosquito breeding")
+            if climate.precipitation_total and climate.precipitation_total > 100:
+                env.append(f"high rainfall ({climate.precipitation_total:.0f} mm) creating breeding sites")
+            elif climate.precipitation_total and climate.precipitation_total > 50:
+                env.append(f"moderate rainfall ({climate.precipitation_total:.0f} mm)")
+            if climate.humidity and climate.humidity > 80:
+                env.append(f"high humidity ({climate.humidity:.0f}%) favouring mosquito survival")
+        if ndvi and ndvi.ndvi_value and ndvi.ndvi_value > 0.4:
+            env.append(f"dense vegetation (NDVI {ndvi.ndvi_value:.3f}) providing larval habitat")
+        if env:
+            parts.append("Contributing environmental factors: " + "; ".join(env) + ".")
+        elif not climate:
+            parts.append("Environmental context is based on the same calendar month from the previous year.")
+    else:
+        parts = [f"Model AI memprediksi {predicted_cases:.0f} kasus demam berdarah untuk bulan ini."]
+        if last_year_case and last_year_case.cases > 0:
+            chg = ((predicted_cases - last_year_case.cases) / last_year_case.cases) * 100
+            if chg > 20:
+                parts.append(f"Angka ini {chg:.0f}% lebih tinggi dibanding bulan yang sama tahun lalu "
+                             f"({last_year_case.cases} kasus), mengindikasikan tren risiko yang meningkat.")
+            elif chg < -20:
+                parts.append(f"Angka ini {abs(chg):.0f}% lebih rendah dibanding bulan yang sama tahun lalu "
+                             f"({last_year_case.cases} kasus), menunjukkan kondisi yang membaik.")
+            else:
+                parts.append(f"Angka ini sebanding dengan bulan yang sama tahun lalu ({last_year_case.cases} kasus).")
+        env = []
+        if climate:
+            if climate.temperature_avg and 25 <= climate.temperature_avg <= 30:
+                env.append(f"suhu ({climate.temperature_avg:.1f}°C) dalam rentang optimal untuk perkembangbiakan nyamuk")
+            if climate.precipitation_total and climate.precipitation_total > 100:
+                env.append(f"curah hujan tinggi ({climate.precipitation_total:.0f} mm) menciptakan tempat perkembangbiakan")
+            elif climate.precipitation_total and climate.precipitation_total > 50:
+                env.append(f"curah hujan sedang ({climate.precipitation_total:.0f} mm)")
+            if climate.humidity and climate.humidity > 80:
+                env.append(f"kelembaban tinggi ({climate.humidity:.0f}%) mendukung kelangsungan hidup nyamuk")
+        if ndvi and ndvi.ndvi_value and ndvi.ndvi_value > 0.4:
+            env.append(f"vegetasi lebat (NDVI {ndvi.ndvi_value:.3f}) menyediakan habitat larva")
+        if env:
+            parts.append("Faktor lingkungan yang berkontribusi: " + "; ".join(env) + ".")
+        elif not climate:
+            parts.append("Konteks lingkungan didasarkan pada bulan kalender yang sama dari tahun sebelumnya.")
     return " ".join(parts)
 
 
-def _regional_analysis(regency_name, predicted_cases, prov_avg, last_year_case):
-    parts = [f"{regency_name} is forecast at {predicted_cases:.0f} cases."]
-    if prov_avg:
-        ratio = predicted_cases / prov_avg
-        if ratio > 1.2:
-            parts.append(f"This is {((ratio-1)*100):.0f}% above the DIY provincial average "
-                         f"({prov_avg:.0f} cases), indicating a higher-than-average burden.")
-        elif ratio < 0.8:
-            parts.append(f"This is {((1-ratio)*100):.0f}% below the DIY provincial average "
-                         f"({prov_avg:.0f} cases), suggesting relatively lower risk.")
-        else:
-            parts.append(f"This aligns with the DIY provincial average of {prov_avg:.0f} cases.")
-    if last_year_case:
-        parts.append(f"For reference, the same month last year recorded {last_year_case.cases} actual cases.")
+def _regional_analysis(regency_name, predicted_cases, prov_avg, last_year_case, lang='id'):
+    if lang == 'en':
+        parts = [f"{regency_name} is forecast at {predicted_cases:.0f} cases."]
+        if prov_avg:
+            ratio = predicted_cases / prov_avg
+            if ratio > 1.2:
+                parts.append(f"This is {((ratio-1)*100):.0f}% above the DIY provincial average "
+                             f"({prov_avg:.0f} cases), indicating a higher-than-average burden.")
+            elif ratio < 0.8:
+                parts.append(f"This is {((1-ratio)*100):.0f}% below the DIY provincial average "
+                             f"({prov_avg:.0f} cases), suggesting relatively lower risk.")
+            else:
+                parts.append(f"This aligns with the DIY provincial average of {prov_avg:.0f} cases.")
+        if last_year_case:
+            parts.append(f"For reference, the same month last year recorded {last_year_case.cases} actual cases.")
+    else:
+        parts = [f"{regency_name} diprakirakan mencapai {predicted_cases:.0f} kasus."]
+        if prov_avg:
+            ratio = predicted_cases / prov_avg
+            if ratio > 1.2:
+                parts.append(f"Angka ini {((ratio-1)*100):.0f}% di atas rata-rata provinsi DIY "
+                             f"({prov_avg:.0f} kasus), mengindikasikan beban yang lebih tinggi dari rata-rata.")
+            elif ratio < 0.8:
+                parts.append(f"Angka ini {((1-ratio)*100):.0f}% di bawah rata-rata provinsi DIY "
+                             f"({prov_avg:.0f} kasus), menunjukkan risiko yang relatif lebih rendah.")
+            else:
+                parts.append(f"Angka ini sejalan dengan rata-rata provinsi DIY sebesar {prov_avg:.0f} kasus.")
+        if last_year_case:
+            parts.append(f"Sebagai referensi, bulan yang sama tahun lalu mencatat {last_year_case.cases} kasus aktual.")
     return " ".join(parts)
 
 

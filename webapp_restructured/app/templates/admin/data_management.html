@@ -172,7 +172,7 @@
             <label class="form-label">Month</label>
             <select id="climateMonth" class="form-select">
               {% for m in range(1, 13) %}
-              <option value="{{ m }}">{{ ['January','February','March','April','May','June','July','August','September','October','November','December'][m-1] }}</option>
+              <option value="{{ m }}">{{ t('month.' + ['january','february','march','april','may','june','july','august','september','october','november','december'][m-1]) }}</option>
               {% endfor %}
             </select>
           </div>
@@ -277,10 +277,8 @@
             <div class="form-group" style="margin-bottom:0;">
               <label class="form-label">Month</label>
               <select id="ndviMonth" class="form-select">
-                {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),
-                                   (5,'May'),(6,'June'),(7,'July'),(8,'August'),
-                                   (9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
-                <option value="{{ m }}" {% if m == now.month %}selected{% endif %}>{{ name }}</option>
+                {% for m, key in [(1,'january'),(2,'february'),(3,'march'),(4,'april'),(5,'may'),(6,'june'),(7,'july'),(8,'august'),(9,'september'),(10,'october'),(11,'november'),(12,'december')] %}
+                <option value="{{ m }}" {% if m == now.month %}selected{% endif %}>{{ t('month.' + key) }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -403,8 +401,8 @@
           <div class="form-group">
             <label class="form-label">Month</label>
             <select id="addCaseMonth" class="form-select">
-              {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),(7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
-              <option value="{{ m }}">{{ name }}</option>
+              {% for m, key in [(1,'january'),(2,'february'),(3,'march'),(4,'april'),(5,'may'),(6,'june'),(7,'july'),(8,'august'),(9,'september'),(10,'october'),(11,'november'),(12,'december')] %}
+              <option value="{{ m }}">{{ t('month.' + key) }}</option>
               {% endfor %}
             </select>
           </div>

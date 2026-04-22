@@ -104,6 +104,27 @@
   });
 })();
 
+/* =========================================================
+   PUBLIC MOBILE MENU
+   ========================================================= */
+(function initPublicMobileMenu() {
+  const btn  = document.getElementById('publicNavHamburger');
+  const menu = document.getElementById('publicMobileMenu');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const isOpen = menu.classList.toggle('open');
+    btn.querySelector('i').className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+  });
+
+  document.addEventListener('click', function (e) {
+    if (!menu.contains(e.target) && e.target !== btn) {
+      menu.classList.remove('open');
+      btn.querySelector('i').className = 'fas fa-bars';
+    }
+  });
+}());
 
 /* =========================================================
    TOAST NOTIFICATION SYSTEM

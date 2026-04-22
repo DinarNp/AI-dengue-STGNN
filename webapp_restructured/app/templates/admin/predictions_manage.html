@@ -25,7 +25,7 @@
   <i class="fas fa-brain alert-icon"></i>
   <div class="alert-text">
     <div class="alert-title">{{ t('page.predictions.active_model_banner') }} {{ active_model.version_name }}</div>
-    Trained {{ active_model.training_date.strftime('%d %b %Y') if active_model.training_date else 'N/A' }}
+    {% if active_model.training_date %}{% set _d = active_model.training_date %}{% set _mn = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] %}{{ t('page.admin_dashboard.trained_on') }} {{ _d.day }} {{ _mn[_d.month] }} {{ _d.year }}{% else %}N/A{% endif %}
     &nbsp;·&nbsp; MAE: {{ "%.3f"|format(active_model.mae) if active_model.mae else 'N/A' }}
     &nbsp;·&nbsp; RMSE: {{ "%.3f"|format(active_model.rmse) if active_model.rmse else 'N/A' }}
     &nbsp;·&nbsp; R²: {{ "%.3f"|format(active_model.r2_score) if active_model.r2_score else 'N/A' }}
@@ -70,9 +70,8 @@
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label">{{ t('page.predictions.month') }}</label>
           <select id="singleMonth" class="form-select">
-            {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),
-                               (7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
-            <option value="{{ m }}" {% if m == 4 %}selected{% endif %}>{{ name }}</option>
+            {% for m, key in [(1,'january'),(2,'february'),(3,'march'),(4,'april'),(5,'may'),(6,'june'),(7,'july'),(8,'august'),(9,'september'),(10,'october'),(11,'november'),(12,'december')] %}
+            <option value="{{ m }}" {% if m == 4 %}selected{% endif %}>{{ t('month.' + key) }}</option>
             {% endfor %}
           </select>
         </div>
@@ -99,9 +98,8 @@
         <div class="form-group" style="margin-bottom:0;">
           <label class="form-label">{{ t('page.predictions.latest_data_month') }}</label>
           <select id="nextMonth" class="form-select">
-            {% for m, name in [(1,'January'),(2,'February'),(3,'March'),(4,'April'),(5,'May'),(6,'June'),
-                               (7,'July'),(8,'August'),(9,'September'),(10,'October'),(11,'November'),(12,'December')] %}
-            <option value="{{ m }}" {% if m == 3 %}selected{% endif %}>{{ name }}</option>
+            {% for m, key in [(1,'january'),(2,'february'),(3,'march'),(4,'april'),(5,'may'),(6,'june'),(7,'july'),(8,'august'),(9,'september'),(10,'october'),(11,'november'),(12,'december')] %}
+            <option value="{{ m }}" {% if m == 3 %}selected{% endif %}>{{ t('month.' + key) }}</option>
             {% endfor %}
           </select>
         </div>
@@ -236,8 +234,8 @@
 let loadingModal, deleteModal;
 let deletePendingYear = null, deletePendingMonth = null;
 
-const MONTH_NAMES = ['January','February','March','April','May','June',
-                     'July','August','September','October','November','December'];
+const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni',
+                     'Juli','Agustus','September','Oktober','November','Desember'];
 
 document.addEventListener('DOMContentLoaded', function () {
   loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));

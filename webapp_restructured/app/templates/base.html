@@ -227,11 +227,14 @@
     <!-- Actions -->
     <div class="topbar-actions">
       <!-- Language switcher -->
-      {% if lang == 'id' %}
-      <a href="{{ url_for('lang.switch', code='en') }}" class="topbar-btn" title="Switch to English" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;text-decoration:none;color:var(--text-muted);">EN</a>
-      {% else %}
-      <a href="{{ url_for('lang.switch', code='id') }}" class="topbar-btn" title="Ganti ke Indonesia" style="font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;text-decoration:none;color:var(--text-muted);">ID</a>
-      {% endif %}
+      <div class="lang-toggle">
+        <a href="{{ url_for('lang.switch', code='id') }}" title="Indonesia" class="lang-opt {% if lang == 'id' %}lang-active{% endif %}">
+          🇮🇩 <span class="lang-label">ID</span>
+        </a>
+        <a href="{{ url_for('lang.switch', code='en') }}" title="English" class="lang-opt {% if lang == 'en' %}lang-active{% endif %}">
+          🇬🇧 <span class="lang-label">EN</span>
+        </a>
+      </div>
 
       <!-- Notification placeholder -->
       <button class="topbar-btn" title="Notifications">
@@ -314,16 +317,35 @@
   </nav>
 
   <div class="public-navbar-actions" style="display:flex;align-items:center;gap:8px;">
-    {% if lang == 'id' %}
-    <a href="{{ url_for('lang.switch', code='en') }}" style="font-size:11px;font-weight:700;color:#64748b;text-decoration:none;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;">EN</a>
-    {% else %}
-    <a href="{{ url_for('lang.switch', code='id') }}" style="font-size:11px;font-weight:700;color:#64748b;text-decoration:none;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;">ID</a>
-    {% endif %}
+    <div class="lang-toggle">
+      <a href="{{ url_for('lang.switch', code='id') }}" title="Indonesia" class="lang-opt {% if lang == 'id' %}lang-active{% endif %}">
+        🇮🇩 <span class="lang-label">ID</span>
+      </a>
+      <a href="{{ url_for('lang.switch', code='en') }}" title="English" class="lang-opt {% if lang == 'en' %}lang-active{% endif %}">
+        🇬🇧 <span class="lang-label">EN</span>
+      </a>
+    </div>
     <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-sm">
-      <i class="fas fa-sign-in-alt"></i> {{ t('nav.login') }}
+      <i class="fas fa-sign-in-alt"></i> <span class="d-none d-sm-inline">{{ t('nav.login') }}</span>
     </a>
+    <!-- Hamburger (mobile only) -->
+    <button class="public-nav-hamburger" id="publicNavHamburger" aria-label="Menu">
+      <i class="fas fa-bars"></i>
+    </button>
   </div>
 </header>
+
+<!-- Mobile Menu Dropdown -->
+<div class="public-mobile-menu" id="publicMobileMenu">
+  <a class="public-mobile-link {% if request.endpoint == 'public.index' %}active{% endif %}"
+     href="{{ url_for('public.index') }}">{{ t('nav.home') }}</a>
+  <a class="public-mobile-link {% if request.endpoint == 'public.dashboard' %}active{% endif %}"
+     href="{{ url_for('public.dashboard') }}">{{ t('nav.dashboard') }}</a>
+  <a class="public-mobile-link {% if request.endpoint == 'public.statistics' %}active{% endif %}"
+     href="{{ url_for('public.statistics') }}">{{ t('nav.statistics') }}</a>
+  <a class="public-mobile-link {% if request.endpoint == 'public.about' %}active{% endif %}"
+     href="{{ url_for('public.about') }}">{{ t('nav.about') }}</a>
+</div>
 
 <!-- Flash Messages for public pages -->
 {% with messages = get_flashed_messages(with_categories=true) %}

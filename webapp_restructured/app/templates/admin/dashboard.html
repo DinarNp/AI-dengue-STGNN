@@ -37,7 +37,7 @@
     <div class="stat-icon icon-secondary"><i class="fas fa-users"></i></div>
     <div class="stat-content">
       <div class="stat-value">{{ stats.total_users }}</div>
-      <div class="stat-label">System Users</div>
+      <div class="stat-label">{{ t('common.system_users') }}</div>
     </div>
   </div>
 
@@ -211,7 +211,7 @@
             <th>{{ t('common.date') }}</th>
             <th>{{ t('common.type') }}</th>
             <th>{{ t('common.status') }}</th>
-            <th>Records</th>
+            <th>{{ t('common.records') }}</th>
             <th>{{ t('page.logs.user_col') }}</th>
           </tr>
         </thead>
@@ -234,7 +234,7 @@
               {% endif %}
             </td>
             <td>{{ log.records_processed or 0 }}</td>
-            <td>{{ log.user.username if log.user else 'System' }}</td>
+            <td>{{ log.user.username if log.user else t('common.system_user') }}</td>
           </tr>
           {% else %}
           <tr>

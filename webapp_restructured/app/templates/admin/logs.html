@@ -19,7 +19,7 @@
                             <th>{{ t('common.date') }}</th>
                             <th>{{ t('common.type') }}</th>
                             <th>{{ t('common.status') }}</th>
-                            <th>Records</th>
+                            <th>{{ t('common.records') }}</th>
                             <th>{{ t('page.logs.user_col') }}</th>
                             <th>{{ t('page.logs.details_col') }}</th>
                         </tr>
@@ -45,11 +45,11 @@
                                 {% endif %}
                             </td>
                             <td>{{ log.records_processed or 0 }}</td>
-                            <td>{{ log.user.username if log.user else 'System' }}</td>
+                            <td>{{ log.user.username if log.user else t('common.system_user') }}</td>
                             <td>
                                 {% if log.error_message %}
                                     <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#errorModal{{ log.id }}">
-                                        <i class="fas fa-exclamation-triangle"></i> Error
+                                        <i class="fas fa-exclamation-triangle"></i> {{ t('common.error') }}
                                     </button>
                                     
                                     <!-- Error Modal -->
@@ -68,7 +68,7 @@
                                     </div>
                                 {% elif log.details %}
                                     <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#detailsModal{{ log.id }}">
-                                        <i class="fas fa-info-circle"></i> View
+                                        <i class="fas fa-info-circle"></i> {{ t('common.view') }}
                                     </button>
                                     
                                     <!-- Details Modal -->
@@ -94,7 +94,7 @@
                         <tr>
                             <td colspan="8" class="text-center text-muted py-4">
                                 <i class="fas fa-info-circle fa-3x mb-3 d-block"></i>
-                                No processing logs found
+                                {{ t('page.logs.no_logs') }}
                             </td>
                         </tr>
                         {% endfor %}

@@ -45,7 +45,7 @@
 /* ----- Reset & Base ----- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -54,6 +54,7 @@ body {
   font-size: 14px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a { color: var(--primary); text-decoration: none; transition: var(--transition); }
@@ -350,6 +351,8 @@ img { max-width: 100%; }
 /* Breadcrumb */
 .topbar-breadcrumb {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .breadcrumb {
@@ -364,7 +367,14 @@ img { max-width: 100%; }
 .breadcrumb-item + .breadcrumb-item::before { color: var(--text-muted); }
 
 /* Topbar actions */
-.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1051;
+}
 
 .topbar-btn {
   width: 36px;
@@ -2007,6 +2017,7 @@ pre {
 
   .public-navbar { padding: 0 16px; }
   .public-navbar-links { display: none; }
+  .public-nav-hamburger { display: flex !important; }
 
   .auth-right { padding: 32px 20px; }
 }
@@ -2016,4 +2027,125 @@ pre {
   .stat-value { font-size: 22px; }
   .hero-stats { gap: 20px; }
   .hero-stat-value { font-size: 22px; }
+}
+
+/* ── Mobile overflow & layout fixes ─────────────────────────── */
+@media (max-width: 768px) {
+  /* Prevent any element from causing horizontal scroll */
+  .main-content,
+  .content-inner,
+  .public-content,
+  .card,
+  .card-body,
+  .card-header,
+  .page-header {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Tables: scrollable on mobile */
+  .table-responsive,
+  .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 500px; }
+
+  /* Page header: stack vertically */
+  .page-header.d-flex {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  /* Charts: limit height on mobile */
+  .chart-container { height: 200px !important; }
+
+  /* Buttons: smaller on mobile */
+  .btn { font-size: 12px; padding: 6px 12px; }
+
+  /* Hide non-essential columns in tables */
+  .d-none-mobile { display: none !important; }
+
+  /* Stat cards: 2 columns on mobile */
+  .grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Content padding */
+  .content-inner { padding: 16px 12px 70px; }
+}
+
+/* ── Public Mobile Menu ──────────────────────────────────────── */
+.public-nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: white;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  align-items: center;
+  justify-content: center;
+}
+.public-nav-hamburger:hover { background: rgba(255,255,255,0.1); }
+
+.public-mobile-menu {
+  display: none;
+  flex-direction: column;
+  background: var(--sidebar-bg, #0f172a);
+  padding: 8px 16px 16px;
+  gap: 4px;
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 1025;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.public-mobile-menu.open { display: flex; }
+
+.public-mobile-link {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: all .15s;
+}
+.public-mobile-link:hover,
+.public-mobile-link.active {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+/* ── Language Toggle ─────────────────────────────────────────── */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  background: var(--body-bg, #f1f5f9);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 20px;
+  padding: 2px;
+  gap: 0;
+  flex-shrink: 0;
+}
+.lang-opt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--text-muted, #64748b);
+  transition: all .15s;
+  white-space: nowrap;
+}
+.lang-opt.lang-active {
+  background: var(--primary, #0ea5e9);
+  color: #fff;
+}
+
+@media (max-width: 480px) {
+  .lang-opt { padding: 3px 7px; gap: 2px; }
+  .lang-label { display: none; }
 }

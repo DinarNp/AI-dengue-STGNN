@@ -7,6 +7,7 @@ from datetime import datetime
 from sqlalchemy import func
 
 from ..models import db, Regency, DengueCase, Prediction, ClimateData, NDVIData
+from ..i18n import get_lang, make_t
 
 public = Blueprint('public', __name__)
 
@@ -182,16 +183,18 @@ def statistics():
         DengueCase.month
     ).all()
     
-    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    
+    _t = make_t(get_lang())
+    _short_keys = ['jan','feb','mar','apr','may_short','jun','jul','aug','sep','oct','nov','dec']
+    _full_keys  = ['january','february','march','april','may','june',
+                   'july','august','september','october','november','december']
+
     monthly_avg = []
     for item in monthly_pattern:
         monthly_avg.append({
-            'month': month_names[item.month - 1],
+            'month': _t('month.' + _short_keys[item.month - 1]),
             'avg_cases': round(item.avg_cases, 1)
         })
-    
+
     # Get regency comparison for current year
     regency_comparison = db.session.query(
         Regency.name,
@@ -205,17 +208,17 @@ def statistics():
     ).order_by(
         func.sum(DengueCase.cases).desc()
     ).all()
-    
+
     regency_totals = []
     for item in regency_comparison:
         regency_totals.append({
             'regency': item.name,
             'total_cases': item.total_cases
         })
-    
+
     # Calculate key metrics
     total_cases_this_year = sum(item['total_cases'] for item in regency_totals)
-    
+
     # Get highest risk month (current year)
     highest_month = db.session.query(
         DengueCase.month,
@@ -227,8 +230,8 @@ def statistics():
     ).order_by(
         func.sum(DengueCase.cases).desc()
     ).first()
-    
-    highest_risk_month = month_names[highest_month.month - 1] if highest_month else 'N/A'
+
+    highest_risk_month = _t('month.' + _full_keys[highest_month.month - 1]) if highest_month else 'N/A'
     
     return render_template('public/statistics.html',
                          yearly_comparison=yearly_comparison,

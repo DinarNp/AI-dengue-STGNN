@@ -109,6 +109,12 @@
   "common.temp_avg": "Suhu Rata-rata",
   "common.information": "Informasi",
   "common.predictions": "Prediksi",
+  "common.records": "Rekaman",
+  "common.system_user": "Sistem",
+  "common.system_users": "Pengguna Sistem",
+  "common.to_label": "s/d",
+  "page.training.months_unit": "bulan",
+  "page.risk_monitor_detail.range_label": "Rentang",
 
   "risk.low": "Rendah",
   "risk.medium": "Sedang",
