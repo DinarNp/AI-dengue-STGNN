@@ -146,6 +146,7 @@
   "risk.threshold_desc": "Metode Ambang Batas",
   "risk.threshold_method": "Alert jika prediksi > mean + 1.25 × SD (kanal endemik)",
   "risk.endemic_channel": "Kanal Endemik",
+  "risk.exceed_probability": "P(Melebihi Ambang)",
 
   "month.january": "Januari",
   "month.february": "Februari",

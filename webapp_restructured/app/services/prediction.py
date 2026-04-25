@@ -4,6 +4,7 @@ Integrates with the existing STGNN model for dengue prediction
 """
 import sys
 import os
+import math
 import pandas as pd
 import numpy as np
 import torch
@@ -229,10 +230,11 @@ class PredictionService:
             
             # Determine risk level (alert/no_alert) via endemic channel
             risk_info = self._calculate_risk_level(predicted_cases, regency_id, month)
-            risk_level      = risk_info['risk_level']
-            alert_threshold = risk_info['alert_threshold']
-            hist_mean       = risk_info['hist_mean']
-            hist_sd         = risk_info['hist_sd']
+            risk_level        = risk_info['risk_level']
+            alert_threshold   = risk_info['alert_threshold']
+            hist_mean         = risk_info['hist_mean']
+            hist_sd           = risk_info['hist_sd']
+            exceed_probability = risk_info['exceed_probability']
 
             # Probability of cases occurring = 1 - P(zero cases)
             case_probability = max(0.0, 1.0 - zero_prob)
@@ -257,6 +259,7 @@ class PredictionService:
                 existing.alert_threshold = alert_threshold
                 existing.hist_mean = hist_mean
                 existing.hist_sd = hist_sd
+                existing.exceed_probability = exceed_probability
                 existing.model_version = self.model_version
                 existing.prediction_date = datetime.utcnow()
             else:
@@ -272,6 +275,7 @@ class PredictionService:
                     alert_threshold=alert_threshold,
                     hist_mean=hist_mean,
                     hist_sd=hist_sd,
+                    exceed_probability=exceed_probability,
                     model_version=self.model_version
                 )
                 db.session.add(new_pred)
@@ -418,11 +422,21 @@ class PredictionService:
         alert_threshold = hist_mean + 1.25 * hist_sd
         risk_level = 'alert' if predicted_cases > alert_threshold else 'no_alert'
 
+        # P(actual > threshold | actual ~ N(predicted, hist_sd))
+        # = 1 - Φ((threshold - predicted) / hist_sd)
+        # using math.erfc: 1 - Φ(z) = 0.5 * erfc(z / sqrt(2))
+        if hist_sd > 0:
+            z = (alert_threshold - predicted_cases) / hist_sd
+            exceed_prob = 0.5 * math.erfc(z / math.sqrt(2))
+        else:
+            exceed_prob = 1.0 if predicted_cases > alert_threshold else 0.0
+
         return {
             'risk_level': risk_level,
             'alert_threshold': round(alert_threshold, 2),
             'hist_mean': round(hist_mean, 2),
             'hist_sd': round(hist_sd, 2),
+            'exceed_probability': round(exceed_prob * 100, 1),
         }
     
     def get_recommendation(self, predicted_cases: float, risk_level: str) -> str:

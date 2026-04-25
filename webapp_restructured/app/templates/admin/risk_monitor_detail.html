@@ -158,20 +158,21 @@
           {{ t('page.risk_monitor_detail.range_label') }}: {{ "%.0f"|format(fm.prediction.confidence_lower) }} – {{ "%.0f"|format(fm.prediction.confidence_upper) }}
         </div>
 
-        <!-- Endemic channel info -->
+        <!-- Endemic channel info + exceed probability -->
         {% if fm.prediction.alert_threshold is not none %}
-        <div style="margin-top:10px;background:var(--body-bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text-muted);display:inline-flex;gap:16px;align-items:center;">
-          <span>{{ t('risk.threshold_label') }}: <strong style="color:{{ rl_color }};">{{ "%.1f"|format(fm.prediction.alert_threshold) }}</strong></span>
+        <div style="margin-top:10px;background:var(--body-bg);border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text-muted);display:inline-flex;gap:16px;align-items:center;flex-wrap:wrap;">
           <span>μ={{ "%.1f"|format(fm.prediction.hist_mean) }}</span>
           <span>σ={{ "%.1f"|format(fm.prediction.hist_sd) }}</span>
+          <span>{{ t('risk.threshold_label') }}: <strong style="color:{{ rl_color }};">{{ "%.1f"|format(fm.prediction.alert_threshold) }}</strong></span>
         </div>
         {% endif %}
-
-        <!-- Probability of cases -->
-        {% if fm.prediction.zero_probability is not none %}
-        {% set prob_cases = ((1 - fm.prediction.zero_probability) * 100) | round(0) | int %}
-        <div style="margin-top:8px;font-size:12px;color:var(--text-muted);">
-          {{ t('risk.prob_cases') }}: <strong style="color:{{ rl_color }};">{{ prob_cases }}%</strong>
+        {% if fm.prediction.exceed_probability is not none %}
+        {% set ep = fm.prediction.exceed_probability %}
+        {% set ep_color = '#ef4444' if ep >= 50 else ('#f59e0b' if ep >= 20 else rl_color) %}
+        <div style="margin-top:8px;background:rgba({{ '239,68,68' if ep >= 50 else ('245,158,11' if ep >= 20 else '148,163,184') }},0.1);border-radius:8px;padding:6px 12px;display:inline-flex;align-items:center;gap:6px;">
+          <i class="fas fa-chart-bar" style="color:{{ ep_color }};font-size:10px;"></i>
+          <span style="font-size:12px;color:var(--text-muted);">{{ t('risk.exceed_probability') }}:</span>
+          <strong style="font-size:13px;color:{{ ep_color }};">{{ "%.1f"|format(ep) }}%</strong>
         </div>
         {% endif %}
       </div>
@@ -286,15 +287,14 @@
             <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">{{ t('risk.level') }}</div>
           </div>
           <div style="background:var(--body-bg);border-radius:10px;padding:16px;text-align:center;">
-            {% if fm.prediction.zero_probability is not none %}
-            {% set prob_cases = ((1 - fm.prediction.zero_probability) * 100) | round(0) | int %}
-            <div style="font-size:32px;font-weight:700;color:{{ modal_accent }};">{{ prob_cases }}%</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ t('risk.prob_cases') }}</div>
+            {% if fm.prediction.exceed_probability is not none %}
+            {% set ep = fm.prediction.exceed_probability %}
+            {% set ep_color = '#ef4444' if ep >= 50 else ('#f59e0b' if ep >= 20 else modal_accent) %}
+            <div style="font-size:32px;font-weight:700;color:{{ ep_color }};">{{ "%.1f"|format(ep) }}%</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ t('risk.exceed_probability') }}</div>
             {% else %}
-            <div style="font-size:32px;font-weight:600;color:var(--text-primary);">
-              {{ "%.0f"|format(fm.prediction.confidence_lower) }}–{{ "%.0f"|format(fm.prediction.confidence_upper) }}
-            </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ t('page.hd_risk_monitor.confidence_range') }}</div>
+            <div style="font-size:32px;font-weight:600;color:var(--text-primary);">—</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">{{ t('risk.exceed_probability') }}</div>
             {% endif %}
           </div>
         </div>

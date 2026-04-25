@@ -179,10 +179,11 @@ class Prediction(db.Model):
     prediction_date = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Risk classification
-    risk_level = db.Column(db.String(20))  # 'alert', 'no_alert'
-    alert_threshold = db.Column(db.Float)   # mean + 1.25*SD threshold used
-    hist_mean = db.Column(db.Float)         # historical mean for that regency+month
-    hist_sd = db.Column(db.Float)           # historical SD for that regency+month
+    risk_level = db.Column(db.String(20))      # 'alert', 'no_alert'
+    alert_threshold = db.Column(db.Float)       # mean + 1.25*SD threshold used
+    hist_mean = db.Column(db.Float)             # historical mean for that regency+month
+    hist_sd = db.Column(db.Float)               # historical SD for that regency+month
+    exceed_probability = db.Column(db.Float)    # P(actual > threshold | ~N(predicted, hist_sd)) %
     
     def __repr__(self):
         return f'<Prediction {self.regency.name} {self.year}-{self.month}: {self.predicted_cases:.1f}>'
