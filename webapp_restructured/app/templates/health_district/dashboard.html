@@ -50,17 +50,17 @@
     </div>
   </div>
 
-  <div class="stat-card {% if latest_prediction %}border-left-{% if latest_prediction.risk_level == 'low' %}success{% elif latest_prediction.risk_level == 'medium' %}warning{% elif latest_prediction.risk_level == 'high' %}warning{% else %}danger{% endif %}{% else %}border-left-primary{% endif %}">
-    <div class="stat-icon {% if latest_prediction %}icon-{% if latest_prediction.risk_level == 'low' %}success{% elif latest_prediction.risk_level == 'medium' %}warning{% else %}danger{% endif %}{% else %}icon-primary{% endif %}">
+  <div class="stat-card {% if latest_prediction %}border-left-{% if latest_prediction.risk_level == 'alert' %}danger{% else %}success{% endif %}{% else %}border-left-primary{% endif %}">
+    <div class="stat-icon {% if latest_prediction %}icon-{% if latest_prediction.risk_level == 'alert' %}danger{% else %}success{% endif %}{% else %}icon-primary{% endif %}">
       <i class="fas fa-shield-alt"></i>
     </div>
     <div class="stat-content">
       <div class="stat-value" style="font-size:18px;">
         {% if latest_prediction %}
           {% set rl = latest_prediction.risk_level %}
-          <span class="risk-badge risk-{{ rl.replace('_','-') }}">
-            <span class="risk-dot {{ rl.replace('_','-') }}"></span>
-            {{ t('risk.' + rl) if rl in ('low','medium','high') else rl.replace('_',' ').upper() }}
+          <span class="risk-badge risk-{{ rl }}">
+            <span class="risk-dot {{ rl }}"></span>
+            {{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
           </span>
         {% else %}
           <span style="color:#94a3b8;">N/A</span>

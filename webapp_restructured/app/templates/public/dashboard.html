@@ -109,8 +109,8 @@
       </div>
       {% if data.latest_prediction %}
         {% set rl = data.latest_prediction.risk_level %}
-        <span class="risk-badge risk-{{ rl.replace('_', '-') }}">
-          {{ t('risk.' + rl) if rl in ('low','medium','high') else rl.replace('_',' ').upper() }}
+        <span class="risk-badge risk-{{ rl }}">
+          {{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
         </span>
       {% endif %}
     </div>

@@ -119,8 +119,8 @@
                                 <td><strong>{{ "%.0f"|format(pred.predicted_cases) }}</strong></td>
                                 <td>
                                     {% set rl = pred.risk_level %}
-                                    <span class="risk-badge risk-{{ rl.replace('_', '-') }}">
-                                        {{ t('risk.' + rl) if rl in ('low','medium','high') else rl.replace('_',' ').upper() }}
+                                    <span class="risk-badge risk-{{ rl }}">
+                                        {{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
                                     </span>
                                 </td>
                             </tr>

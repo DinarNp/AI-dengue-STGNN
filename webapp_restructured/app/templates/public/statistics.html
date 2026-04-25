@@ -118,15 +118,7 @@
             <td><strong>{{ item.regency }}</strong></td>
             <td><span style="font-weight:600;font-size:15px;">{{ item.total_cases | int }}</span></td>
             <td>
-              {% if item.total_cases < 300 %}
-                <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }}</span>
-              {% elif item.total_cases < 600 %}
-                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }}</span>
-              {% elif item.total_cases < 900 %}
-                <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }}</span>
-              {% else %}
-                <span class="risk-badge risk-very-high"><span class="risk-dot very-high"></span>{{ t('risk.very_high') }}</span>
-              {% endif %}
+              <span style="font-weight:600;font-size:13px;color:var(--text-primary);">{{ item.total_cases | int }}</span>
             </td>
             <td style="min-width:160px;">
               <div class="progress-bar-wrapper" style="margin:0;">

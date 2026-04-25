@@ -81,13 +81,7 @@
               <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ pct }}%</div>
             </td>
             <td>
-              {% if case.cases < 30 %}
-                <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }}</span>
-              {% elif case.cases < 60 %}
-                <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }}</span>
-              {% else %}
-                <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }}</span>
-              {% endif %}
+              <span style="font-weight:600;font-size:13px;color:var(--text-primary);">{{ case.cases }}</span>
             </td>
           </tr>
           {% else %}
