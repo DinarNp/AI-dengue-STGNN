@@ -817,6 +817,9 @@ img { max-width: 100%; }
 .risk-badge.risk-high      { background: #ffedd5; color: #9a3412; }
 .risk-badge.risk-very-high,
 .risk-badge.risk-very_high { background: #fee2e2; color: #991b1b; }
+.risk-badge.risk-alert     { background: #fee2e2; color: #991b1b; }
+.risk-badge.risk-no_alert,
+.risk-badge.risk-no-alert  { background: #d1fae5; color: #065f46; }
 
 .risk-dot {
   width: 8px;
@@ -830,6 +833,9 @@ img { max-width: 100%; }
 .risk-dot.high      { background: var(--orange); }
 .risk-dot.very-high,
 .risk-dot.very_high { background: var(--danger); }
+.risk-dot.alert     { background: var(--danger); }
+.risk-dot.no_alert,
+.risk-dot.no-alert  { background: var(--success); }
 
 /* Status indicator */
 .status-indicator {

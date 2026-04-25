@@ -32,24 +32,24 @@
     </div>
   </div>
   <div class="stat-card border-left-danger">
-    <div class="stat-icon icon-danger"><i class="fas fa-exclamation-triangle"></i></div>
+    <div class="stat-icon icon-danger"><i class="fas fa-bell"></i></div>
     <div class="stat-content">
-      <div class="stat-value">{{ province_risk.get('high', 0) }}</div>
-      <div class="stat-label">{{ t('common.high_risk_regencies') }}</div>
-    </div>
-  </div>
-  <div class="stat-card border-left-warning">
-    <div class="stat-icon" style="background:rgba(245,158,11,0.15);"><i class="fas fa-minus-circle" style="color:#f59e0b;"></i></div>
-    <div class="stat-content">
-      <div class="stat-value">{{ province_risk.get('medium', 0) }}</div>
-      <div class="stat-label">{{ t('common.medium_risk_regencies') }}</div>
+      <div class="stat-value">{{ province_risk.get('alert', 0) }}</div>
+      <div class="stat-label">{{ t('common.alert_regencies') }}</div>
     </div>
   </div>
   <div class="stat-card border-left-success">
     <div class="stat-icon icon-success"><i class="fas fa-check-circle"></i></div>
     <div class="stat-content">
-      <div class="stat-value">{{ province_risk.get('low', 0) }}</div>
-      <div class="stat-label">{{ t('common.low_risk_regencies') }}</div>
+      <div class="stat-value">{{ province_risk.get('no_alert', 0) }}</div>
+      <div class="stat-label">{{ t('common.no_alert_regencies') }}</div>
+    </div>
+  </div>
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-chart-line"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ t('risk.threshold_label') }}</div>
+      <div class="stat-label">{{ t('risk.threshold_desc') }}</div>
     </div>
   </div>
 </div>
@@ -58,9 +58,9 @@
 <div class="card" style="margin-bottom:24px;">
   <div class="card-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:12px 20px;">
     <span style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ t('risk.levels') }}</span>
-    <span class="risk-badge risk-low"><span class="risk-dot low"></span>{{ t('risk.low') }} (&lt;30)</span>
-    <span class="risk-badge risk-medium"><span class="risk-dot medium"></span>{{ t('risk.medium') }} (30–60)</span>
-    <span class="risk-badge risk-high"><span class="risk-dot high"></span>{{ t('risk.high') }} (&gt;60)</span>
+    <span class="risk-badge risk-alert"><span class="risk-dot alert"></span>{{ t('risk.alert') }}</span>
+    <span class="risk-badge risk-no_alert"><span class="risk-dot no_alert"></span>{{ t('risk.no_alert') }}</span>
+    <span style="font-size:11.5px;color:#94a3b8;">— {{ t('risk.threshold_method') }}</span>
     <span style="margin-left:auto;font-size:11.5px;color:#94a3b8;">
       <i class="fas fa-info-circle"></i> {{ t('risk.badge_info') }}
     </span>
@@ -71,14 +71,12 @@
 <div class="grid-3">
   {% for rf in regency_forecasts %}
   {% set risk = rf.risk_level %}
-  {% if risk == 'high' %}
-    {% set rl_color = '#ef4444' %}{% set rl_border = 'border-left-danger' %}
-  {% elif risk == 'medium' %}
-    {% set rl_color = '#f59e0b' %}{% set rl_border = 'border-left-warning' %}
-  {% elif risk == 'low' %}
-    {% set rl_color = '#10b981' %}{% set rl_border = 'border-left-success' %}
+  {% if risk == 'alert' %}
+    {% set rl_color = '#ef4444' %}
+  {% elif risk == 'no_alert' %}
+    {% set rl_color = '#10b981' %}
   {% else %}
-    {% set rl_color = '#94a3b8' %}{% set rl_border = '' %}
+    {% set rl_color = '#94a3b8' %}
   {% endif %}
 
   <div class="card" style="margin-bottom:0;border-top:3px solid {{ rl_color }};">
@@ -91,7 +89,7 @@
       </div>
       {% if risk %}
       <span class="risk-badge risk-{{ risk }}">
-        <span class="risk-dot {{ risk }}"></span>{{ risk.upper() }}
+        <span class="risk-dot {{ risk }}"></span>{{ t('risk.' + risk) }}
       </span>
       {% else %}
       <span class="pill" style="font-size:11px;">{{ t('risk.no_data') }}</span>
@@ -111,13 +109,15 @@
         {% for fm in rf.forecast_months %}
         {% if fm.prediction %}
           {% set frl = fm.prediction.risk_level %}
-          {% if frl == 'high' %}{% set fc = '#ef4444' %}{% set fbg = 'rgba(239,68,68,0.1)' %}
-          {% elif frl == 'medium' %}{% set fc = '#f59e0b' %}{% set fbg = 'rgba(245,158,11,0.1)' %}
+          {% if frl == 'alert' %}{% set fc = '#ef4444' %}{% set fbg = 'rgba(239,68,68,0.1)' %}
           {% else %}{% set fc = '#10b981' %}{% set fbg = 'rgba(16,185,129,0.1)' %}{% endif %}
           <div style="background:{{ fbg }};border:1px solid {{ fc }}40;border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
             <div style="font-size:10px;color:var(--text-muted);">{{ fm.month_name[:3] }} {{ fm.year }}</div>
             <div style="font-size:18px;font-weight:800;color:{{ fc }};line-height:1.2;">{{ "%.0f"|format(fm.prediction.predicted_cases) }}</div>
-            <div style="font-size:9px;color:{{ fc }};font-weight:600;text-transform:uppercase;">{{ t('risk.' + frl) }}</div>
+            {% if fm.prediction.case_probability is defined and fm.prediction.case_probability is not none %}
+            <div style="font-size:9px;color:var(--text-muted);">{{ "%.0f"|format((1 - fm.prediction.zero_probability) * 100) if fm.prediction.zero_probability is not none else '—' }}% {{ t('risk.prob_cases') }}</div>
+            {% endif %}
+            <div style="font-size:9px;color:{{ fc }};font-weight:600;text-transform:uppercase;margin-top:2px;">{{ t('risk.' + frl) }}</div>
           </div>
         {% else %}
           <div style="background:var(--body-bg);border:1px solid var(--border-color);border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
@@ -129,24 +129,19 @@
         {% endfor %}
       </div>
 
-      <!-- Risk count pills -->
+      <!-- Alert count pills -->
       <div style="display:flex;gap:6px;margin-bottom:12px;">
-        {% if rf.risk_counts.high > 0 %}
+        {% if rf.risk_counts.get('alert', 0) > 0 %}
         <span style="font-size:11px;background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 10px;border-radius:20px;font-weight:600;">
-          {{ rf.risk_counts.high }} {{ t('risk.high') }}
+          {{ rf.risk_counts.get('alert', 0) }} {{ t('risk.alert') }}
         </span>
         {% endif %}
-        {% if rf.risk_counts.medium > 0 %}
-        <span style="font-size:11px;background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 10px;border-radius:20px;font-weight:600;">
-          {{ rf.risk_counts.medium }} {{ t('risk.medium') }}
-        </span>
-        {% endif %}
-        {% if rf.risk_counts.low > 0 %}
+        {% if rf.risk_counts.get('no_alert', 0) > 0 %}
         <span style="font-size:11px;background:rgba(16,185,129,0.15);color:#10b981;padding:2px 10px;border-radius:20px;font-weight:600;">
-          {{ rf.risk_counts.low }} {{ t('risk.low') }}
+          {{ rf.risk_counts.get('no_alert', 0) }} {{ t('risk.no_alert') }}
         </span>
         {% endif %}
-        {% if rf.risk_counts.high == 0 and rf.risk_counts.medium == 0 and rf.risk_counts.low == 0 %}
+        {% if rf.risk_counts.get('alert', 0) == 0 and rf.risk_counts.get('no_alert', 0) == 0 %}
         <span style="font-size:11px;color:#94a3b8;">{{ t('common.no_predictions') }}</span>
         {% endif %}
       </div>
@@ -172,7 +167,7 @@
 
 {% block extra_js %}
 <script>
-const regencyColors = { high: '#ef4444', medium: '#f59e0b', low: '#10b981', null: '#94a3b8' };
+const regencyColors = { alert: '#ef4444', no_alert: '#10b981', null: '#94a3b8' };
 var _tPredicted = {{ t('page.risk_monitor.predicted') | tojson }};
 var _tActual    = {{ t('page.risk_monitor.actual') | tojson }};
 var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};

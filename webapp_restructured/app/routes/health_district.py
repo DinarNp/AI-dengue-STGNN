@@ -277,49 +277,35 @@ def view_risk_monitor():
 
         RECOMMENDATIONS = {
             'id': {
-                'low': [
+                'no_alert': [
                     "Lanjutkan pengendalian vektor rutin dan inspeksi rumah tangga",
                     "Promosi kesehatan reguler dan edukasi berbasis sekolah",
                     "Pemeliharaan sistem surveilans untuk deteksi dini",
                     "Kegiatan kesiapsiagaan musiman menjelang transisi musim hujan",
                     "Pelibatan masyarakat dalam pengelolaan lingkungan jangka panjang"
                 ],
-                'medium': [
-                    "Penguatan pengendalian vektor rutin (pengelolaan sumber larva, kerja bakti)",
-                    "Peningkatan surveilans berbasis masyarakat melalui kader terlatih",
-                    "Persiapan protokol respons dan penimbunan sumber daya",
-                    "Pemantauan intensif kondisi lingkungan",
-                    "Komunikasi kepada tenaga kesehatan tentang kesiapan penanganan kasus"
-                ],
-                'high': [
-                    "Pengendalian vektor intensif segera (fogging dalam ruangan, pengobatan luar ruangan di area padat)",
+                'alert': [
+                    "Prediksi kasus melebihi ambang batas endemik — segera aktifkan respons",
+                    "Intensifikasi pengendalian vektor (pengelolaan sumber larva, fogging di area padat)",
                     "Pengerahan tim respons cepat untuk deteksi kasus aktif dan pelacakan kontak",
-                    "Kampanye edukasi masyarakat multi-saluran mendesak (radio, media sosial, pertemuan warga)",
-                    "Koordinasi antar puskesmas untuk respons wabah regional",
-                    "Persiapan fasilitas kesehatan (unit isolasi, perlengkapan perawatan, kapasitas diagnostik)"
+                    "Penguatan surveilans berbasis masyarakat melalui kader terlatih",
+                    "Koordinasi fasilitas kesehatan untuk kesiapan penanganan kasus dan penimbunan sumber daya"
                 ],
             },
             'en': {
-                'low': [
+                'no_alert': [
                     "Continuation of routine vector control and household inspections",
                     "Regular health promotion and school-based education",
                     "Surveillance system maintenance for early warning detection",
                     "Seasonal preparedness activities during pre-wet season transition",
                     "Community engagement in long-term environmental management"
                 ],
-                'medium': [
-                    "Strengthened routine vector control (larval source management, community clean-up)",
-                    "Enhanced community-based surveillance through trained volunteers",
-                    "Response protocol preparation and resource stockpiling",
-                    "Intensified environmental condition monitoring",
-                    "Healthcare provider communication on case management readiness"
-                ],
-                'high': [
-                    "Immediate intensive vector control (indoor residual spraying, outdoor treatment in high-density areas)",
-                    "Rapid response team deployment for active case detection and contact tracing",
-                    "Urgent multi-channel community education campaigns (radio, social media, community meetings)",
-                    "Inter-health center coordination for regional outbreak response",
-                    "Healthcare facility preparation (isolation units, treatment supplies, diagnostic capacity)"
+                'alert': [
+                    "Predicted cases exceed endemic threshold — activate response immediately",
+                    "Intensify vector control (larval source management, fogging in high-density areas)",
+                    "Deploy rapid response teams for active case detection and contact tracing",
+                    "Strengthen community-based surveillance through trained volunteers",
+                    "Coordinate healthcare facilities for case management readiness and resource stockpiling"
                 ],
             },
         }
@@ -362,11 +348,11 @@ def view_risk_monitor():
             'regional_analysis': regional,
         })
 
-    risk_counts = {'low': 0, 'medium': 0, 'high': 0}
+    risk_counts = {'alert': 0, 'no_alert': 0}
     for fm in forecast_months:
         if fm['prediction']:
-            risk_counts[fm['prediction'].risk_level] = \
-                risk_counts.get(fm['prediction'].risk_level, 0) + 1
+            rl = fm['prediction'].risk_level
+            risk_counts[rl] = risk_counts.get(rl, 0) + 1
 
     # Last 24 months actual trend (oldest → newest)
     recent_cases = DengueCase.query.filter_by(

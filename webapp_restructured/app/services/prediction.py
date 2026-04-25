@@ -227,26 +227,36 @@ class PredictionService:
                 predicted_cases = float(input_data['Cases'].tail(3).mean())
                 zero_prob = 0.0
             
-            # Determine risk level
-            risk_level = self._calculate_risk_level(predicted_cases)
-            
+            # Determine risk level (alert/no_alert) via endemic channel
+            risk_info = self._calculate_risk_level(predicted_cases, regency_id, month)
+            risk_level      = risk_info['risk_level']
+            alert_threshold = risk_info['alert_threshold']
+            hist_mean       = risk_info['hist_mean']
+            hist_sd         = risk_info['hist_sd']
+
+            # Probability of cases occurring = 1 - P(zero cases)
+            case_probability = max(0.0, 1.0 - zero_prob)
+
             # Calculate confidence bounds (simple approach: ±30%)
             confidence_lower = max(0, predicted_cases * 0.7)
             confidence_upper = predicted_cases * 1.3
-            
+
             # Save prediction to database
             existing = Prediction.query.filter_by(
                 regency_id=regency_id,
                 year=year,
                 month=month
             ).first()
-            
+
             if existing:
                 existing.predicted_cases = predicted_cases
                 existing.zero_probability = zero_prob
                 existing.confidence_lower = confidence_lower
                 existing.confidence_upper = confidence_upper
                 existing.risk_level = risk_level
+                existing.alert_threshold = alert_threshold
+                existing.hist_mean = hist_mean
+                existing.hist_sd = hist_sd
                 existing.model_version = self.model_version
                 existing.prediction_date = datetime.utcnow()
             else:
@@ -259,12 +269,15 @@ class PredictionService:
                     confidence_lower=confidence_lower,
                     confidence_upper=confidence_upper,
                     risk_level=risk_level,
+                    alert_threshold=alert_threshold,
+                    hist_mean=hist_mean,
+                    hist_sd=hist_sd,
                     model_version=self.model_version
                 )
                 db.session.add(new_pred)
-            
+
             db.session.commit()
-            
+
             return {
                 'success': True,
                 'regency': regency.name,
@@ -272,9 +285,13 @@ class PredictionService:
                 'month': month,
                 'predicted_cases': round(predicted_cases, 1),
                 'zero_probability': round(zero_prob * 100, 1),
+                'case_probability': round(case_probability * 100, 1),
                 'confidence_lower': round(confidence_lower, 1),
                 'confidence_upper': round(confidence_upper, 1),
-                'risk_level': risk_level
+                'risk_level': risk_level,
+                'alert_threshold': alert_threshold,
+                'hist_mean': hist_mean,
+                'hist_sd': hist_sd,
             }
             
         except Exception as e:
@@ -376,24 +393,37 @@ class PredictionService:
             )
         }
 
-    def _calculate_risk_level(self, predicted_cases: float) -> str:
+    def _calculate_risk_level(self, predicted_cases: float, regency_id: int, month: int) -> dict:
         """
-        Calculate risk level based on predicted cases
-        
-        Args:
-            predicted_cases: Number of predicted cases
-            
-        Returns:
-            Risk level string
-        """
-        thresholds = self.config.get('RISK_THRESHOLDS', {'low': 30, 'medium': 60, 'high': 100})
+        Calculate alert status based on endemic channel method.
+        Threshold = historical mean + 1.25 * SD for the same regency+month.
 
-        if predicted_cases < thresholds['low']:
-            return 'low'
-        elif predicted_cases < thresholds['medium']:
-            return 'medium'
+        Returns dict with keys: risk_level, alert_threshold, hist_mean, hist_sd
+        """
+        historical = db.session.query(DengueCase.cases).filter(
+            DengueCase.regency_id == regency_id,
+            DengueCase.month == month
+        ).all()
+
+        values = [r.cases for r in historical if r.cases is not None]
+
+        if len(values) >= 3:
+            hist_mean = float(np.mean(values))
+            hist_sd   = float(np.std(values, ddof=1))
         else:
-            return 'high'
+            # Fallback: no enough history — use flat threshold
+            hist_mean = float(np.mean(values)) if values else 0.0
+            hist_sd   = 0.0
+
+        alert_threshold = hist_mean + 1.25 * hist_sd
+        risk_level = 'alert' if predicted_cases > alert_threshold else 'no_alert'
+
+        return {
+            'risk_level': risk_level,
+            'alert_threshold': round(alert_threshold, 2),
+            'hist_mean': round(hist_mean, 2),
+            'hist_sd': round(hist_sd, 2),
+        }
     
     def get_recommendation(self, predicted_cases: float, risk_level: str) -> str:
         """
@@ -407,30 +437,22 @@ class PredictionService:
             Recommendation text
         """
         recommendations = {
-            'low': (
-                "Risk level is LOW. Maintain routine dengue prevention activities:\n"
-                "- Continuation of routine vector control and household inspections\n",
-                "- Regular health promotion and school-based education\n",
-                "- Surveillance system maintenance for early warning detection\n",
-                "- Seasonal preparedness activities during pre-wet season transition\n",
+            'no_alert': (
+                "Status: NO ALERT. Maintain routine dengue prevention activities:\n"
+                "- Continuation of routine vector control and household inspections\n"
+                "- Regular health promotion and school-based education\n"
+                "- Surveillance system maintenance for early warning detection\n"
+                "- Seasonal preparedness activities during pre-wet season transition\n"
                 "- Community engagement in long-term environmental management"
             ),
-            'medium': (
-                "Risk level is MEDIUM. Strengthen prevention and early detection:\n"
-                "- Strengthened routine vector control (larval source management, community clean-up)\n",
-                "- Enhanced community-based surveillance through trained volunteers\n",
-                "- Response protocol preparation and resource stockpiling\n",
-                "- Intensified environmental condition monitoring\n",
-                "- Healthcare provider communication on case management readiness"
+            'alert': (
+                "Status: ALERT. Predicted cases exceed endemic threshold — activate response:\n"
+                "- Intensify vector control (larval source management, fogging in high-density areas)\n"
+                "- Deploy rapid response teams for active case detection and contact tracing\n"
+                "- Strengthen community-based surveillance through trained volunteers\n"
+                "- Escalate health promotion across all channels (radio, social media, community meetings)\n"
+                "- Coordinate healthcare facilities for case management readiness and resource stockpiling"
             ),
-            'high': (
-                "Risk level is HIGH. Activate emergency dengue response:\n"
-                "- Immediate intensive vector control (indoor residual spraying, outdoor treatment in high-density areas)\n",
-                "- Rapid response team deployment for active case detection and contact tracing\n",
-                "- Urgent multi-channel community education campaigns (radio, social media, community meetings)\n",
-                "- Inter-health center coordination for regional outbreak response\n",
-                "- Healthcare facility preparation (isolation units, treatment supplies, diagnostic capacity)"
-            )
         }
 
         return recommendations.get(risk_level, "No recommendation available")

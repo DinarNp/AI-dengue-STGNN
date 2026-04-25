@@ -908,23 +908,16 @@ def export_predictions():
 
 RISK_RECOMMENDATIONS = {
     'id': {
-        'low': [
+        'no_alert': [
             "Lanjutkan inspeksi rutin dan eliminasi tempat perkembangbiakan nyamuk (3M Plus)",
             "Pertahankan edukasi kesehatan masyarakat rutin tentang pencegahan demam berdarah",
             "Pastikan pemantauan mingguan terhadap potensi tempat perkembangbiakan",
             "Jaga surveilans vektor tetap aktif melalui program Jumantik",
         ],
-        'medium': [
-            "Intensifkan kegiatan Jumantik dan tingkatkan frekuensi pemantauan",
-            "Lakukan fogging terarah di area dengan kasus yang dilaporkan",
-            "Perkuat kampanye kesadaran masyarakat (3M Plus)",
-            "Tingkatkan surveilans demam dan dorong kunjungan dini ke fasilitas kesehatan",
-            "Koordinasikan dengan tokoh masyarakat untuk kampanye kebersihan lingkungan",
-        ],
-        'high': [
-            "Segera laksanakan fogging massal di area terdampak dan sekitarnya",
+        'alert': [
+            "Prediksi kasus melebihi ambang batas endemik — segera aktifkan respons wabah",
+            "Segera laksanakan fogging terarah di area terdampak dan sekitarnya",
             "Kerahkan tim respons cepat untuk penemuan kasus aktif dan pelacakan kontak",
-            "Dirikan pos skrining demam tambahan di puskesmas",
             "Pastikan ketersediaan darah dan trombosit yang memadai di rumah sakit setempat",
             "Keluarkan peringatan kesehatan masyarakat melalui semua saluran media yang tersedia",
             "Koordinasikan dengan pemerintah daerah dan dinas kesehatan provinsi",
@@ -932,23 +925,16 @@ RISK_RECOMMENDATIONS = {
         ],
     },
     'en': {
-        'low': [
+        'no_alert': [
             "Continue regular inspection and elimination of mosquito breeding sites (3M Plus)",
             "Maintain routine community health education on dengue prevention",
             "Ensure weekly monitoring of potential breeding sites",
             "Keep vector surveillance active through Jumantik program",
         ],
-        'medium': [
-            "Intensify Jumantik activities and increase monitoring frequency",
-            "Conduct targeted fogging in areas with reported cases",
-            "Strengthen community awareness campaigns (3M Plus)",
-            "Increase fever surveillance and encourage early health facility visits",
-            "Coordinate with community leaders for clean-up campaigns",
-        ],
-        'high': [
-            "Immediately implement mass fogging in affected and surrounding areas",
+        'alert': [
+            "Predicted cases exceed endemic threshold — activate outbreak response immediately",
+            "Implement targeted fogging in affected and surrounding areas",
             "Deploy rapid response teams for active case finding and contact tracing",
-            "Set up additional fever screening posts at community health centres",
             "Ensure adequate blood and platelet supplies at local hospitals",
             "Issue public health alerts through all available media channels",
             "Coordinate with local government and provincial health office",
@@ -1022,14 +1008,14 @@ def _build_regency_forecast(regency):
             'regional_analysis': regional,
         })
 
-    risk_counts = {'low': 0, 'medium': 0, 'high': 0}
+    risk_counts = {'alert': 0, 'no_alert': 0}
     for fm in forecast_months:
         if fm['prediction']:
-            risk_counts[fm['prediction'].risk_level] = risk_counts.get(fm['prediction'].risk_level, 0) + 1
+            rl = fm['prediction'].risk_level
+            risk_counts[rl] = risk_counts.get(rl, 0) + 1
 
-    risk_level = 'high' if risk_counts['high'] > 0 else \
-                 ('medium' if risk_counts['medium'] > 0 else
-                 ('low' if risk_counts['low'] > 0 else None))
+    risk_level = 'alert' if risk_counts.get('alert', 0) > 0 else \
+                 ('no_alert' if risk_counts.get('no_alert', 0) > 0 else None)
 
     recent_cases = DengueCase.query.filter_by(regency_id=regency.id)\
         .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
@@ -1084,14 +1070,14 @@ def risk_monitor():
                 'prediction': pred,
             })
 
-        risk_counts = {'low': 0, 'medium': 0, 'high': 0}
+        risk_counts = {'alert': 0, 'no_alert': 0}
         for fm in forecast_months_summary:
             if fm['prediction']:
-                risk_counts[fm['prediction'].risk_level] = risk_counts.get(fm['prediction'].risk_level, 0) + 1
+                rl = fm['prediction'].risk_level
+                risk_counts[rl] = risk_counts.get(rl, 0) + 1
 
-        risk_level = 'high' if risk_counts['high'] > 0 else \
-                     ('medium' if risk_counts['medium'] > 0 else
-                     ('low' if risk_counts['low'] > 0 else None))
+        risk_level = 'alert' if risk_counts.get('alert', 0) > 0 else \
+                     ('no_alert' if risk_counts.get('no_alert', 0) > 0 else None)
 
         recent_cases = DengueCase.query.filter_by(regency_id=regency.id)\
             .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
@@ -1113,7 +1099,7 @@ def risk_monitor():
             'prediction_trend': prediction_trend,
         })
 
-    province_risk = {'low': 0, 'medium': 0, 'high': 0}
+    province_risk = {'alert': 0, 'no_alert': 0}
     for rf in regency_forecasts:
         if rf['risk_level']:
             province_risk[rf['risk_level']] = province_risk.get(rf['risk_level'], 0) + 1
