@@ -114,6 +114,61 @@
   </div>
 </div>
 
+<!-- ===== FORECAST SUMMARY TABLE ===== -->
+{% if forecast_months %}
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.risk_monitor_detail.forecast_table_title') }}
+    </h5>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{{ t('common.month') }}</th>
+          <th>{{ t('page.hd_risk_monitor.predicted_cases') }}</th>
+          <th>μ ({{ t('common.mean') }})</th>
+          <th>σ (SD)</th>
+          <th>{{ t('risk.threshold_label') }} (μ+1.25σ)</th>
+          <th>{{ t('risk.exceed_probability') }}</th>
+          <th>{{ t('risk.level') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fm in forecast_months %}
+        <tr>
+          <td><strong>{{ fm.month_name }} {{ fm.year }}</strong></td>
+          {% if fm.prediction %}
+          <td><strong style="font-size:15px;">{{ "%.0f"|format(fm.prediction.predicted_cases) }}</strong></td>
+          <td>{{ "%.1f"|format(fm.prediction.hist_mean) if fm.prediction.hist_mean is not none else '—' }}</td>
+          <td>{{ "%.1f"|format(fm.prediction.hist_sd) if fm.prediction.hist_sd is not none else '—' }}</td>
+          <td><strong>{{ "%.1f"|format(fm.prediction.alert_threshold) if fm.prediction.alert_threshold is not none else '—' }}</strong></td>
+          <td>
+            {% if fm.prediction.exceed_probability is not none %}
+            {% set ep = fm.prediction.exceed_probability %}
+            {% set ep_color = '#ef4444' if ep >= 50 else ('#f59e0b' if ep >= 20 else '#10b981') %}
+            <strong style="color:{{ ep_color }};font-size:14px;">{{ "%.1f"|format(ep) }}%</strong>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            {% set rl = fm.prediction.risk_level %}
+            <span class="risk-badge risk-{{ rl }}">
+              <span class="risk-dot {{ rl }}"></span>{{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
+            </span>
+          </td>
+          {% else %}
+          <td colspan="6" style="color:#94a3b8;font-size:12px;">{{ t('risk.no_data') }}</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
 <!-- ===== 3-MONTH FORECAST CARDS ===== -->
 {% if forecast_months %}
 <div class="grid-3" style="margin-bottom:24px;">

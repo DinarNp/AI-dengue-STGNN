@@ -147,6 +147,8 @@
   "risk.threshold_method": "Alert if predicted > mean + 1.25 × SD (endemic channel)",
   "risk.endemic_channel": "Endemic Channel",
   "risk.exceed_probability": "P(Exceeds Threshold)",
+  "page.risk_monitor_detail.forecast_table_title": "3-Month Forecast Summary Table",
+  "common.mean": "Mean",
 
   "month.january": "January",
   "month.february": "February",

@@ -147,6 +147,8 @@
   "risk.threshold_method": "Alert jika prediksi > mean + 1.25 × SD (kanal endemik)",
   "risk.endemic_channel": "Kanal Endemik",
   "risk.exceed_probability": "P(Melebihi Ambang)",
+  "page.risk_monitor_detail.forecast_table_title": "Tabel Ringkasan Prediksi 3 Bulan",
+  "common.mean": "Rata-rata",
 
   "month.january": "Januari",
   "month.february": "Februari",
