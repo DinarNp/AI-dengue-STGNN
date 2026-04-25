@@ -9,6 +9,9 @@ from sqlalchemy import func
 from ..models import db, Regency, DengueCase, Prediction, ClimateData, NDVIData
 from ..i18n import get_lang, make_t
 
+_FULL_MONTH_KEYS = ['january','february','march','april','may','june',
+                    'july','august','september','october','november','december']
+
 public = Blueprint('public', __name__)
 
 
@@ -100,10 +103,52 @@ def dashboard():
             'cases': item.total_cases
         })
 
+    # Build 3-month provincial forecast for chart + table
+    _lang = get_lang()
+    _t    = make_t(_lang)
+
+    # Find latest actual month across all regencies
+    latest_any = DengueCase.query.order_by(
+        DengueCase.year.desc(), DengueCase.month.desc()
+    ).first()
+    base_y = latest_any.year  if latest_any else current_year
+    base_m = latest_any.month if latest_any else current_month - 1
+
+    provincial_forecast = []  # for chart
+    forecast_table = []       # for simple table (per month → per regency)
+    py, pm = base_y, base_m
+    for _ in range(3):
+        pm += 1
+        if pm > 12:
+            pm = 1; py += 1
+        month_label = f"{_t('month.' + _FULL_MONTH_KEYS[pm - 1])} {py}"
+        preds = Prediction.query.filter_by(year=py, month=pm).all()
+        total_pred = sum(p.predicted_cases for p in preds if p.predicted_cases is not None)
+        any_alert  = any(p.risk_level == 'alert' for p in preds)
+        provincial_forecast.append({
+            'month': f"{py}-{pm:02d}",
+            'month_label': month_label,
+            'cases': round(total_pred) if preds else None,
+            'alert': any_alert,
+        })
+        # Per-regency rows for table
+        rows = []
+        pred_map = {p.regency_id: p for p in preds}
+        for reg in regencies:
+            p = pred_map.get(reg.id)
+            rows.append({
+                'regency_name': reg.name,
+                'predicted': round(p.predicted_cases) if p and p.predicted_cases is not None else None,
+                'risk_level': p.risk_level if p else None,
+            })
+        forecast_table.append({'month_label': month_label, 'rows': rows})
+
     return render_template('public/dashboard.html',
                          regency_data=regency_data,
                          provincial_total=provincial_total,
                          overall_trend=overall_trend,
+                         provincial_forecast=provincial_forecast,
+                         forecast_table=forecast_table,
                          current_year=current_year)
 
 

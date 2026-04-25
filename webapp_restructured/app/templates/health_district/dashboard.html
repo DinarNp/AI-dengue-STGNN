@@ -113,6 +113,59 @@
   </div>
 </div>
 
+<!-- 3-Month Forecast Summary Table -->
+{% if forecast_months %}
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.risk_monitor_detail.forecast_table_title') }}
+    </h5>
+  </div>
+  <div class="card-body" style="padding:0;overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{{ t('common.month') }}</th>
+          <th>{{ t('page.hd_dashboard.predicted_cases') }}</th>
+          <th>μ ({{ t('common.mean') }})</th>
+          <th>σ (SD)</th>
+          <th>{{ t('risk.threshold_label') }} (μ+1.25σ)</th>
+          <th>{{ t('risk.exceed_probability') }}</th>
+          <th>{{ t('risk.level') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fm in forecast_months %}
+        <tr>
+          <td><strong>{{ fm.month_name }} {{ fm.year }}</strong></td>
+          {% if fm.prediction %}
+            {% set pred = fm.prediction %}
+            {% set ep = pred.exceed_probability if pred.exceed_probability is not none else 0 %}
+            {% set ep_color = '#dc2626' if ep >= 75 else ('#f59e0b' if ep >= 40 else '#16a34a') %}
+            {% set rl = pred.risk_level if pred.risk_level else 'no_alert' %}
+            <td>{{ "%.0f"|format(pred.predicted_cases) }}</td>
+            <td>{{ "%.1f"|format(pred.hist_mean) if pred.hist_mean is not none else '—' }}</td>
+            <td>{{ "%.1f"|format(pred.hist_sd) if pred.hist_sd is not none else '—' }}</td>
+            <td>{{ "%.1f"|format(pred.alert_threshold) if pred.alert_threshold is not none else '—' }}</td>
+            <td><strong style="color:{{ ep_color }};">{{ "%.1f"|format(ep) }}%</strong></td>
+            <td style="white-space:nowrap;">
+              <span class="risk-badge risk-{{ rl }}" style="padding:3px 8px;">
+                <span class="risk-dot {{ rl }}"></span>
+                {{ t('risk.' + rl) }}
+              </span>
+            </td>
+          {% else %}
+            <td colspan="6" style="color:#94a3b8;text-align:center;">—</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block extra_js %}

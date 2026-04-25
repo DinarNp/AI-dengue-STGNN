@@ -87,10 +87,20 @@
   </div>
   <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#ef4444;border-radius:2px;"></span>{{ t('page.risk_monitor.actual') }}
+      <span style="display:inline-block;width:22px;height:3px;background:#1e293b;border-radius:2px;"></span>
+      {{ t('page.risk_monitor.actual') }}
     </span>
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#94a3b8;border-radius:2px;border-top:2px dashed #94a3b8;"></span>{{ t('page.risk_monitor.predicted') }}
+      <span style="display:inline-block;width:22px;height:3px;background:#f59e0b;border-radius:2px;"></span>
+      Mean + 1.25 SD
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#6366f1;border-radius:2px;border-top:2px dashed #6366f1;"></span>
+      {{ t('page.risk_monitor.predicted') }}
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#cbd5e1;border-radius:2px;"></span>
+      Forecast Ensemble
     </span>
     {% if rf.monthly_trend %}
     <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
@@ -471,50 +481,166 @@
 (function() {
   var ctx = document.getElementById('trendChart');
   if (!ctx) return;
-  var actual = {{ rf.monthly_trend | tojson }};
-  var pred   = {{ rf.prediction_trend | tojson }};
-  var _tPredicted = {{ t('page.risk_monitor.predicted') | tojson }};
-  var _tActual    = {{ t('page.risk_monitor.actual') | tojson }};
-  var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
+
+  var actual       = {{ rf.monthly_trend   | tojson }};
+  var predRaw      = {{ rf.prediction_trend | tojson }};
+  var thresholdAll = {{ rf.threshold_trend  | tojson }};
+  var ensembleRaw  = {{ rf.ensemble_data    | tojson }};
+  var _tPredicted  = {{ t('page.risk_monitor.predicted') | tojson }};
+  var _tActual     = {{ t('page.risk_monitor.actual')    | tojson }};
+  var _tCases      = {{ t('page.risk_monitor.cases_suffix') | tojson }};
+
   var nActual = actual.length;
-  var labels = [], data = [];
-  for (var i = 0; i < actual.length; i++) { labels.push(actual[i].month); data.push(actual[i].cases); }
-  for (var j = 0; j < pred.length; j++)   { labels.push(pred[j].month);   data.push(pred[j].cases); }
+
+  // ---- Build labels ----
+  var labels = actual.map(function(d) { return d.month; })
+                     .concat(predRaw.map(function(d) { return d.month; }));
+
+  // ---- Dataset 1: Reported Cases (dark solid, square markers) ----
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
+
+  // ---- Dataset 2: Mean + 1.25 SD threshold (amber, all months) ----
+  var thresholdData = thresholdAll.slice(); // already same length as labels
+
+  // ---- Dataset 3: Forecast Average (indigo dashed, circle markers, forecast only) ----
+  // Include last actual point for visual bridge
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  // ---- Dataset 4+: Forecast Ensemble (gray thin lines, fan out using hist_sd) ----
+  var nEnsemble = 12;
+  var ensembleDatasets = [];
+  var hasEnsemble = ensembleRaw.some(function(e) { return e.hist_sd > 0 && e.predicted !== null; });
+  if (hasEnsemble) {
+    for (var e = 0; e < nEnsemble; e++) {
+      // sigma multiplier ranging from -2 to +2
+      var sigma = (e / (nEnsemble - 1)) * 4 - 2;
+      var lineData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; });
+      ensembleRaw.forEach(function(fp, idx) {
+        if (fp.predicted !== null) {
+          // spread grows with sqrt(idx+1) to simulate diverging trajectories
+          var spread = sigma * fp.hist_sd * Math.sqrt(idx + 1);
+          lineData.push(Math.max(0, Math.round(fp.predicted + spread)));
+        } else {
+          lineData.push(null);
+        }
+      });
+      ensembleDatasets.push({
+        label: 'ensemble_' + e,
+        data: lineData,
+        borderColor: 'rgba(148,163,184,0.35)',
+        borderWidth: 1,
+        pointRadius: 0,
+        tension: 0.3,
+        fill: false,
+        spanGaps: false,
+        hoverBorderWidth: 0,
+      });
+    }
+  }
+
+  // ---- Vertical separator plugin ----
+  var verticalSepPlugin = {
+    id: 'verticalSep',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx;
+      var xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.6)';
+      c.lineWidth = 1.5;
+      c.setLineDash([6, 4]);
+      c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = 'rgba(100,116,139,0.75)';
+      c.font = '11px sans-serif';
+      c.fillText('Forecast →', x + 6, chart.chartArea.top + 14);
+      c.restore();
+    }
+  };
+
+  var allDatasets = ensembleDatasets.concat([
+    // Threshold line (render under actual)
+    {
+      label: 'Mean + 1.25 SD',
+      data: thresholdData,
+      borderColor: '#f59e0b',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointStyle: 'rectRot',
+      pointRadius: function(c) { return c.dataIndex >= nActual ? 5 : 3; },
+      pointHoverRadius: 6,
+      pointBackgroundColor: '#f59e0b',
+      tension: 0.3,
+      fill: false,
+      spanGaps: true,
+      order: 3,
+    },
+    // Reported Cases
+    {
+      label: _tActual,
+      data: reportedData,
+      borderColor: '#1e293b',
+      backgroundColor: 'rgba(30,41,59,0.07)',
+      borderWidth: 2.5,
+      pointStyle: 'rect',
+      pointRadius: 4,
+      pointHoverRadius: 7,
+      pointBackgroundColor: '#1e293b',
+      tension: 0.3,
+      fill: true,
+      spanGaps: false,
+      order: 1,
+    },
+    // Forecast Average
+    {
+      label: _tPredicted,
+      data: forecastAvgData,
+      borderColor: '#6366f1',
+      backgroundColor: 'rgba(99,102,241,0.05)',
+      borderWidth: 2.5,
+      borderDash: [7, 4],
+      pointStyle: 'circle',
+      pointRadius: function(c) { return c.dataIndex >= nActual ? 6 : 0; },
+      pointHoverRadius: 8,
+      pointBackgroundColor: 'white',
+      pointBorderColor: '#6366f1',
+      pointBorderWidth: 2,
+      tension: 0.3,
+      fill: false,
+      spanGaps: false,
+      order: 2,
+    },
+  ]);
+
   new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'Cases',
-        data: data,
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239,68,68,0.07)',
-        borderWidth: 2.5,
-        tension: 0.3,
-        fill: true,
-        spanGaps: false,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointBackgroundColor: function(c) { return c.dataIndex >= nActual ? '#94a3b8' : '#ef4444'; },
-        pointBorderColor:     function(c) { return c.dataIndex >= nActual ? '#94a3b8' : '#ef4444'; },
-        segment: {
-          borderColor: function(c) { return c.p0DataIndex >= nActual - 1 ? '#94a3b8' : '#ef4444'; },
-          borderDash:  function(c) { return c.p0DataIndex >= nActual - 1 ? [6, 4] : []; }
-        }
-      }]
-    },
+    plugins: [verticalSepPlugin],
+    data: { labels: labels, datasets: allDatasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: {
-          label: function(item) {
-            if (item.raw === null || item.raw === undefined) return '';
-            return (item.dataIndex >= nActual ? _tPredicted : _tActual) + ': ' + item.raw + ' ' + _tCases;
+        tooltip: {
+          filter: function(item) {
+            return item.dataset.label && !item.dataset.label.startsWith('ensemble_');
+          },
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              if (item.dataset.label === 'Mean + 1.25 SD')
+                return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
+            }
           }
-        }}
+        }
       },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 14, maxRotation: 45, font: { size: 11 } } },

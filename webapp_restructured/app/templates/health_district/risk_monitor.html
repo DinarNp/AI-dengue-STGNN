@@ -78,12 +78,20 @@
   <!-- legend -->
   <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#ef4444;border-radius:2px;"></span>
+      <span style="display:inline-block;width:22px;height:3px;background:#1e293b;border-radius:2px;"></span>
       {{ t('page.hd_risk_monitor.actual_label') }}
     </span>
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#94a3b8;border-radius:2px;border-top:2px dashed #94a3b8;"></span>
+      <span style="display:inline-block;width:22px;height:3px;background:#f59e0b;border-radius:2px;"></span>
+      Mean + 1.25 SD
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#6366f1;border-radius:2px;border-top:2px dashed #6366f1;"></span>
       {{ t('page.hd_risk_monitor.predicted_label') }}
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#cbd5e1;border-radius:2px;"></span>
+      Forecast Ensemble
     </span>
     {% if monthly_trend %}
     <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
@@ -536,47 +544,136 @@
   var ctx = document.getElementById('trendChart');
   if (!ctx) return;
 
-  var actualPoints = {{ monthly_trend    | tojson }};
-  var predPoints   = {{ prediction_trend | tojson }};
-  var nActual = actualPoints.length;
-  var _tPredicted = {{ t('page.hd_risk_monitor.predicted_label') | tojson }};
-  var _tActual    = {{ t('page.hd_risk_monitor.actual_label') | tojson }};
-  var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
+  var actual       = {{ monthly_trend    | tojson }};
+  var predRaw      = {{ prediction_trend | tojson }};
+  var thresholdAll = {{ threshold_trend  | tojson }};
+  var ensembleRaw  = {{ ensemble_data    | tojson }};
+  var _tPredicted  = {{ t('page.hd_risk_monitor.predicted_label') | tojson }};
+  var _tActual     = {{ t('page.hd_risk_monitor.actual_label') | tojson }};
+  var _tCases      = {{ t('page.risk_monitor.cases_suffix') | tojson }};
+  var nActual = actual.length;
 
-  var allLabels = [];
-  var allData   = [];
-  for (var i = 0; i < actualPoints.length; i++) {
-    allLabels.push(actualPoints[i].month);
-    allData.push(actualPoints[i].cases);
+  var labels = actual.map(function(d) { return d.month; })
+                     .concat(predRaw.map(function(d) { return d.month; }));
+
+  // Dataset 1: Reported Cases
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
+
+  // Dataset 2: Mean + 1.25 SD threshold
+  var thresholdData = thresholdAll.slice();
+
+  // Dataset 3: Forecast Average (indigo dashed, starts at last actual for continuity)
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  // Dataset 4+: Ensemble fan (12 gray lines spread by hist_sd)
+  var nEnsemble = 12;
+  var ensembleDatasets = [];
+  var hasEnsemble = ensembleRaw.some(function(e) { return e.hist_sd > 0 && e.predicted !== null; });
+  if (hasEnsemble) {
+    for (var e = 0; e < nEnsemble; e++) {
+      var sigma = (e / (nEnsemble - 1)) * 4 - 2;
+      var lineData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; });
+      ensembleRaw.forEach(function(fp, idx) {
+        if (fp.predicted !== null) {
+          var spread = sigma * fp.hist_sd * Math.sqrt(idx + 1);
+          lineData.push(Math.max(0, Math.round(fp.predicted + spread)));
+        } else {
+          lineData.push(null);
+        }
+      });
+      ensembleDatasets.push({
+        label: 'ensemble_' + e,
+        data: lineData,
+        borderColor: 'rgba(148,163,184,0.35)',
+        borderWidth: 1,
+        pointRadius: 0,
+        tension: 0.3,
+        fill: false,
+        spanGaps: false,
+      });
+    }
   }
-  for (var j = 0; j < predPoints.length; j++) {
-    allLabels.push(predPoints[j].month);
-    allData.push(predPoints[j].cases);
-  }
+
+  // Vertical separator plugin
+  var verticalSepPlugin = {
+    id: 'verticalSep',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx, xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.6)';
+      c.lineWidth = 1.5;
+      c.setLineDash([6, 4]);
+      c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = 'rgba(100,116,139,0.75)';
+      c.font = '11px sans-serif';
+      c.fillText('Forecast →', x + 6, chart.chartArea.top + 14);
+      c.restore();
+    }
+  };
+
+  var allDatasets = ensembleDatasets.concat([
+    {
+      label: 'Mean + 1.25 SD',
+      data: thresholdData,
+      borderColor: '#f59e0b',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      pointStyle: 'rectRot',
+      pointRadius: function(c) { return c.dataIndex >= nActual ? 5 : 3; },
+      pointHoverRadius: 6,
+      pointBackgroundColor: '#f59e0b',
+      tension: 0.3,
+      fill: false,
+      spanGaps: true,
+      order: 3,
+    },
+    {
+      label: _tActual,
+      data: reportedData,
+      borderColor: '#1e293b',
+      backgroundColor: 'rgba(30,41,59,0.07)',
+      borderWidth: 2.5,
+      pointStyle: 'rect',
+      pointRadius: 4,
+      pointHoverRadius: 7,
+      pointBackgroundColor: '#1e293b',
+      tension: 0.3,
+      fill: true,
+      spanGaps: false,
+      order: 1,
+    },
+    {
+      label: _tPredicted,
+      data: forecastAvgData,
+      borderColor: '#6366f1',
+      backgroundColor: 'rgba(99,102,241,0.05)',
+      borderWidth: 2.5,
+      borderDash: [7, 4],
+      pointStyle: 'circle',
+      pointRadius: function(c) { return c.dataIndex >= nActual ? 6 : 0; },
+      pointHoverRadius: 8,
+      pointBackgroundColor: 'white',
+      pointBorderColor: '#6366f1',
+      pointBorderWidth: 2,
+      tension: 0.3,
+      fill: false,
+      spanGaps: false,
+      order: 2,
+    },
+  ]);
 
   new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: allLabels,
-      datasets: [{
-        label: 'Cases',
-        data: allData,
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239,68,68,0.07)',
-        borderWidth: 2.5,
-        tension: 0.3,
-        fill: true,
-        spanGaps: false,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        pointBackgroundColor: function(ctx) { return ctx.dataIndex >= nActual ? '#94a3b8' : '#ef4444'; },
-        pointBorderColor:     function(ctx) { return ctx.dataIndex >= nActual ? '#94a3b8' : '#ef4444'; },
-        segment: {
-          borderColor: function(ctx) { return ctx.p0DataIndex >= nActual - 1 ? '#94a3b8' : '#ef4444'; },
-          borderDash:  function(ctx) { return ctx.p0DataIndex >= nActual - 1 ? [6, 4] : []; }
-        }
-      }]
-    },
+    plugins: [verticalSepPlugin],
+    data: { labels: labels, datasets: allDatasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -584,10 +681,14 @@
       plugins: {
         legend: { display: false },
         tooltip: {
+          filter: function(item) {
+            return item.dataset.label && !item.dataset.label.startsWith('ensemble_');
+          },
           callbacks: {
             label: function(item) {
               if (item.raw === null || item.raw === undefined) return '';
-              return (item.dataIndex >= nActual ? _tPredicted : _tActual) + ': ' + item.raw + ' ' + _tCases;
+              if (item.dataset.label === 'Mean + 1.25 SD') return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
             }
           }
         }

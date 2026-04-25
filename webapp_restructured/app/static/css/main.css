@@ -824,8 +824,11 @@ img { max-width: 100%; }
 .risk-dot {
   width: 8px;
   height: 8px;
+  min-width: 8px;
+  min-height: 8px;
   border-radius: var(--radius-full);
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .risk-dot.low       { background: var(--success); }
@@ -833,7 +836,20 @@ img { max-width: 100%; }
 .risk-dot.high      { background: var(--orange); }
 .risk-dot.very-high,
 .risk-dot.very_high { background: var(--danger); }
-.risk-dot.alert     { background: var(--danger); }
+.risk-dot.alert {
+  background: var(--danger);
+  /* Reset Bootstrap .alert overrides */
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  min-width: 8px;
+  min-height: 8px;
+  display: inline-block;
+  flex-shrink: 0;
+}
 .risk-dot.no_alert,
 .risk-dot.no-alert  { background: var(--success); }
 

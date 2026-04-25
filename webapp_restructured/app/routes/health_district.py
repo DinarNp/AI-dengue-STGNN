@@ -60,6 +60,12 @@ def dashboard():
         latest_year  = current_year
         latest_month = datetime.now().month
 
+    _full_keys = ['january','february','march','april','may','june',
+                  'july','august','september','october','november','december']
+    _lang = get_lang()
+    _t = make_t(_lang)
+
+    forecast_months = []
     prediction_trend = []
     py, pm = latest_year, latest_month
     for _ in range(3):
@@ -72,6 +78,12 @@ def dashboard():
             year=py,
             month=pm
         ).first()
+        forecast_months.append({
+            'year': py,
+            'month': pm,
+            'month_name': _t('month.' + _full_keys[pm - 1]),
+            'prediction': pred,
+        })
         prediction_trend.append({
             'month': f"{py}-{pm:02d}",
             'cases': round(float(pred.predicted_cases), 1) if pred else None
@@ -84,6 +96,7 @@ def dashboard():
                          total_cases_this_year=total_cases_this_year,
                          monthly_trend=monthly_trend,
                          prediction_trend=prediction_trend,
+                         forecast_months=forecast_months,
                          current_year=current_year)
 
 
@@ -354,6 +367,8 @@ def view_risk_monitor():
             rl = fm['prediction'].risk_level
             risk_counts[rl] = risk_counts.get(rl, 0) + 1
 
+    import numpy as _np
+
     # Last 24 months actual trend (oldest → newest)
     recent_cases = DengueCase.query.filter_by(
         regency_id=regency.id
@@ -372,6 +387,42 @@ def view_risk_monitor():
         for fm in forecast_months
     ]
 
+    # Threshold (mean + 1.25 SD) for every chart month (historical + forecast)
+    threshold_trend = []
+    for item in monthly_trend:
+        month_of_year = int(item['month'].split('-')[1])
+        hist_vals = db.session.query(DengueCase.cases).filter(
+            DengueCase.regency_id == regency.id,
+            DengueCase.month == month_of_year
+        ).all()
+        vals = [r.cases for r in hist_vals if r.cases is not None]
+        if len(vals) >= 2:
+            hm = float(_np.mean(vals))
+            hs = float(_np.std(vals, ddof=1))
+            threshold_trend.append(round(hm + 1.25 * hs, 1))
+        elif vals:
+            threshold_trend.append(round(float(vals[0]), 1))
+        else:
+            threshold_trend.append(None)
+    for fm in forecast_months:
+        pred = fm['prediction']
+        if pred and pred.alert_threshold is not None:
+            threshold_trend.append(round(float(pred.alert_threshold), 1))
+        else:
+            threshold_trend.append(None)
+
+    # Ensemble spread data per forecast month
+    ensemble_data = []
+    for fm in forecast_months:
+        pred = fm['prediction']
+        if pred:
+            ensemble_data.append({
+                'predicted': round(float(pred.predicted_cases), 1),
+                'hist_sd': round(float(pred.hist_sd), 2) if pred.hist_sd else 0.0,
+            })
+        else:
+            ensemble_data.append({'predicted': None, 'hist_sd': 0.0})
+
     return render_template('health_district/risk_monitor.html',
                            regency=regency,
                            forecast_months=forecast_months,
@@ -379,7 +430,9 @@ def view_risk_monitor():
                            latest_year=latest_year,
                            latest_month=latest_month,
                            monthly_trend=monthly_trend,
-                           prediction_trend=prediction_trend)
+                           prediction_trend=prediction_trend,
+                           threshold_trend=threshold_trend,
+                           ensemble_data=ensemble_data)
 
 
 def _risk_explanation(predicted_cases, last_year_case, climate, ndvi, lang='id'):

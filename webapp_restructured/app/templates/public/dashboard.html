@@ -83,12 +83,87 @@
       <span class="badge badge-primary">{{ t('public.all_regency') }}</span>
     </div>
   </div>
+  <!-- Legend -->
+  <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:28px;height:3px;background:#0ea5e9;border-radius:2px;"></span>
+      {{ t('page.hd_dashboard.actual_cases') }}
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:28px;height:3px;background:#f59e0b;border-radius:2px;border-top:2px dashed #f59e0b;"></span>
+      {{ t('page.hd_dashboard.predicted_cases') }}
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;"></span>
+      Alert
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;"></span>
+      No Alert
+    </span>
+  </div>
   <div class="card-body">
-    <div class="chart-container" style="height:240px;">
+    <div class="chart-container" style="height:260px;">
       <canvas id="provincialTrendChart"></canvas>
     </div>
   </div>
 </div>
+
+<!-- ===== 3-MONTH FORECAST TABLE ===== -->
+{% if forecast_table %}
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.risk_monitor_detail.forecast_table_title') }}
+    </h5>
+  </div>
+  <div class="card-body" style="padding:0;overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{{ t('public.regency') if t('public.regency') else 'Kabupaten' }}</th>
+          {% for fm in forecast_table %}
+          <th colspan="2" style="text-align:center;border-left:1px solid var(--border-color);">{{ fm.month_label }}</th>
+          {% endfor %}
+        </tr>
+        <tr>
+          <th></th>
+          {% for fm in forecast_table %}
+          <th style="border-left:1px solid var(--border-color);font-weight:500;font-size:11px;">{{ t('page.hd_dashboard.predicted_cases') }}</th>
+          <th style="font-weight:500;font-size:11px;">Status</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% set row_count = forecast_table[0].rows | length %}
+        {% for i in range(row_count) %}
+        <tr>
+          <td><strong>{{ forecast_table[0].rows[i].regency_name }}</strong></td>
+          {% for fm in forecast_table %}
+          {% set row = fm.rows[i] %}
+          <td style="border-left:1px solid var(--border-color);">
+            {% if row.predicted is not none %}{{ row.predicted }}{% else %}—{% endif %}
+          </td>
+          <td style="white-space:nowrap;">
+            {% if row.risk_level %}
+              {% set rl = row.risk_level %}
+              <span class="risk-badge risk-{{ rl }}" style="padding:3px 8px;">
+                <span class="risk-dot {{ rl }}"></span>
+                {{ t('risk.' + rl) }}
+              </span>
+            {% else %}
+              <span style="color:#94a3b8;">—</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
 
 <!-- ===== REGENCY CARDS GRID ===== -->
 <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
@@ -168,29 +243,104 @@
 // ---- Provincial Trend Chart ----
 const provincialCtx = document.getElementById('provincialTrendChart');
 if (provincialCtx) {
+  const actualData   = {{ overall_trend      | tojson }};
+  const forecastData = {{ provincial_forecast | tojson }};
+  const nActual = actualData.length;
+
+  // Build unified label array
+  const allLabels = actualData.map(d => d.month).concat(forecastData.map(d => d.month));
+
+  // Dataset 1: actual (null for forecast slots)
+  const actualValues = actualData.map(d => d.cases).concat(forecastData.map(() => null));
+
+  // Dataset 2: predicted — include last actual point for visual continuity, then forecast
+  const predValues = actualData.map((_, i) => i === nActual - 1 ? actualData[i].cases : null)
+                               .concat(forecastData.map(d => d.cases));
+
+  // Per-point colors for predicted dots
+  const predPointColors = actualData.map(() => 'transparent')
+    .concat(forecastData.map(d => d.alert ? '#ef4444' : '#10b981'));
+  const predPointRadius = actualData.map(() => 0)
+    .concat(forecastData.map(() => 7));
+
+  // Vertical separator plugin
+  const verticalSepPlugin = {
+    id: 'verticalSep',
+    afterDraw(chart) {
+      if (nActual >= allLabels.length) return;
+      const ctx   = chart.ctx;
+      const xScale = chart.scales.x;
+      const x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, chart.chartArea.top);
+      ctx.lineTo(x, chart.chartArea.bottom);
+      ctx.strokeStyle = 'rgba(148,163,184,0.8)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([6, 4]);
+      ctx.stroke();
+      // Label "Prediksi →"
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(148,163,184,0.9)';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('Prediksi →', x + 6, chart.chartArea.top + 14);
+      ctx.restore();
+    }
+  };
+
   new Chart(provincialCtx, {
     type: 'line',
+    plugins: [verticalSepPlugin],
     data: {
-      labels: {{ overall_trend | map(attribute='month') | list | tojson }},
-      datasets: [{
-        label: 'Total Cases',
-        data:  {{ overall_trend | map(attribute='cases') | list | tojson }},
-        borderColor: '#0ea5e9',
-        backgroundColor: 'rgba(14,165,233,0.08)',
-        borderWidth: 2.5,
-        tension: 0.4,
-        fill: true,
-        pointBackgroundColor: '#0ea5e9',
-        pointRadius: 4,
-        pointHoverRadius: 7
-      }]
+      labels: allLabels,
+      datasets: [
+        {
+          label: 'Kasus Aktual',
+          data: actualValues,
+          borderColor: '#0ea5e9',
+          backgroundColor: 'rgba(14,165,233,0.08)',
+          borderWidth: 2.5,
+          tension: 0.4,
+          fill: true,
+          pointBackgroundColor: '#0ea5e9',
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          spanGaps: false
+        },
+        {
+          label: 'Prediksi',
+          data: predValues,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.06)',
+          borderWidth: 2,
+          borderDash: [6, 4],
+          tension: 0.3,
+          fill: false,
+          pointBackgroundColor: predPointColors,
+          pointBorderColor: predPointColors,
+          pointRadius: predPointRadius,
+          pointHoverRadius: predPointRadius.map(r => r + 2),
+          spanGaps: false
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              return item.dataset.label + ': ' + item.raw + ' kasus';
+            }
+          }
+        }
+      },
       scales: {
-        x: { grid: { display: false } },
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 14, maxRotation: 45, font: { size: 11 } } },
         y: { beginAtZero: true, ticks: { precision: 0 } }
       }
     }

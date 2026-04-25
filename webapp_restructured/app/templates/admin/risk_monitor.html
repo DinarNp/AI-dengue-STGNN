@@ -58,8 +58,8 @@
 <div class="card" style="margin-bottom:24px;">
   <div class="card-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:12px 20px;">
     <span style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ t('risk.levels') }}</span>
-    <span class="risk-badge risk-alert"><span class="risk-dot alert"></span>{{ t('risk.alert') }}</span>
-    <span class="risk-badge risk-no_alert"><span class="risk-dot no_alert"></span>{{ t('risk.no_alert') }}</span>
+    <span class="risk-badge risk-alert" style="padding:3px 8px;white-space:nowrap;"><span class="risk-dot alert"></span>{{ t('risk.alert') }}</span>
+    <span class="risk-badge risk-no_alert" style="padding:3px 8px;white-space:nowrap;"><span class="risk-dot no_alert"></span>{{ t('risk.no_alert') }}</span>
     <span style="font-size:11.5px;color:#94a3b8;">— {{ t('risk.threshold_method') }}</span>
     <span style="margin-left:auto;font-size:11.5px;color:#94a3b8;">
       <i class="fas fa-info-circle"></i> {{ t('risk.badge_info') }}
@@ -88,7 +88,7 @@
         <span style="color:white;font-weight:700;font-size:14px;">{{ rf.regency.name }}</span>
       </div>
       {% if risk %}
-      <span class="risk-badge risk-{{ risk }}">
+      <span class="risk-badge risk-{{ risk }}" style="padding:3px 8px;white-space:nowrap;">
         <span class="risk-dot {{ risk }}"></span>{{ t('risk.' + risk) }}
       </span>
       {% else %}
