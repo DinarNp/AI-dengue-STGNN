@@ -211,9 +211,16 @@ def statistics():
 
     regency_totals = []
     for item in regency_comparison:
+        # Get latest prediction risk_level for this regency
+        reg_obj = Regency.query.filter_by(name=item.name).first()
+        latest_pred = None
+        if reg_obj:
+            latest_pred = Prediction.query.filter_by(regency_id=reg_obj.id)\
+                .order_by(Prediction.year.desc(), Prediction.month.desc()).first()
         regency_totals.append({
             'regency': item.name,
-            'total_cases': item.total_cases
+            'total_cases': item.total_cases,
+            'risk_level': latest_pred.risk_level if latest_pred else None,
         })
 
     # Calculate key metrics

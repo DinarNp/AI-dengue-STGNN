@@ -118,7 +118,12 @@
             <td><strong>{{ item.regency }}</strong></td>
             <td><span style="font-weight:600;font-size:15px;">{{ item.total_cases | int }}</span></td>
             <td>
-              <span style="font-weight:600;font-size:13px;color:var(--text-primary);">{{ item.total_cases | int }}</span>
+              {% set rl = item.risk_level %}
+              {% if rl in ('alert','no_alert') %}
+              <span class="risk-badge risk-{{ rl }}"><span class="risk-dot {{ rl }}"></span>{{ t('risk.' + rl) }}</span>
+              {% else %}
+              <span style="color:#94a3b8;font-size:12px;">—</span>
+              {% endif %}
             </td>
             <td style="min-width:160px;">
               <div class="progress-bar-wrapper" style="margin:0;">
