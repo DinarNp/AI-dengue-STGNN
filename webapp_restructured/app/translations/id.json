@@ -211,6 +211,7 @@
   "page.admin_dashboard.train_model": "Latih Model",
   "page.admin_dashboard.generate_predictions": "Hasilkan Prediksi",
   "page.admin_dashboard.view_risk": "Lihat Monitor Risiko",
+  "page.admin_dashboard.monthly_trend_title": "Tren Kasus Bulanan per Kabupaten",
 
   "page.data_management.title": "Manajemen Data",
   "page.data_management.subtitle": "Kelola data kasus, iklim, dan data satelit NDVI",

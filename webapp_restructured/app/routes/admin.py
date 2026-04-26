@@ -22,6 +22,8 @@ admin = Blueprint('admin', __name__, url_prefix='/admin')
 @admin_required
 def dashboard():
     """Admin dashboard"""
+    import numpy as _np
+
     # Get statistics
     stats = {
         'total_regencies': Regency.query.filter_by(is_active=True).count(),
@@ -31,19 +33,84 @@ def dashboard():
             db.func.max(DengueCase.year * 12 + DengueCase.month)
         ).scalar()
     }
-    
+
     # Get recent processing logs
     recent_logs = DataProcessingLog.query.order_by(
         DataProcessingLog.started_at.desc()
     ).limit(10).all()
-    
+
     # Get active model
     active_model = ModelVersion.query.filter_by(is_active=True).first()
-    
+
+    # Build chart data per regency (last 24 actual + 3 forecast + threshold)
+    regencies_list = Regency.query.filter_by(is_active=True).order_by(Regency.id).all()
+    all_chart_data = []
+    for reg in regencies_list:
+        recent_cases = DengueCase.query.filter_by(regency_id=reg.id)\
+            .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
+        monthly_trend = [{'month': f"{c.year}-{c.month:02d}", 'cases': c.cases}
+                         for c in reversed(recent_cases)]
+
+        if recent_cases:
+            ly, lm = recent_cases[0].year, recent_cases[0].month
+        else:
+            now = datetime.now()
+            ly, lm = now.year, now.month
+
+        prediction_trend = []
+        py, pm = ly, lm
+        for _ in range(3):
+            pm += 1
+            if pm > 12:
+                pm = 1
+                py += 1
+            pred = Prediction.query.filter_by(regency_id=reg.id, year=py, month=pm).first()
+            prediction_trend.append({
+                'month': f"{py}-{pm:02d}",
+                'cases': round(float(pred.predicted_cases), 1) if pred else None
+            })
+
+        threshold_trend = []
+        for item in monthly_trend:
+            parts = item['month'].split('-')
+            yoi, moi = int(parts[0]), int(parts[1])
+            hist_vals = db.session.query(DengueCase.cases).filter(
+                DengueCase.regency_id == reg.id,
+                DengueCase.month == moi,
+                DengueCase.year >= 2021,
+                DengueCase.year <= yoi - 1
+            ).all()
+            vals = [r.cases for r in hist_vals if r.cases is not None]
+            if len(vals) >= 2:
+                hm = float(_np.mean(vals))
+                hs = float(_np.std(vals, ddof=1))
+                threshold_trend.append(round(hm + 1.25 * hs, 1))
+            elif vals:
+                threshold_trend.append(round(float(vals[0]), 1))
+            else:
+                threshold_trend.append(None)
+        for item in prediction_trend:
+            parts = item['month'].split('-')
+            py2, pm2 = int(parts[0]), int(parts[1])
+            pred2 = Prediction.query.filter_by(regency_id=reg.id, year=py2, month=pm2).first()
+            if pred2 and pred2.alert_threshold is not None:
+                threshold_trend.append(round(float(pred2.alert_threshold), 1))
+            else:
+                threshold_trend.append(None)
+
+        all_chart_data.append({
+            'regency_id': reg.id,
+            'regency_name': reg.name,
+            'monthly_trend': monthly_trend,
+            'prediction_trend': prediction_trend,
+            'threshold_trend': threshold_trend,
+        })
+
     return render_template('admin/dashboard.html',
                          stats=stats,
                          recent_logs=recent_logs,
-                         active_model=active_model)
+                         active_model=active_model,
+                         all_chart_data=all_chart_data)
 
 
 @admin.route('/data-management')

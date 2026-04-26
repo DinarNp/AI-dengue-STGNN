@@ -14,55 +14,8 @@
   <p class="page-subtitle">{{ t('page.admin_dashboard.subtitle') }}</p>
 </div>
 
-<!-- ===== STAT CARDS ===== -->
-<div class="grid-4">
-
-  <div class="stat-card border-left-primary">
-    <div class="stat-icon icon-primary"><i class="fas fa-city"></i></div>
-    <div class="stat-content">
-      <div class="stat-value">{{ stats.total_regencies }}</div>
-      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
-    </div>
-  </div>
-
-  <div class="stat-card border-left-danger">
-    <div class="stat-icon icon-danger"><i class="fas fa-notes-medical"></i></div>
-    <div class="stat-content">
-      <div class="stat-value" data-counter="{{ stats.total_cases }}">{{ stats.total_cases }}</div>
-      <div class="stat-label">{{ t('page.admin_dashboard.total_cases') }}</div>
-    </div>
-  </div>
-
-  <div class="stat-card border-left-secondary">
-    <div class="stat-icon icon-secondary"><i class="fas fa-users"></i></div>
-    <div class="stat-content">
-      <div class="stat-value">{{ stats.total_users }}</div>
-      <div class="stat-label">{{ t('common.system_users') }}</div>
-    </div>
-  </div>
-
-  <div class="stat-card {% if active_model %}border-left-success{% else %}border-left-warning{% endif %}">
-    <div class="stat-icon {% if active_model %}icon-success{% else %}icon-warning{% endif %}">
-      <i class="fas fa-brain"></i>
-    </div>
-    <div class="stat-content">
-      <div class="stat-value" style="font-size:17px;">
-        {% if active_model %}
-          <span style="color:var(--success);">{{ t('common.active') }}</span>
-        {% else %}
-          <span style="color:var(--warning);">{{ t('page.admin_dashboard.no_model') }}</span>
-        {% endif %}
-      </div>
-      <div class="stat-label">
-        {% if active_model %}{{ active_model.version_name | truncate(18, True) }}{% else %}{{ t('page.admin_dashboard.active_model') }}{% endif %}
-      </div>
-    </div>
-  </div>
-
-</div>
-
 <!-- ===== QUICK ACTIONS ===== -->
-<div class="card mb-20">
+<!-- <div class="card mb-20">
   <div class="card-header">
     <h5 class="card-header-title"><i class="fas fa-bolt" style="color:var(--warning);margin-right:8px;"></i>{{ t('page.admin_dashboard.quick_actions') }}</h5>
   </div>
@@ -111,7 +64,96 @@
 
     </div>
   </div>
+</div> -->
+
+<!-- ===== STAT CARDS ===== -->
+<div class="grid-4">
+
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-city"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ stats.total_regencies }}</div>
+      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-danger">
+    <div class="stat-icon icon-danger"><i class="fas fa-notes-medical"></i></div>
+    <div class="stat-content">
+      <div class="stat-value" data-counter="{{ stats.total_cases }}">{{ stats.total_cases }}</div>
+      <div class="stat-label">{{ t('page.admin_dashboard.total_cases') }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-secondary">
+    <div class="stat-icon icon-secondary"><i class="fas fa-users"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ stats.total_users }}</div>
+      <div class="stat-label">{{ t('common.system_users') }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card {% if active_model %}border-left-success{% else %}border-left-warning{% endif %}">
+    <div class="stat-icon {% if active_model %}icon-success{% else %}icon-warning{% endif %}">
+      <i class="fas fa-brain"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-value" style="font-size:17px;">
+        {% if active_model %}
+          <span style="color:var(--success);">{{ t('common.active') }}</span>
+        {% else %}
+          <span style="color:var(--warning);">{{ t('page.admin_dashboard.no_model') }}</span>
+        {% endif %}
+      </div>
+      <div class="stat-label">
+        {% if active_model %}{{ active_model.version_name | truncate(18, True) }}{% else %}{{ t('page.admin_dashboard.active_model') }}{% endif %}
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<!-- ===== MONTHLY TREND CHART ===== -->
+{% if all_chart_data %}
+<div class="card mb-20">
+  <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+    <h5 class="card-header-title">
+      <i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.admin_dashboard.monthly_trend_title') }}
+    </h5>
+    <div class="card-header-actions" style="display:flex;align-items:center;gap:10px;">
+      <select id="regencySelector" class="form-select" style="width:auto;min-width:180px;font-size:13px;">
+        {% for rd in all_chart_data %}
+        <option value="{{ loop.index0 }}">{{ rd.regency_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#1e293b;border-radius:2px;"></span>
+      {{ t('page.risk_monitor.actual') }}
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#f59e0b;border-radius:2px;"></span>
+      Mean + 1.25 SD
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#6366f1;border-radius:2px;border-top:2px dashed #6366f1;"></span>
+      {{ t('page.risk_monitor.predicted') }}
+    </span>
+    <span id="chartRangeLabel" style="font-size:11.5px;color:var(--text-muted);margin-left:auto;"></span>
+  </div>
+
+  <div class="card-body">
+    <div class="chart-container" style="height:260px;">
+      <canvas id="dashTrendChart"></canvas>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <!-- ===== DATA STATUS TABLE ===== -->
 {% if data_stats %}
@@ -249,4 +291,160 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+{% if all_chart_data %}
+<script>
+(function () {
+  var allData     = {{ all_chart_data | tojson }};
+  var _tActual    = {{ t('page.risk_monitor.actual')         | tojson }};
+  var _tPredicted = {{ t('page.risk_monitor.predicted')      | tojson }};
+  var _tCases     = {{ t('page.risk_monitor.cases_suffix')   | tojson }};
+  var _tUpTo      = {{ t('page.hd_dashboard.actual_up_to')   | tojson }};
+  var _tForecast  = {{ t('page.hd_dashboard.forecast')       | tojson }};
+
+  var chartInstance = null;
+
+  function buildChart(idx) {
+    var rd           = allData[idx];
+    var actual       = rd.monthly_trend;
+    var predRaw      = rd.prediction_trend;
+    var thresholdAll = rd.threshold_trend;
+    var nActual      = actual.length;
+
+    var labels = actual.map(function(d) { return d.month; })
+                       .concat(predRaw.map(function(d) { return d.month; }));
+
+    var reportedData = actual.map(function(d) { return d.cases; })
+                             .concat(predRaw.map(function() { return null; }));
+
+    var thresholdData = thresholdAll.slice();
+
+    var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                                .concat(predRaw.map(function(d) { return d.cases; }));
+
+    var rangeEl = document.getElementById('chartRangeLabel');
+    if (rangeEl && actual.length) {
+      var txt = _tUpTo + ' ' + actual[actual.length - 1].month;
+      var fp = predRaw.filter(function(p) { return p.cases !== null; });
+      if (fp.length) txt += '  ·  ' + _tForecast + ': ' + fp[0].month + (fp.length > 1 ? ' – ' + fp[fp.length - 1].month : '');
+      rangeEl.textContent = txt;
+    }
+
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+    var verticalSepPlugin = {
+      id: 'verticalSep',
+      afterDraw: function(chart) {
+        if (nActual >= labels.length) return;
+        var c = chart.ctx, xScale = chart.scales.x;
+        var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+        c.save();
+        c.beginPath();
+        c.moveTo(x, chart.chartArea.top);
+        c.lineTo(x, chart.chartArea.bottom);
+        c.strokeStyle = 'rgba(100,116,139,0.6)';
+        c.lineWidth = 1.5;
+        c.setLineDash([6, 4]);
+        c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = 'rgba(100,116,139,0.75)';
+        c.font = '11px sans-serif';
+        c.fillText('Forecast →', x + 6, chart.chartArea.top + 14);
+        c.restore();
+      }
+    };
+
+    var ctx = document.getElementById('dashTrendChart');
+    if (!ctx) return;
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      plugins: [verticalSepPlugin],
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Mean + 1.25 SD',
+            data: thresholdData,
+            borderColor: '#f59e0b',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            pointStyle: 'rectRot',
+            pointRadius: function(c) { return c.dataIndex >= nActual ? 5 : 3; },
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#f59e0b',
+            tension: 0.3,
+            fill: false,
+            spanGaps: true,
+            order: 3,
+          },
+          {
+            label: _tActual,
+            data: reportedData,
+            borderColor: '#1e293b',
+            backgroundColor: 'rgba(30,41,59,0.07)',
+            borderWidth: 2.5,
+            pointStyle: 'rect',
+            pointRadius: 4,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#1e293b',
+            tension: 0.3,
+            fill: true,
+            spanGaps: false,
+            order: 1,
+          },
+          {
+            label: _tPredicted,
+            data: forecastAvgData,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.05)',
+            borderWidth: 2.5,
+            borderDash: [7, 4],
+            pointStyle: 'circle',
+            pointRadius: function(c) { return c.dataIndex >= nActual ? 6 : 0; },
+            pointHoverRadius: 8,
+            pointBackgroundColor: 'white',
+            pointBorderColor: '#6366f1',
+            pointBorderWidth: 2,
+            tension: 0.3,
+            fill: false,
+            spanGaps: false,
+            order: 2,
+          },
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(item) {
+                if (item.raw === null || item.raw === undefined) return '';
+                if (item.dataset.label === 'Mean + 1.25 SD')
+                  return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+                return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { maxTicksLimit: 14, maxRotation: 45, font: { size: 11 } } },
+          y: { beginAtZero: true, ticks: { precision: 0 } }
+        }
+      }
+    });
+  }
+
+  var sel = document.getElementById('regencySelector');
+  if (sel) {
+    buildChart(0);
+    sel.addEventListener('change', function() { buildChart(parseInt(this.value)); });
+  }
+})();
+</script>
+{% endif %}
 {% endblock %}

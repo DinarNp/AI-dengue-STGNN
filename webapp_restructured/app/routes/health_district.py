@@ -19,13 +19,15 @@ health_district = Blueprint('health_district', __name__, url_prefix='/district')
 @health_district_required
 def dashboard():
     """Health district office dashboard"""
+    import numpy as _np
+
     # Get user's regency
     regency = Regency.query.filter_by(name=current_user.regency).first()
-    
+
     if not regency:
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
         return redirect(url_for('main.index'))
-    
+
     current_year = datetime.now().year
 
     # Last 24 months of actual cases
@@ -89,6 +91,35 @@ def dashboard():
             'cases': round(float(pred.predicted_cases), 1) if pred else None
         })
 
+    # Threshold (mean + 1.25 SD) — same-month data from 2021 up to year-1
+    threshold_trend = []
+    for item in monthly_trend:
+        parts = item['month'].split('-')
+        yoi, moi = int(parts[0]), int(parts[1])
+        hist_vals = db.session.query(DengueCase.cases).filter(
+            DengueCase.regency_id == regency.id,
+            DengueCase.month == moi,
+            DengueCase.year >= 2021,
+            DengueCase.year <= yoi - 1
+        ).all()
+        vals = [r.cases for r in hist_vals if r.cases is not None]
+        if len(vals) >= 2:
+            hm = float(_np.mean(vals))
+            hs = float(_np.std(vals, ddof=1))
+            threshold_trend.append(round(hm + 1.25 * hs, 1))
+        elif vals:
+            threshold_trend.append(round(float(vals[0]), 1))
+        else:
+            threshold_trend.append(None)
+    for item in prediction_trend:
+        parts = item['month'].split('-')
+        py2, pm2 = int(parts[0]), int(parts[1])
+        pred2 = Prediction.query.filter_by(regency_id=regency.id, year=py2, month=pm2).first()
+        if pred2 and pred2.alert_threshold is not None:
+            threshold_trend.append(round(float(pred2.alert_threshold), 1))
+        else:
+            threshold_trend.append(None)
+
     return render_template('health_district/dashboard.html',
                          regency=regency,
                          recent_cases=recent_cases,
@@ -96,6 +127,7 @@ def dashboard():
                          total_cases_this_year=total_cases_this_year,
                          monthly_trend=monthly_trend,
                          prediction_trend=prediction_trend,
+                         threshold_trend=threshold_trend,
                          forecast_months=forecast_months,
                          current_year=current_year)
 

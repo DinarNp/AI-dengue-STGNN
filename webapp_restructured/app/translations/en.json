@@ -211,6 +211,7 @@
   "page.admin_dashboard.train_model": "Train Model",
   "page.admin_dashboard.generate_predictions": "Generate Predictions",
   "page.admin_dashboard.view_risk": "View Risk Monitor",
+  "page.admin_dashboard.monthly_trend_title": "Monthly Case Trend by Regency",
 
   "page.data_management.title": "Data Management",
   "page.data_management.subtitle": "Manage case data, climate data, and NDVI satellite data",
@@ -369,7 +370,7 @@
   "page.hd_dashboard.risk_level": "Current Risk Level",
   "page.hd_dashboard.monthly_summary": "Monthly Summary",
   "page.hd_dashboard.next_month_pred": "Next Month Prediction",
-  "page.hd_dashboard.trend_title": "Monthly Trend — Last 24 Months &amp; 3-Month Forecast",
+  "page.hd_dashboard.trend_title": "Monthly Trend — Last 24 Months & 3-Month Forecast",
   "page.hd_dashboard.actual_cases": "Actual cases",
   "page.hd_dashboard.predicted_cases": "Predicted cases",
   "page.hd_dashboard.actual_up_to": "Actual up to",
