@@ -1029,12 +1029,17 @@ def _build_regency_forecast(regency):
     ]
 
     # Threshold (mean + 1.25 SD) for every month on the chart (historical + forecast)
+    # Uses only same-month data from 2021 up to year-1 (exclusive of target year).
     threshold_trend = []
     for item in monthly_trend:
-        month_of_year = int(item['month'].split('-')[1])
+        parts = item['month'].split('-')
+        year_of_item = int(parts[0])
+        month_of_year = int(parts[1])
         hist_vals = db.session.query(DengueCase.cases).filter(
             DengueCase.regency_id == regency.id,
-            DengueCase.month == month_of_year
+            DengueCase.month == month_of_year,
+            DengueCase.year >= 2021,
+            DengueCase.year <= year_of_item - 1
         ).all()
         vals = [r.cases for r in hist_vals if r.cases is not None]
         if len(vals) >= 2:
@@ -1052,18 +1057,6 @@ def _build_regency_forecast(regency):
         else:
             threshold_trend.append(None)
 
-    # Ensemble data per forecast month (predicted + hist_sd for client-side fan generation)
-    ensemble_data = []
-    for fm in forecast_months:
-        pred = fm['prediction']
-        if pred:
-            ensemble_data.append({
-                'predicted': round(float(pred.predicted_cases), 1),
-                'hist_sd': round(float(pred.hist_sd), 2) if pred.hist_sd else 0.0,
-            })
-        else:
-            ensemble_data.append({'predicted': None, 'hist_sd': 0.0})
-
     return {
         'regency': regency,
         'latest_year': latest_year,
@@ -1074,7 +1067,6 @@ def _build_regency_forecast(regency):
         'monthly_trend': monthly_trend,
         'prediction_trend': prediction_trend,
         'threshold_trend': threshold_trend,
-        'ensemble_data': ensemble_data,
     }
 
 

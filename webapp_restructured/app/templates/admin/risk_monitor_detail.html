@@ -98,10 +98,6 @@
       <span style="display:inline-block;width:22px;height:3px;background:#6366f1;border-radius:2px;border-top:2px dashed #6366f1;"></span>
       {{ t('page.risk_monitor.predicted') }}
     </span>
-    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:22px;height:3px;background:#cbd5e1;border-radius:2px;"></span>
-      Forecast Ensemble
-    </span>
     {% if rf.monthly_trend %}
     <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
       {{ t('page.hd_dashboard.actual_up_to') }} <strong>{{ rf.monthly_trend[-1].month }}</strong>
@@ -485,7 +481,6 @@
   var actual       = {{ rf.monthly_trend   | tojson }};
   var predRaw      = {{ rf.prediction_trend | tojson }};
   var thresholdAll = {{ rf.threshold_trend  | tojson }};
-  var ensembleRaw  = {{ rf.ensemble_data    | tojson }};
   var _tPredicted  = {{ t('page.risk_monitor.predicted') | tojson }};
   var _tActual     = {{ t('page.risk_monitor.actual')    | tojson }};
   var _tCases      = {{ t('page.risk_monitor.cases_suffix') | tojson }};
@@ -507,38 +502,6 @@
   // Include last actual point for visual bridge
   var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
                               .concat(predRaw.map(function(d) { return d.cases; }));
-
-  // ---- Dataset 4+: Forecast Ensemble (gray thin lines, fan out using hist_sd) ----
-  var nEnsemble = 12;
-  var ensembleDatasets = [];
-  var hasEnsemble = ensembleRaw.some(function(e) { return e.hist_sd > 0 && e.predicted !== null; });
-  if (hasEnsemble) {
-    for (var e = 0; e < nEnsemble; e++) {
-      // sigma multiplier ranging from -2 to +2
-      var sigma = (e / (nEnsemble - 1)) * 4 - 2;
-      var lineData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; });
-      ensembleRaw.forEach(function(fp, idx) {
-        if (fp.predicted !== null) {
-          // spread grows with sqrt(idx+1) to simulate diverging trajectories
-          var spread = sigma * fp.hist_sd * Math.sqrt(idx + 1);
-          lineData.push(Math.max(0, Math.round(fp.predicted + spread)));
-        } else {
-          lineData.push(null);
-        }
-      });
-      ensembleDatasets.push({
-        label: 'ensemble_' + e,
-        data: lineData,
-        borderColor: 'rgba(148,163,184,0.35)',
-        borderWidth: 1,
-        pointRadius: 0,
-        tension: 0.3,
-        fill: false,
-        spanGaps: false,
-        hoverBorderWidth: 0,
-      });
-    }
-  }
 
   // ---- Vertical separator plugin ----
   var verticalSepPlugin = {
@@ -564,7 +527,7 @@
     }
   };
 
-  var allDatasets = ensembleDatasets.concat([
+  var allDatasets = [
     // Threshold line (render under actual)
     {
       label: 'Mean + 1.25 SD',
@@ -616,7 +579,7 @@
       spanGaps: false,
       order: 2,
     },
-  ]);
+  ];
 
   new Chart(ctx, {
     type: 'line',
@@ -629,9 +592,6 @@
       plugins: {
         legend: { display: false },
         tooltip: {
-          filter: function(item) {
-            return item.dataset.label && !item.dataset.label.startsWith('ensemble_');
-          },
           callbacks: {
             label: function(item) {
               if (item.raw === null || item.raw === undefined) return '';

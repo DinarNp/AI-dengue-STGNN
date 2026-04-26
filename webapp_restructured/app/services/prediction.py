@@ -229,7 +229,7 @@ class PredictionService:
                 zero_prob = 0.0
             
             # Determine risk level (alert/no_alert) via endemic channel
-            risk_info = self._calculate_risk_level(predicted_cases, regency_id, month)
+            risk_info = self._calculate_risk_level(predicted_cases, regency_id, month, year)
             risk_level        = risk_info['risk_level']
             alert_threshold   = risk_info['alert_threshold']
             hist_mean         = risk_info['hist_mean']
@@ -397,16 +397,19 @@ class PredictionService:
             )
         }
 
-    def _calculate_risk_level(self, predicted_cases: float, regency_id: int, month: int) -> dict:
+    def _calculate_risk_level(self, predicted_cases: float, regency_id: int, month: int, year: int) -> dict:
         """
         Calculate alert status based on endemic channel method.
-        Threshold = historical mean + 1.25 * SD for the same regency+month.
+        Threshold = historical mean + 1.25 * SD for the same regency+month,
+        using only data from 2021 up to year-1 (exclusive of target year).
 
         Returns dict with keys: risk_level, alert_threshold, hist_mean, hist_sd
         """
         historical = db.session.query(DengueCase.cases).filter(
             DengueCase.regency_id == regency_id,
-            DengueCase.month == month
+            DengueCase.month == month,
+            DengueCase.year >= 2021,
+            DengueCase.year <= year - 1
         ).all()
 
         values = [r.cases for r in historical if r.cases is not None]
