@@ -1178,6 +1178,7 @@ def risk_monitor():
         risk_level = 'alert' if risk_counts.get('alert', 0) > 0 else \
                      ('no_alert' if risk_counts.get('no_alert', 0) > 0 else None)
 
+        import numpy as _np_rm
         recent_cases = DengueCase.query.filter_by(regency_id=regency.id)\
             .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
         monthly_trend = [{'month': f"{c.year}-{c.month:02d}", 'cases': c.cases} for c in reversed(recent_cases)]
@@ -1186,6 +1187,32 @@ def risk_monitor():
              'cases': round(float(fm['prediction'].predicted_cases), 1) if fm['prediction'] else None}
             for fm in forecast_months_summary
         ]
+
+        threshold_trend = []
+        for item in monthly_trend:
+            parts = item['month'].split('-')
+            yoi, moi = int(parts[0]), int(parts[1])
+            hist_vals = db.session.query(DengueCase.cases).filter(
+                DengueCase.regency_id == regency.id,
+                DengueCase.month == moi,
+                DengueCase.year >= 2021,
+                DengueCase.year <= yoi - 1
+            ).all()
+            vals = [r.cases for r in hist_vals if r.cases is not None]
+            if len(vals) >= 2:
+                hm = float(_np_rm.mean(vals))
+                hs = float(_np_rm.std(vals, ddof=1))
+                threshold_trend.append(round(hm + 1.25 * hs, 1))
+            elif vals:
+                threshold_trend.append(round(float(vals[0]), 1))
+            else:
+                threshold_trend.append(None)
+        for fm in forecast_months_summary:
+            pred_t = fm['prediction']
+            if pred_t and pred_t.alert_threshold is not None:
+                threshold_trend.append(round(float(pred_t.alert_threshold), 1))
+            else:
+                threshold_trend.append(None)
 
         regency_forecasts.append({
             'regency': regency,
@@ -1196,6 +1223,7 @@ def risk_monitor():
             'risk_level': risk_level,
             'monthly_trend': monthly_trend,
             'prediction_trend': prediction_trend,
+            'threshold_trend': threshold_trend,
         })
 
     province_risk = {'alert': 0, 'no_alert': 0}

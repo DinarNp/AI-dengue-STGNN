@@ -27,27 +27,32 @@ def dashboard():
     """
     Public dashboard showing dengue conditions for all regencies
     """
+    import numpy as _np
+
     # Get all active regencies
     regencies = Regency.query.filter_by(is_active=True).all()
-    
+
     # Get current month/year
     current_year = datetime.now().year
     current_month = datetime.now().month
-    
+
+    _lang = get_lang()
+    _t    = make_t(_lang)
+
     # Collect data for each regency
     regency_data = []
-    
+
     for regency in regencies:
         # Get latest dengue cases
         latest_case = DengueCase.query.filter_by(
             regency_id=regency.id
         ).order_by(DengueCase.year.desc(), DengueCase.month.desc()).first()
-        
+
         # Get latest prediction
         latest_prediction = Prediction.query.filter_by(
             regency_id=regency.id
         ).order_by(Prediction.year.desc(), Prediction.month.desc()).first()
-        
+
         # Get current year total
         year_total = db.session.query(
             func.sum(DengueCase.cases)
@@ -55,25 +60,85 @@ def dashboard():
             DengueCase.regency_id == regency.id,
             DengueCase.year == current_year
         ).scalar() or 0
-        
-        # Get last 6 months trend
+
+        # Last 6 months of actual cases
         trend = DengueCase.query.filter_by(
             regency_id=regency.id
         ).order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(6).all()
-        
-        trend_data = []
-        for case in reversed(trend):
-            trend_data.append({
-                'month': f"{case.year}-{case.month:02d}",
-                'cases': case.cases
+
+        trend_data = [{'month': f"{c.year}-{c.month:02d}", 'cases': c.cases}
+                      for c in reversed(trend)]
+
+        # Next 3 forecast months
+        if latest_case:
+            base_y, base_m = latest_case.year, latest_case.month
+        else:
+            base_y, base_m = current_year, current_month
+
+        forecast_months = []
+        prediction_trend = []
+        risk_counts = {'alert': 0, 'no_alert': 0}
+        py, pm = base_y, base_m
+        for _ in range(3):
+            pm += 1
+            if pm > 12:
+                pm = 1; py += 1
+            pred = Prediction.query.filter_by(regency_id=regency.id, year=py, month=pm).first()
+            forecast_months.append({
+                'year': py, 'month': pm,
+                'month_name': _t('month.' + _FULL_MONTH_KEYS[pm - 1]),
+                'prediction': pred,
             })
-        
+            prediction_trend.append({
+                'month': f"{py}-{pm:02d}",
+                'cases': round(float(pred.predicted_cases), 1) if pred else None,
+            })
+            if pred:
+                rl = pred.risk_level
+                risk_counts[rl] = risk_counts.get(rl, 0) + 1
+
+        risk_level = 'alert' if risk_counts.get('alert', 0) > 0 else \
+                     ('no_alert' if risk_counts.get('no_alert', 0) > 0 else None)
+
+        # Threshold for sparkline (6 actual + 3 forecast months)
+        threshold_trend = []
+        for item in trend_data:
+            parts = item['month'].split('-')
+            yoi, moi = int(parts[0]), int(parts[1])
+            hist_vals = db.session.query(DengueCase.cases).filter(
+                DengueCase.regency_id == regency.id,
+                DengueCase.month == moi,
+                DengueCase.year >= 2021,
+                DengueCase.year <= yoi - 1
+            ).all()
+            vals = [r.cases for r in hist_vals if r.cases is not None]
+            if len(vals) >= 2:
+                hm = float(_np.mean(vals)); hs = float(_np.std(vals, ddof=1))
+                threshold_trend.append(round(hm + 1.25 * hs, 1))
+            elif vals:
+                threshold_trend.append(round(float(vals[0]), 1))
+            else:
+                threshold_trend.append(None)
+        for item in prediction_trend:
+            parts = item['month'].split('-')
+            py2, pm2 = int(parts[0]), int(parts[1])
+            pred2 = Prediction.query.filter_by(regency_id=regency.id, year=py2, month=pm2).first()
+            if pred2 and pred2.alert_threshold is not None:
+                threshold_trend.append(round(float(pred2.alert_threshold), 1))
+            else:
+                threshold_trend.append(None)
+
         regency_data.append({
             'regency': regency,
             'latest_case': latest_case,
             'latest_prediction': latest_prediction,
             'year_total': year_total,
-            'trend': trend_data
+            'trend': trend_data,
+            'prediction_trend': prediction_trend,
+            'threshold_trend': threshold_trend,
+            'forecast_months': forecast_months,
+            'risk_counts': risk_counts,
+            'risk_level': risk_level,
         })
     
     # Get provincial totals
@@ -103,11 +168,27 @@ def dashboard():
             'cases': item.total_cases
         })
 
+    # Provincial threshold — same-month provincial totals from 2021 up to year-1
+    overall_threshold = []
+    for item in overall_trend:
+        parts = item['month'].split('-')
+        yoi, moi = int(parts[0]), int(parts[1])
+        prov_hist = db.session.query(
+            func.sum(DengueCase.cases)
+        ).filter(
+            DengueCase.month == moi,
+            DengueCase.year >= 2021,
+            DengueCase.year <= yoi - 1
+        ).group_by(DengueCase.year).all()
+        vals = [float(r[0]) for r in prov_hist if r[0] is not None]
+        if len(vals) >= 2:
+            hm = float(_np.mean(vals)); hs = float(_np.std(vals, ddof=1))
+            overall_threshold.append(round(hm + 1.25 * hs, 1))
+        elif vals:
+            overall_threshold.append(round(vals[0], 1))
+        else:
+            overall_threshold.append(None)
     # Build 3-month provincial forecast for chart + table
-    _lang = get_lang()
-    _t    = make_t(_lang)
-
-    # Find latest actual month across all regencies
     latest_any = DengueCase.query.order_by(
         DengueCase.year.desc(), DengueCase.month.desc()
     ).first()
@@ -115,7 +196,7 @@ def dashboard():
     base_m = latest_any.month if latest_any else current_month - 1
 
     provincial_forecast = []  # for chart
-    forecast_table = []       # for simple table (per month → per regency)
+    forecast_table = []       # for table (per month → per regency)
     py, pm = base_y, base_m
     for _ in range(3):
         pm += 1
@@ -131,6 +212,11 @@ def dashboard():
             'cases': round(total_pred) if preds else None,
             'alert': any_alert,
         })
+        # Forecast threshold: sum of per-regency alert_threshold
+        total_threshold = sum(
+            p.alert_threshold for p in preds if p.alert_threshold is not None
+        )
+        overall_threshold.append(round(total_threshold, 1) if preds else None)
         # Per-regency rows for table
         rows = []
         pred_map = {p.regency_id: p for p in preds}
@@ -143,10 +229,72 @@ def dashboard():
             })
         forecast_table.append({'month_label': month_label, 'rows': rows})
 
+    # Per-regency chart data (24 months actual + 3 forecast + threshold) for selector chart
+    all_chart_data = []
+    for reg in regencies:
+        recent_cases = DengueCase.query.filter_by(regency_id=reg.id)\
+            .order_by(DengueCase.year.desc(), DengueCase.month.desc()).limit(24).all()
+        monthly_trend_reg = [{'month': f"{c.year}-{c.month:02d}", 'cases': c.cases}
+                              for c in reversed(recent_cases)]
+
+        if recent_cases:
+            ly, lm = recent_cases[0].year, recent_cases[0].month
+        else:
+            ly, lm = current_year, current_month
+
+        pred_trend_reg = []
+        cpy, cpm = ly, lm
+        for _ in range(3):
+            cpm += 1
+            if cpm > 12:
+                cpm = 1; cpy += 1
+            pred = Prediction.query.filter_by(regency_id=reg.id, year=cpy, month=cpm).first()
+            pred_trend_reg.append({
+                'month': f"{cpy}-{cpm:02d}",
+                'cases': round(float(pred.predicted_cases), 1) if pred else None,
+            })
+
+        thresh_reg = []
+        for item in monthly_trend_reg:
+            parts = item['month'].split('-')
+            yoi, moi = int(parts[0]), int(parts[1])
+            hist_vals = db.session.query(DengueCase.cases).filter(
+                DengueCase.regency_id == reg.id,
+                DengueCase.month == moi,
+                DengueCase.year >= 2021,
+                DengueCase.year <= yoi - 1
+            ).all()
+            vals = [r.cases for r in hist_vals if r.cases is not None]
+            if len(vals) >= 2:
+                hm = float(_np.mean(vals)); hs = float(_np.std(vals, ddof=1))
+                thresh_reg.append(round(hm + 1.25 * hs, 1))
+            elif vals:
+                thresh_reg.append(round(float(vals[0]), 1))
+            else:
+                thresh_reg.append(None)
+        for item in pred_trend_reg:
+            parts = item['month'].split('-')
+            py2, pm2 = int(parts[0]), int(parts[1])
+            pred2 = Prediction.query.filter_by(regency_id=reg.id, year=py2, month=pm2).first()
+            if pred2 and pred2.alert_threshold is not None:
+                thresh_reg.append(round(float(pred2.alert_threshold), 1))
+            else:
+                thresh_reg.append(None)
+
+        all_chart_data.append({
+            'regency_id': reg.id,
+            'regency_name': reg.name,
+            'monthly_trend': monthly_trend_reg,
+            'prediction_trend': pred_trend_reg,
+            'threshold_trend': thresh_reg,
+        })
+
     return render_template('public/dashboard.html',
                          regency_data=regency_data,
+                         all_chart_data=all_chart_data,
                          provincial_total=provincial_total,
                          overall_trend=overall_trend,
+                         overall_threshold=overall_threshold,
                          provincial_forecast=provincial_forecast,
                          forecast_table=forecast_table,
                          current_year=current_year)

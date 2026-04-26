@@ -75,32 +75,37 @@
   </div>
 </div>
 
-<!-- ===== PROVINCIAL TREND CHART ===== -->
+<!-- ===== MONTHLY TREND CHART (per-regency selector) ===== -->
+{% if all_chart_data %}
 <div class="card mb-20">
-  <div class="card-header">
-    <h5 class="card-header-title"><i class="fas fa-wave-square" style="color:var(--primary);margin-right:8px;"></i>{{ t('public.provincial_trend') }}</h5>
-    <div class="card-header-actions">
-      <span class="badge badge-primary">{{ t('public.all_regency') }}</span>
+  <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+    <h5 class="card-header-title">
+      <i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.admin_dashboard.monthly_trend_title') }}
+    </h5>
+    <div class="card-header-actions" style="display:flex;align-items:center;gap:10px;">
+      <select id="regencySelector" class="form-select" style="width:auto;min-width:180px;font-size:13px;">
+        {% for rd in all_chart_data %}
+        <option value="{{ loop.index0 }}">{{ rd.regency_name }}</option>
+        {% endfor %}
+      </select>
     </div>
   </div>
   <!-- Legend -->
   <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#0ea5e9;border-radius:2px;"></span>
+      <span style="display:inline-block;width:22px;height:3px;background:#1e293b;border-radius:2px;"></span>
       {{ t('page.hd_dashboard.actual_cases') }}
     </span>
     <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:28px;height:3px;background:#f59e0b;border-radius:2px;border-top:2px dashed #f59e0b;"></span>
+      <span style="display:inline-block;width:22px;height:3px;background:#f59e0b;border-radius:2px;"></span>
+      Mean + 1.25 SD
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#6366f1;border-radius:2px;border-top:2px dashed #6366f1;"></span>
       {{ t('page.hd_dashboard.predicted_cases') }}
     </span>
-    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;"></span>
-      Alert
-    </span>
-    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
-      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;"></span>
-      No Alert
-    </span>
+    <span id="chartRangeLabel" style="font-size:11.5px;color:var(--text-muted);margin-left:auto;"></span>
   </div>
   <div class="card-body">
     <div class="chart-container" style="height:260px;">
@@ -108,6 +113,7 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 <!-- ===== 3-MONTH FORECAST TABLE ===== -->
 {% if forecast_table %}
@@ -173,62 +179,96 @@
 
 <div class="grid-3">
   {% for data in regency_data %}
-  <div class="card" style="margin-bottom:0;">
+  {% set risk = data.risk_level %}
+  {% if risk == 'alert' %}
+    {% set rl_color = '#ef4444' %}
+  {% elif risk == 'no_alert' %}
+    {% set rl_color = '#10b981' %}
+  {% else %}
+    {% set rl_color = '#94a3b8' %}
+  {% endif %}
+
+  <div class="card" style="margin-bottom:0;border-top:3px solid {{ rl_color }};">
+
     <!-- Card header -->
     <div class="card-header" style="background:var(--sidebar-bg);">
       <div style="display:flex;align-items:center;gap:8px;flex:1;">
-        <div style="width:32px;height:32px;border-radius:6px;background:rgba(14,165,233,0.2);display:flex;align-items:center;justify-content:center;">
-          <i class="fas fa-map-marker-alt" style="color:var(--primary);font-size:13px;"></i>
-        </div>
-        <h6 style="margin:0;color:white;font-size:12.5px;font-weight:600;">{{ data.regency.name }}</h6>
+        <i class="fas fa-map-marker-alt" style="color:{{ rl_color }};"></i>
+        <span style="color:white;font-weight:700;font-size:14px;">{{ data.regency.name }}</span>
       </div>
-      {% if data.latest_prediction %}
-        {% set rl = data.latest_prediction.risk_level %}
-        <span class="risk-badge risk-{{ rl }}">
-          {{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
-        </span>
+      {% if risk %}
+      <span class="risk-badge risk-{{ risk }}" style="padding:3px 8px;white-space:nowrap;">
+        <span class="risk-dot {{ risk }}"></span>{{ t('risk.' + risk) }}
+      </span>
+      {% else %}
+      <span class="pill" style="font-size:11px;">{{ t('risk.no_data') }}</span>
       {% endif %}
     </div>
 
     <div class="card-body" style="padding:16px;">
-      <!-- Key metrics row -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
-        <div style="text-align:center;padding:10px;background:var(--body-bg);border-radius:6px;">
-          <div style="font-size:22px;font-weight:700;color:var(--text-primary);">
-            {% if data.latest_case %}{{ data.latest_case.cases }}{% else %}<span style="color:#94a3b8;">—</span>{% endif %}
-          </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ t('public.latest_cases') }}</div>
-          {% if data.latest_case %}
-          <div style="font-size:10px;color:#94a3b8;">{{ data.latest_case.year }}-{{ "%02d"|format(data.latest_case.month) }}</div>
-          {% endif %}
-        </div>
-        <div style="text-align:center;padding:10px;background:var(--body-bg);border-radius:6px;">
-          <div style="font-size:22px;font-weight:700;color:var(--primary);">
-            {% if data.latest_prediction %}{{ "%.0f"|format(data.latest_prediction.predicted_cases) }}{% else %}<span style="color:#94a3b8;">—</span>{% endif %}
-          </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ t('public.predicted_short') }}</div>
-          {% if data.latest_prediction %}
-          <div style="font-size:10px;color:#94a3b8;">{{ data.latest_prediction.year }}-{{ "%02d"|format(data.latest_prediction.month) }}</div>
-          {% endif %}
-        </div>
+
+      <!-- Data up-to label -->
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">
+        <i class="fas fa-clock" style="margin-right:4px;"></i>
+        {% if data.latest_case %}
+          {{ t('common.data_up_to') }} <strong>{{ data.latest_case.year }}-{{ "%02d"|format(data.latest_case.month) }}</strong>
+        {% else %}
+          {{ t('risk.no_data') }}
+        {% endif %}
       </div>
 
-      <!-- Year total -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span style="font-size:12px;color:var(--text-muted);">{{ t('public.year_total_label') }} ({{ current_year }})</span>
-        <span style="font-weight:700;font-size:14px;">{{ data.year_total }} {{ t('common.cases') }}</span>
+      <!-- 3-month forecast pills (clickable → full analysis) -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+        {% for fm in data.forecast_months %}
+        {% if fm.prediction %}
+          {% set frl = fm.prediction.risk_level %}
+          {% if frl == 'alert' %}{% set fc = '#ef4444' %}{% set fbg = 'rgba(239,68,68,0.1)' %}
+          {% else %}{% set fc = '#10b981' %}{% set fbg = 'rgba(16,185,129,0.1)' %}{% endif %}
+          <a href="{{ url_for('admin.risk_monitor_detail', regency_id=data.regency.id) }}"
+             style="background:{{ fbg }};border:1px solid {{ fc }}40;border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;text-decoration:none;display:block;transition:box-shadow .15s;"
+             onmouseover="this.style.boxShadow='0 2px 8px {{ fc }}40'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:10px;color:var(--text-muted);">{{ fm.month_name[:3] }} {{ fm.year }}</div>
+            <div style="font-size:18px;font-weight:800;color:{{ fc }};line-height:1.2;">{{ "%.0f"|format(fm.prediction.predicted_cases) }}</div>
+            <div style="font-size:9px;color:{{ fc }};font-weight:600;text-transform:uppercase;margin-top:2px;">{{ t('risk.' + frl) }}</div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:3px;"><i class="fas fa-search-plus"></i></div>
+          </a>
+        {% else %}
+          <div style="background:var(--body-bg);border:1px solid var(--border-color);border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
+            <div style="font-size:10px;color:var(--text-muted);">{{ fm.month_name[:3] }} {{ fm.year }}</div>
+            <div style="font-size:13px;color:#94a3b8;margin:4px 0;">—</div>
+            <div style="font-size:9px;color:#94a3b8;">{{ t('common.no_pred') }}</div>
+          </div>
+        {% endif %}
+        {% endfor %}
       </div>
 
-      <!-- Mini sparkline -->
+      <!-- Alert count pills -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        {% if data.risk_counts.get('alert', 0) > 0 %}
+        <span style="font-size:11px;background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 10px;border-radius:20px;font-weight:600;">
+          {{ data.risk_counts.get('alert', 0) }} {{ t('risk.alert') }}
+        </span>
+        {% endif %}
+        {% if data.risk_counts.get('no_alert', 0) > 0 %}
+        <span style="font-size:11px;background:rgba(16,185,129,0.15);color:#10b981;padding:2px 10px;border-radius:20px;font-weight:600;">
+          {{ data.risk_counts.get('no_alert', 0) }} {{ t('risk.no_alert') }}
+        </span>
+        {% endif %}
+        {% if data.risk_counts.get('alert', 0) == 0 and data.risk_counts.get('no_alert', 0) == 0 %}
+        <span style="font-size:11px;color:#94a3b8;">{{ t('common.no_predictions') }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Sparkline with threshold + forecast -->
       <div style="margin-bottom:12px;">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">{{ t('public.six_month_trend') }}</div>
-        <canvas id="trendChart{{ loop.index }}" height="60"></canvas>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">{{ t('page.risk_monitor.trend_label') }}</div>
+        <canvas id="trendChart{{ loop.index }}" height="70"></canvas>
       </div>
     </div>
 
     <div class="card-footer" style="padding:10px 16px;">
-      <a href="{{ url_for('public.regency_detail', regency_id=data.regency.id) }}" class="btn btn-primary btn-sm btn-w">
-        <i class="fas fa-eye"></i> {{ t('public.view_details') }}
+      <a href="{{ url_for('admin.risk_monitor_detail', regency_id=data.regency.id) }}" class="btn btn-primary btn-sm btn-w">
+        <i class="fas fa-search-plus"></i> {{ t('common.view_full_analysis') }}
       </a>
     </div>
   </div>
@@ -240,88 +280,120 @@
 
 {% block extra_js %}
 <script>
-// ---- Provincial Trend Chart ----
-const provincialCtx = document.getElementById('provincialTrendChart');
-if (provincialCtx) {
-  const actualData   = {{ overall_trend      | tojson }};
-  const forecastData = {{ provincial_forecast | tojson }};
-  const nActual = actualData.length;
+var _tActual    = {{ t('page.hd_dashboard.actual_cases')    | tojson }};
+var _tPredicted = {{ t('page.hd_dashboard.predicted_cases') | tojson }};
+var _tCases     = {{ t('page.risk_monitor.cases_suffix')    | tojson }};
+var _tForecast  = {{ t('page.hd_dashboard.forecast')        | tojson }};
 
-  // Build unified label array
-  const allLabels = actualData.map(d => d.month).concat(forecastData.map(d => d.month));
+// ---- Provincial Trend Chart (per-regency selector) ----
+{% if all_chart_data %}
+var allData = {{ all_chart_data | tojson }};
+var chartInstance = null;
 
-  // Dataset 1: actual (null for forecast slots)
-  const actualValues = actualData.map(d => d.cases).concat(forecastData.map(() => null));
+function buildChart(idx) {
+  var rd = allData[idx];
+  var actual       = rd.monthly_trend;
+  var predRaw      = rd.prediction_trend;
+  var thresholdAll = rd.threshold_trend;
+  var nActual      = actual.length;
 
-  // Dataset 2: predicted — include last actual point for visual continuity, then forecast
-  const predValues = actualData.map((_, i) => i === nActual - 1 ? actualData[i].cases : null)
-                               .concat(forecastData.map(d => d.cases));
+  var labels = actual.map(function(d) { return d.month; })
+                     .concat(predRaw.map(function(d) { return d.month; }));
 
-  // Per-point colors for predicted dots
-  const predPointColors = actualData.map(() => 'transparent')
-    .concat(forecastData.map(d => d.alert ? '#ef4444' : '#10b981'));
-  const predPointRadius = actualData.map(() => 0)
-    .concat(forecastData.map(() => 7));
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
 
-  // Vertical separator plugin
-  const verticalSepPlugin = {
-    id: 'verticalSep',
-    afterDraw(chart) {
-      if (nActual >= allLabels.length) return;
-      const ctx   = chart.ctx;
-      const xScale = chart.scales.x;
-      const x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(x, chart.chartArea.top);
-      ctx.lineTo(x, chart.chartArea.bottom);
-      ctx.strokeStyle = 'rgba(148,163,184,0.8)';
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([6, 4]);
-      ctx.stroke();
-      // Label "Prediksi →"
-      ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(148,163,184,0.9)';
-      ctx.font = '11px sans-serif';
-      ctx.fillText('Prediksi →', x + 6, chart.chartArea.top + 14);
-      ctx.restore();
+  var thresholdData = thresholdAll.slice();
+
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  var firstMonth = labels[0] || '';
+  var lastPred   = predRaw.length ? predRaw[predRaw.length - 1].month : (labels[labels.length - 1] || '');
+  var rangeEl = document.getElementById('chartRangeLabel');
+  if (rangeEl) rangeEl.textContent = firstMonth + ' – ' + lastPred;
+
+  var verticalSepPlugin = {
+    id: 'verticalSepProv',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx, xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.6)';
+      c.lineWidth = 1.5;
+      c.setLineDash([6, 4]);
+      c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = 'rgba(100,116,139,0.75)';
+      c.font = '11px sans-serif';
+      c.fillText(_tForecast + ' →', x + 6, chart.chartArea.top + 14);
+      c.restore();
     }
   };
 
-  new Chart(provincialCtx, {
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+  var ctx = document.getElementById('provincialTrendChart');
+  if (!ctx) return;
+
+  chartInstance = new Chart(ctx, {
     type: 'line',
     plugins: [verticalSepPlugin],
     data: {
-      labels: allLabels,
+      labels: labels,
       datasets: [
         {
-          label: 'Kasus Aktual',
-          data: actualValues,
-          borderColor: '#0ea5e9',
-          backgroundColor: 'rgba(14,165,233,0.08)',
-          borderWidth: 2.5,
-          tension: 0.4,
-          fill: true,
-          pointBackgroundColor: '#0ea5e9',
-          pointRadius: 4,
-          pointHoverRadius: 7,
-          spanGaps: false
-        },
-        {
-          label: 'Prediksi',
-          data: predValues,
+          label: 'Mean + 1.25 SD',
+          data: thresholdData,
           borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245,158,11,0.06)',
+          backgroundColor: 'transparent',
           borderWidth: 2,
-          borderDash: [6, 4],
+          pointStyle: 'rectRot',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 5 : 3; },
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#f59e0b',
           tension: 0.3,
           fill: false,
-          pointBackgroundColor: predPointColors,
-          pointBorderColor: predPointColors,
-          pointRadius: predPointRadius,
-          pointHoverRadius: predPointRadius.map(r => r + 2),
-          spanGaps: false
-        }
+          spanGaps: true,
+          order: 3,
+        },
+        {
+          label: _tActual,
+          data: reportedData,
+          borderColor: '#1e293b',
+          backgroundColor: 'rgba(30,41,59,0.07)',
+          borderWidth: 2.5,
+          pointStyle: 'rect',
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#1e293b',
+          tension: 0.3,
+          fill: true,
+          spanGaps: false,
+          order: 1,
+        },
+        {
+          label: _tPredicted,
+          data: forecastAvgData,
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,0.05)',
+          borderWidth: 2.5,
+          borderDash: [7, 4],
+          pointStyle: 'circle',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 6 : 0; },
+          pointHoverRadius: 8,
+          pointBackgroundColor: 'white',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 2,
+          tension: 0.3,
+          fill: false,
+          spanGaps: false,
+          order: 2,
+        },
       ]
     },
     options: {
@@ -334,7 +406,9 @@ if (provincialCtx) {
           callbacks: {
             label: function(item) {
               if (item.raw === null || item.raw === undefined) return '';
-              return item.dataset.label + ': ' + item.raw + ' kasus';
+              if (item.dataset.label === 'Mean + 1.25 SD')
+                return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
             }
           }
         }
@@ -347,37 +421,129 @@ if (provincialCtx) {
   });
 }
 
-// ---- Kabupaten Sparklines ----
-const regencyColors = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444'];
+(function() {
+  var sel = document.getElementById('regencySelector');
+  if (sel) {
+    buildChart(0);
+    sel.addEventListener('change', function() { buildChart(parseInt(this.value)); });
+  }
+})();
+{% endif %}
+
+// ---- Regency Sparklines ----
 {% for data in regency_data %}
 (function() {
-  const el = document.getElementById('trendChart{{ loop.index }}');
+  var el = document.getElementById('trendChart{{ loop.index }}');
   if (!el) return;
-  const color = regencyColors[{{ loop.index0 }} % regencyColors.length];
+
+  var actual       = {{ data.trend            | tojson }};
+  var predRaw      = {{ data.prediction_trend | tojson }};
+  var thresholdAll = {{ data.threshold_trend  | tojson }};
+  var nActual      = actual.length;
+
+  var labels = actual.map(function(d) { return d.month; })
+                     .concat(predRaw.map(function(d) { return d.month; }));
+
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
+
+  var thresholdData = thresholdAll.slice();
+
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  var verticalSepPlugin = {
+    id: 'verticalSep{{ loop.index }}',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx, xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.5)';
+      c.lineWidth = 1;
+      c.setLineDash([4, 3]);
+      c.stroke();
+      c.setLineDash([]);
+      c.restore();
+    }
+  };
+
   new Chart(el, {
     type: 'line',
+    plugins: [verticalSepPlugin],
     data: {
-      labels: {{ data.trend | map(attribute='month') | list | tojson }},
-      datasets: [{
-        data: {{ data.trend | map(attribute='cases') | list | tojson }},
-        borderColor: color,
-        backgroundColor: color.replace('#', 'rgba(').replace(/(..)(..)(..)$/, function(m,r,g,b){
-          return parseInt(r,16)+','+parseInt(g,16)+','+parseInt(b,16)+',0.1)';
-        }),
-        borderWidth: 2,
-        tension: 0.4,
-        fill: true,
-        pointRadius: 2,
-        pointHoverRadius: 4
-      }]
+      labels: labels,
+      datasets: [
+        {
+          label: 'Mean + 1.25 SD',
+          data: thresholdData,
+          borderColor: '#f59e0b',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointStyle: 'rectRot',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 3 : 2; },
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#f59e0b',
+          tension: 0.3,
+          fill: false,
+          spanGaps: true,
+          order: 3,
+        },
+        {
+          label: _tActual,
+          data: reportedData,
+          borderColor: '#1e293b',
+          backgroundColor: 'rgba(30,41,59,0.07)',
+          borderWidth: 1.5,
+          pointStyle: 'rect',
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#1e293b',
+          tension: 0.3,
+          fill: true,
+          spanGaps: false,
+          order: 1,
+        },
+        {
+          label: _tPredicted,
+          data: forecastAvgData,
+          borderColor: '#6366f1',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 3],
+          pointStyle: 'circle',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 3 : 0; },
+          pointHoverRadius: 5,
+          pointBackgroundColor: 'white',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 1.5,
+          tension: 0.3,
+          fill: false,
+          spanGaps: false,
+          order: 2,
+        },
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: true,
-      plugins: { legend: { display: false }, tooltip: { callbacks: {
-        title: function(items) { return items[0].label; },
-        label: function(item) { return item.raw + ' ' + {{ t('page.risk_monitor.cases_suffix') | tojson }}; }
-      }}},
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              if (item.dataset.label === 'Mean + 1.25 SD')
+                return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
+            }
+          }
+        }
+      },
       scales: {
         x: { display: false },
         y: { display: false, beginAtZero: true }

@@ -167,41 +167,105 @@
 
 {% block extra_js %}
 <script>
-const regencyColors = { alert: '#ef4444', no_alert: '#10b981', null: '#94a3b8' };
 var _tPredicted = {{ t('page.risk_monitor.predicted') | tojson }};
-var _tActual    = {{ t('page.risk_monitor.actual') | tojson }};
+var _tActual    = {{ t('page.risk_monitor.actual')    | tojson }};
 var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
+
 {% for rf in regency_forecasts %}
 (function() {
   var el = document.getElementById('trendChart{{ loop.index }}');
   if (!el) return;
-  var actual = {{ rf.monthly_trend | tojson }};
-  var pred   = {{ rf.prediction_trend | tojson }};
-  var nActual = actual.length;
-  var labels = [], data = [];
-  for (var i = 0; i < actual.length; i++) { labels.push(actual[i].month); data.push(actual[i].cases); }
-  for (var j = 0; j < pred.length; j++)   { labels.push(pred[j].month);   data.push(pred[j].cases); }
+
+  var actual       = {{ rf.monthly_trend    | tojson }};
+  var predRaw      = {{ rf.prediction_trend | tojson }};
+  var thresholdAll = {{ rf.threshold_trend  | tojson }};
+  var nActual      = actual.length;
+
+  var labels = actual.map(function(d) { return d.month; })
+                     .concat(predRaw.map(function(d) { return d.month; }));
+
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
+
+  var thresholdData = thresholdAll.slice();
+
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  var verticalSepPlugin = {
+    id: 'verticalSep{{ loop.index }}',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx, xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.5)';
+      c.lineWidth = 1;
+      c.setLineDash([4, 3]);
+      c.stroke();
+      c.setLineDash([]);
+      c.restore();
+    }
+  };
+
   new Chart(el, {
     type: 'line',
+    plugins: [verticalSepPlugin],
     data: {
       labels: labels,
-      datasets: [{
-        data: data,
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239,68,68,0.06)',
-        borderWidth: 1.5,
-        tension: 0.3,
-        fill: true,
-        spanGaps: false,
-        pointRadius: 2,
-        pointHoverRadius: 4,
-        pointBackgroundColor: function(c) { return c.dataIndex >= nActual ? '#94a3b8' : '#ef4444'; },
-        pointBorderColor:     function(c) { return c.dataIndex >= nActual ? '#94a3b8' : '#ef4444'; },
-        segment: {
-          borderColor: function(c) { return c.p0DataIndex >= nActual - 1 ? '#94a3b8' : '#ef4444'; },
-          borderDash:  function(c) { return c.p0DataIndex >= nActual - 1 ? [4, 3] : []; }
-        }
-      }]
+      datasets: [
+        {
+          label: 'Mean + 1.25 SD',
+          data: thresholdData,
+          borderColor: '#f59e0b',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointStyle: 'rectRot',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 3 : 2; },
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#f59e0b',
+          tension: 0.3,
+          fill: false,
+          spanGaps: true,
+          order: 3,
+        },
+        {
+          label: _tActual,
+          data: reportedData,
+          borderColor: '#1e293b',
+          backgroundColor: 'rgba(30,41,59,0.07)',
+          borderWidth: 1.5,
+          pointStyle: 'rect',
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#1e293b',
+          tension: 0.3,
+          fill: true,
+          spanGaps: false,
+          order: 1,
+        },
+        {
+          label: _tPredicted,
+          data: forecastAvgData,
+          borderColor: '#6366f1',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 3],
+          pointStyle: 'circle',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 3 : 0; },
+          pointHoverRadius: 5,
+          pointBackgroundColor: 'white',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 1.5,
+          tension: 0.3,
+          fill: false,
+          spanGaps: false,
+          order: 2,
+        },
+      ]
     },
     options: {
       responsive: true,
@@ -209,12 +273,16 @@ var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: {
-          label: function(item) {
-            if (item.raw === null || item.raw === undefined) return '';
-            return (item.dataIndex >= nActual ? _tPredicted : _tActual) + ': ' + item.raw + ' ' + _tCases;
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              if (item.dataset.label === 'Mean + 1.25 SD')
+                return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
+            }
           }
-        }}
+        }
       },
       scales: {
         x: { display: false },
