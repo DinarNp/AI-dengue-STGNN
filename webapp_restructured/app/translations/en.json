@@ -23,7 +23,6 @@
   "nav.about": "About",
   "nav.login": "Login",
   "nav.logout": "Logout",
-
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.add": "Add",
@@ -127,7 +126,6 @@
   "ndvi.moderate_desc": "Moderate NDVI indicates shrublands, grasslands, or agricultural land with moderate vegetation cover and reasonable health.",
   "ndvi.dense_desc": "High NDVI indicates dense, healthy vegetation such as broadleaf forests or well-irrigated cropland with strong photosynthetic activity.",
   "ndvi.very_dense_desc": "Very high NDVI indicates tropical rainforest or very dense, highly productive vegetation — typical for lush tropical regions.",
-
   "risk.low": "Low",
   "risk.medium": "Medium",
   "risk.high": "High",
@@ -149,7 +147,6 @@
   "risk.exceed_probability": "P(Exceeds Threshold)",
   "page.risk_monitor_detail.forecast_table_title": "3-Month Forecast Summary Table",
   "common.mean": "Mean",
-
   "month.january": "January",
   "month.february": "February",
   "month.march": "March",
@@ -174,8 +171,7 @@
   "month.oct": "Oct",
   "month.nov": "Nov",
   "month.dec": "Dec",
-
-  "auth.system" : "AI Prediction System",
+  "auth.system": "AI Prediction System",
   "auth.predict_monitor": "Predict. Monitor",
   "auth.protect": "Protect",
   "auth.description": "AI-powered dengue prediction for Yogyakarta Special Region. Supporting public health decisions across 5 regencies with real-time outbreak risk monitoring.",
@@ -191,7 +187,6 @@
   "auth.demo_credentials": "Demo Credentials",
   "auth.back_to_home": "Back to Home",
   "auth.login_loading": "Logging in...",
-
   "page.admin_dashboard.title": "Admin Dashboard",
   "page.admin_dashboard.subtitle": "Dengue prediction system summary",
   "page.admin_dashboard.total_cases": "Total Cases (All Time)",
@@ -212,7 +207,6 @@
   "page.admin_dashboard.generate_predictions": "Generate Predictions",
   "page.admin_dashboard.view_risk": "View Risk Monitor",
   "page.admin_dashboard.monthly_trend_title": "Monthly Case Trend by Regency",
-
   "page.data_management.title": "Data Management",
   "page.data_management.subtitle": "Manage case data, climate data, and NDVI satellite data",
   "page.data_management.overview": "Data Completeness Overview",
@@ -254,7 +248,6 @@
   "page.data_management.export_to_csv": "Export to CSV",
   "page.data_management.add_case_modal": "Add Case Data",
   "page.data_management.no_regency_data": "No regency data available",
-
   "page.training.title": "Model Training",
   "page.training.subtitle": "Train and manage STGNN dengue prediction models",
   "page.training.active_model": "Active Model",
@@ -281,7 +274,6 @@
   "page.training.processing": "Processing...",
   "page.training.please_wait": "Please wait",
   "page.training.samples_col": "Samples",
-
   "page.predictions.title": "Predictions Management",
   "page.predictions.subtitle": "Generate and manage dengue case predictions",
   "page.predictions.export_all": "Export All Predictions",
@@ -312,7 +304,6 @@
   "page.predictions.generating_modal": "Generating Predictions...",
   "page.predictions.running_model": "Running STGNN model inference",
   "page.predictions.next_3_desc": "Enter the last month with actual data. The system will generate predictions for the following 3 months in sequence, using each prediction as input for the next month automatically.",
-
   "page.risk_monitor.title": "Provincial Risk Monitor",
   "page.risk_monitor.subtitle": "3-Month Dengue Risk Forecast — All Regencies, Yogyakarta Special Region",
   "page.risk_monitor.ai_powered": "AI-STGNN Powered",
@@ -320,7 +311,6 @@
   "page.risk_monitor.actual": "Actual",
   "page.risk_monitor.predicted": "Predicted",
   "page.risk_monitor.cases_suffix": "cases",
-
   "page.risk_monitor_detail.back": "Back to Overview",
   "page.risk_monitor_detail.breadcrumb": "Detail",
   "page.risk_monitor_detail.forecast_title": "3-Month Risk Forecast",
@@ -351,7 +341,6 @@
   "page.risk_monitor_detail.provincial_average": "Provincial Average",
   "page.risk_monitor_detail.no_prediction": "No prediction generated yet",
   "page.risk_monitor_detail.run_prediction": "Run predictions for",
-
   "page.logs.title": "Activity Logs",
   "page.logs.subtitle": "System activity history",
   "page.logs.user_col": "User",
@@ -362,7 +351,6 @@
   "page.logs.no_logs": "No activity logs",
   "page.logs.error_details": "Error Details",
   "page.logs.full_details": "Full Details",
-
   "page.hd_dashboard.title": "Health District Dashboard",
   "page.hd_dashboard.subtitle": "Monitor dengue status and predictions for your district",
   "page.hd_dashboard.recent_cases": "Recent Cases",
@@ -376,7 +364,6 @@
   "page.hd_dashboard.actual_up_to": "Actual up to",
   "page.hd_dashboard.forecast": "Forecast",
   "page.hd_dashboard.total_cases_year": "Total Cases",
-
   "page.hd_risk_monitor.title": "Risk Monitor",
   "page.hd_risk_monitor.subtitle": "3-month dengue risk forecast for your district",
   "page.hd_risk_monitor.months_forecast": "Months Forecast",
@@ -399,7 +386,6 @@
   "page.hd_risk_monitor.risk_legend": "Risk Level Legend:",
   "page.hd_risk_monitor.view_details": "View Details",
   "page.hd_risk_monitor.trend_label": "Trend (24 months + 3-month forecast)",
-
   "page.hd_reports.title": "Monthly Reports",
   "page.hd_reports.subtitle": "Monthly dengue case summary for your district",
   "page.hd_reports.yearly_case_title": "Yearly Case Statistics",
@@ -414,7 +400,6 @@
   "page.hd_reports.total_cases": "Total Cases",
   "page.hd_reports.avg_monthly": "Monthly Average",
   "page.hd_reports.peak_month": "Peak Month",
-
   "page.hd_update_cases.title": "Input Case Data",
   "page.hd_update_cases.subtitle": "Enter or update monthly dengue case data",
   "page.hd_update_cases.current_year": "This Year's Case Data",
@@ -437,13 +422,12 @@
   "page.hd_update_cases.add_now": "Add Now",
   "page.hd_update_cases.adding_for": "Adding data for",
   "page.hd_update_cases.edit_cases": "Edit Cases",
-
   "public.hero_title": "AI Dengue Prediction System",
   "public.hero_subtitle": "AI-based dengue monitoring and prediction for Yogyakarta Special Region",
-  "public.hero_kabupaten" : "Regency",
-  "public.hero_model" : "STGNN Model",
-  "public.hero_real_time" : "Real Time",
-  "public.hero_risk_monitor" : "Risk Monitor",
+  "public.hero_kabupaten": "Regency",
+  "public.hero_model": "STGNN Model",
+  "public.hero_real_time": "Real Time",
+  "public.hero_risk_monitor": "Risk Monitor",
   "public.hero_btn_dashboard": "View Dashboard",
   "public.hero_btn_learn": "Learn More",
   "public.features_title": "Key Features",
@@ -552,7 +536,6 @@
   "public.key_features": "Key Features",
   "public.contact_title": "For More Information",
   "public.contact_desc": "This system is developed to support public health decision-making in dengue prevention and control across Yogyakarta Special Region.",
-
   "public.dashboard_title": "Public Dashboard",
   "public.dashboard_subtitle": "Monitor dengue cases and predictions in Yogyakarta Special Region",
   "public.total_cases": "Total Cases",
@@ -562,7 +545,6 @@
   "public.risk_overview": "Risk Overview",
   "public.case_trend": "Case Trend",
   "public.regency_comparison": "Regency Comparison",
-
   "public.statistics_title": "Dengue Statistics",
   "public.statistics_subtitle": "Analysis of dengue case data in Yogyakarta Special Region",
   "public.summary_stats": "Summary Statistics",
@@ -570,23 +552,18 @@
   "public.monthly_trend": "Monthly Trend",
   "public.regency_breakdown": "Regency Breakdown",
   "public.data_table": "Data Table",
-
   "public.about_title": "About the System",
   "public.about_subtitle": "AI-STGNN Dengue Prediction System",
-
   "public.regency_detail_title": "Regency Detail",
   "public.back_to_dashboard": "Back to Dashboard",
   "public.yearly_stats": "Yearly Statistics",
   "public.recent_cases_table": "Recent Cases",
   "public.recent_predictions_table": "Recent Predictions",
-
   "footer.copyright": "© 2026 Explain Dengue · AI-STGNN · Yogyakarta Special Region, Indonesia",
   "footer.public": "© 2026 Explain Dengue · Yogyakarta Special Region, Indonesia",
-
   "lang.switch_to_en": "English",
   "lang.switch_to_id": "Indonesia",
   "lang.current": "EN",
-
   "page.data_view.back": "Back to Data Management",
   "page.data_view.import_csv": "Import CSV",
   "page.data_view.export_csv": "Export CSV",
@@ -600,5 +577,40 @@
   "page.data_view.import_note": "The CSV file will update existing records and add new ones.",
   "page.data_view.import_btn": "Import",
   "page.data_view.previous": "Previous",
-  "page.data_view.next": "Next"
+  "page.data_view.next": "Next",
+  "public.about_ai_model_label": "AI Model",
+  "public.about_stgnn_title": "Spatio-Temporal Graph Neural Network",
+  "public.about_stgnn_desc": "The model jointly captures <strong>spatial dependencies</strong> between regencies through a graph structure, and <strong>temporal patterns</strong> such as seasonality and historical trends through recurrent layers — combining both into a single end-to-end prediction.",
+  "public.about_model_arch_title": "Model Architecture",
+  "public.about_arch_gcn": "Graph Convolution",
+  "public.about_arch_gcn_desc": "Spatial edges between regencies",
+  "public.about_arch_lstm": "LSTM / GRU",
+  "public.about_arch_lstm_desc": "Temporal sequence modeling",
+  "public.about_arch_attention": "Attention",
+  "public.about_arch_attention_desc": "Learns which neighbours matter",
+  "public.about_arch_zinb": "Zero-inflated",
+  "public.about_arch_zinb_desc": "Handles months with zero cases",
+  "public.about_risk_class_title": "Risk Classification",
+  "public.about_alert_desc": "Predicted cases > μ + 1.25 σ (historical baseline)",
+  "public.about_no_alert_desc": "Predicted cases ≤ μ + 1.25 σ (historical baseline)",
+  "public.about_threshold_note": "Threshold is computed per regency per month using data from 2021 up to the year before the forecast target.",
+  "public.about_data_sources_subtitle": "Three complementary data streams feed the prediction model.",
+  "public.about_pill_monthly": "Monthly",
+  "public.about_pill_regencies": "5 Regencies",
+  "public.about_pill_from_2021": "From 2021",
+  "public.about_pill_monthly_avg": "Monthly avg",
+  "public.about_pill_resolution": "250m resolution",
+  "public.about_tech_subtitle": "Open-source tools powering the system end-to-end.",
+  "public.about_role_web_framework": "Web framework",
+  "public.about_role_deep_learning": "Deep learning",
+  "public.about_role_db_orm": "Database ORM",
+  "public.about_role_data_processing": "Data processing",
+  "public.about_role_metrics": "Metrics & helpers",
+  "public.about_role_graph": "Graph structure",
+  "public.about_role_ui_framework": "UI framework",
+  "public.about_role_viz": "Data visualisation",
+  "public.about_role_icons": "Icon library",
+  "public.about_role_responsive": "Mobile-friendly design",
+  "public.about_role_i18n": "ID / EN bilingual",
+  "public.about_role_dark_mode": "Theme switching"
 }

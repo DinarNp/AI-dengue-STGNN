@@ -23,7 +23,6 @@
   "nav.about": "Tentang",
   "nav.login": "Masuk",
   "nav.logout": "Keluar",
-
   "common.save": "Simpan",
   "common.cancel": "Batal",
   "common.add": "Tambah",
@@ -127,7 +126,6 @@
   "ndvi.moderate_desc": "NDVI sedang menunjukkan semak belukar, padang rumput, atau lahan pertanian dengan tutupan vegetasi sedang dan kondisi yang cukup baik.",
   "ndvi.dense_desc": "NDVI tinggi menunjukkan vegetasi lebat dan sehat seperti hutan berdaun lebar atau lahan pertanian beririgasi dengan aktivitas fotosintesis kuat.",
   "ndvi.very_dense_desc": "NDVI sangat tinggi menunjukkan hutan hujan tropis atau vegetasi yang sangat lebat dan produktif — khas untuk daerah tropis yang subur.",
-
   "risk.low": "Rendah",
   "risk.medium": "Sedang",
   "risk.high": "Tinggi",
@@ -149,7 +147,6 @@
   "risk.exceed_probability": "P(Melebihi Ambang)",
   "page.risk_monitor_detail.forecast_table_title": "Tabel Ringkasan Prediksi 3 Bulan",
   "common.mean": "Rata-rata",
-
   "month.january": "Januari",
   "month.february": "Februari",
   "month.march": "Maret",
@@ -174,8 +171,7 @@
   "month.oct": "Okt",
   "month.nov": "Nov",
   "month.dec": "Des",
-
-  "auth.system" : "Sistem Prediksi AI",
+  "auth.system": "Sistem Prediksi AI",
   "auth.predict_monitor": "Memprediksi. Memantau",
   "auth.protect": "Melindungi",
   "auth.description": "Prediksi demam berdarah berbasis AI untuk Daerah Istimewa Yogyakarta. Mendukung pengambilan keputusan kesehatan masyarakat di 5 kabupaten dengan pemantauan risiko wabah secara aktual.",
@@ -191,7 +187,6 @@
   "auth.demo_credentials": "Akun Demo",
   "auth.back_to_home": "Kembali ke Beranda",
   "auth.login_loading": "Masuk...",
-
   "page.admin_dashboard.title": "Dasbor Admin",
   "page.admin_dashboard.subtitle": "Ringkasan sistem prediksi demam berdarah",
   "page.admin_dashboard.total_cases": "Total Kasus (Keseluruhan)",
@@ -212,7 +207,6 @@
   "page.admin_dashboard.generate_predictions": "Hasilkan Prediksi",
   "page.admin_dashboard.view_risk": "Lihat Monitor Risiko",
   "page.admin_dashboard.monthly_trend_title": "Tren Kasus Bulanan per Kabupaten",
-
   "page.data_management.title": "Manajemen Data",
   "page.data_management.subtitle": "Kelola data kasus, iklim, dan data satelit NDVI",
   "page.data_management.overview": "Gambaran Kelengkapan Data",
@@ -254,7 +248,6 @@
   "page.data_management.export_to_csv": "Ekspor ke CSV",
   "page.data_management.add_case_modal": "Tambah Data Kasus",
   "page.data_management.no_regency_data": "Tidak ada data kabupaten tersedia",
-
   "page.training.title": "Pelatihan Model",
   "page.training.subtitle": "Latih dan kelola model prediksi demam berdarah STGNN",
   "page.training.active_model": "Model Aktif",
@@ -281,7 +274,6 @@
   "page.training.processing": "Memproses...",
   "page.training.please_wait": "Mohon tunggu",
   "page.training.samples_col": "Sampel",
-
   "page.predictions.title": "Manajemen Prediksi",
   "page.predictions.subtitle": "Hasilkan dan kelola prediksi kasus demam berdarah",
   "page.predictions.export_all": "Ekspor Semua Prediksi",
@@ -312,7 +304,6 @@
   "page.predictions.generating_modal": "Menghasilkan Prediksi...",
   "page.predictions.running_model": "Menjalankan inferensi model STGNN",
   "page.predictions.next_3_desc": "Masukkan bulan terakhir dengan data aktual. Sistem akan menghasilkan prediksi untuk 3 bulan berikutnya secara berurutan, menggunakan setiap prediksi sebagai input untuk bulan berikutnya secara otomatis.",
-
   "page.risk_monitor.title": "Monitor Risiko Provinsi",
   "page.risk_monitor.subtitle": "Prakiraan Risiko Demam Berdarah 3 Bulan — Semua Kabupaten, Daerah Istimewa Yogyakarta",
   "page.risk_monitor.ai_powered": "Didukung AI-STGNN",
@@ -320,7 +311,6 @@
   "page.risk_monitor.actual": "Aktual",
   "page.risk_monitor.predicted": "Prediksi",
   "page.risk_monitor.cases_suffix": "kasus",
-
   "page.risk_monitor_detail.back": "Kembali ke Gambaran Umum",
   "page.risk_monitor_detail.breadcrumb": "Detail",
   "page.risk_monitor_detail.forecast_title": "Prakiraan Risiko 3 Bulan",
@@ -351,7 +341,6 @@
   "page.risk_monitor_detail.provincial_average": "Rata-Rata Provinsi",
   "page.risk_monitor_detail.no_prediction": "Belum ada prediksi yang dihasilkan",
   "page.risk_monitor_detail.run_prediction": "Jalankan prediksi untuk",
-
   "page.logs.title": "Log Aktivitas",
   "page.logs.subtitle": "Riwayat aktivitas sistem",
   "page.logs.user_col": "Pengguna",
@@ -362,7 +351,6 @@
   "page.logs.no_logs": "Tidak ada log aktivitas",
   "page.logs.error_details": "Detail Kesalahan",
   "page.logs.full_details": "Detail Lengkap",
-
   "page.hd_dashboard.title": "Dasbor Puskesmas",
   "page.hd_dashboard.subtitle": "Pantau status demam berdarah dan prediksi untuk wilayah Anda",
   "page.hd_dashboard.recent_cases": "Kasus Terbaru",
@@ -376,7 +364,6 @@
   "page.hd_dashboard.actual_up_to": "Aktual hingga",
   "page.hd_dashboard.forecast": "Prakiraan",
   "page.hd_dashboard.total_cases_year": "Total Kasus",
-
   "page.hd_risk_monitor.title": "Monitor Risiko",
   "page.hd_risk_monitor.subtitle": "Prakiraan risiko demam berdarah 3 bulan ke depan untuk wilayah Anda",
   "page.hd_risk_monitor.months_forecast": "Bulan Prakiraan",
@@ -399,7 +386,6 @@
   "page.hd_risk_monitor.risk_legend": "Keterangan Tingkat Risiko:",
   "page.hd_risk_monitor.view_details": "Lihat Detail",
   "page.hd_risk_monitor.trend_label": "Tren (24 bulan + prakiraan 3 bulan)",
-
   "page.hd_reports.title": "Laporan Bulanan",
   "page.hd_reports.subtitle": "Ringkasan kasus demam berdarah bulanan untuk wilayah Anda",
   "page.hd_reports.yearly_case_title": "Statistik Kasus Tahunan",
@@ -414,7 +400,6 @@
   "page.hd_reports.total_cases": "Total Kasus",
   "page.hd_reports.avg_monthly": "Rata-rata Bulanan",
   "page.hd_reports.peak_month": "Bulan Puncak",
-
   "page.hd_update_cases.title": "Input Data Kasus",
   "page.hd_update_cases.subtitle": "Masukkan atau perbarui data kasus demam berdarah bulanan",
   "page.hd_update_cases.current_year": "Data Kasus Tahun Ini",
@@ -437,7 +422,6 @@
   "page.hd_update_cases.add_now": "Tambah Sekarang",
   "page.hd_update_cases.adding_for": "Menambahkan data untuk",
   "page.hd_update_cases.edit_cases": "Edit Data Kasus",
-
   "public.hero_title": "Sistem Prediksi Demam Berdarah Berbasis AI",
   "public.hero_subtitle": "Pemantauan dan prediksi demam berdarah berbasis kecerdasan buatan untuk Daerah Istimewa Yogyakarta",
   "public.hero_btn_dashboard": "Lihat Dasbor",
@@ -487,10 +471,10 @@
   "public.area": "Luas",
   "public.live_monitoring": "Pemantauan Langsung — Daerah Istimewa Yogyakarta",
   "public.hero_description": "Memanfaatkan model Spatio-Temporal Graph Neural Networks untuk memprediksi wabah demam berdarah di 5 kabupaten — membantu petugas kesehatan bertindak sebelum epidemi dimulai.",
-  "public.hero_kabupaten" : "Kabupaten",
-  "public.hero_model" : "Model STGNN",
-  "public.hero_real_time" : "Aktual",
-  "public.hero_risk_monitor" : "Pemantauan Risiko",
+  "public.hero_kabupaten": "Kabupaten",
+  "public.hero_model": "Model STGNN",
+  "public.hero_real_time": "Aktual",
+  "public.hero_risk_monitor": "Pemantauan Risiko",
   "public.view_dashboard": "Lihat Dasbor",
   "public.sign_in": "Masuk",
   "public.system_features": "Fitur Sistem",
@@ -527,7 +511,7 @@
   "public.view_statistics": "Lihat Statistik",
   "public.about_overview": "Sistem Prediksi Demam Berdarah",
   "public.about_desc1": "Sistem prediksi spasial-temporal berbasis AI untuk kasus demam berdarah di Daerah Istimewa Yogyakarta, Indonesia.",
-  "public.about_desc2": "Sistem ini memanfaatkan teknik machine learning canggih, khususnya Spatio-Temporal Graph Neural Networks (STGNN), untuk memprediksi wabah demam berdarah dengan menganalisis data kasus historis, variabel iklim, dan faktor lingkungan.",
+  "public.about_desc2": "Sistem ini memanfaatkan teknik machine learning canggih, khususnya <i>Spatio-Temporal Graph Neural Networks (STGNN)</i>, untuk memprediksi wabah demam berdarah dengan menganalisis data kasus historis, variabel iklim, dan faktor lingkungan.",
   "public.how_step1_title": "Pengumpulan Data:",
   "public.how_step1_desc": "Kasus demam berdarah historis, data iklim (suhu, kelembaban, curah hujan), dan indeks vegetasi satelit NDVI",
   "public.how_step2_title": "Analisis Spasial:",
@@ -552,7 +536,6 @@
   "public.key_features": "Fitur Utama",
   "public.contact_title": "Informasi Lebih Lanjut",
   "public.contact_desc": "Sistem ini dikembangkan untuk mendukung pengambilan keputusan kesehatan masyarakat dalam pencegahan dan pengendalian demam berdarah di Daerah Istimewa Yogyakarta.",
-
   "public.dashboard_title": "Dasbor Publik",
   "public.dashboard_subtitle": "Pantau kasus dan prediksi demam berdarah di Daerah Istimewa Yogyakarta",
   "public.total_cases": "Total Kasus",
@@ -562,7 +545,6 @@
   "public.risk_overview": "Gambaran Risiko",
   "public.case_trend": "Tren Kasus",
   "public.regency_comparison": "Perbandingan Kabupaten",
-
   "public.statistics_title": "Statistik Demam Berdarah",
   "public.statistics_subtitle": "Analisis data kasus Demam Berdarah di Daerah Istimewa Yogyakarta",
   "public.summary_stats": "Statistik Ringkasan",
@@ -570,23 +552,18 @@
   "public.monthly_trend": "Tren Bulanan",
   "public.regency_breakdown": "Rincian Kabupaten",
   "public.data_table": "Tabel Data",
-
   "public.about_title": "Tentang Sistem",
   "public.about_subtitle": "Sistem Prediksi Demam Berdarah berbasis AI-STGNN",
-
   "public.regency_detail_title": "Detail Kabupaten",
   "public.back_to_dashboard": "Kembali ke Dasbor",
   "public.yearly_stats": "Statistik Tahunan",
   "public.recent_cases_table": "Kasus Terbaru",
   "public.recent_predictions_table": "Prediksi Terbaru",
-
   "footer.copyright": "© 2026 Explain Dengue · AI-STGNN · Daerah Istimewa Yogyakarta, Indonesia",
   "footer.public": "© 2026 Explain Dengue · Daerah Istimewa Yogyakarta, Indonesia",
-
   "lang.switch_to_en": "English",
   "lang.switch_to_id": "Indonesia",
   "lang.current": "ID",
-
   "page.data_view.back": "Kembali ke Manajemen Data",
   "page.data_view.import_csv": "Impor CSV",
   "page.data_view.export_csv": "Ekspor CSV",
@@ -600,5 +577,40 @@
   "page.data_view.import_note": "File CSV akan memperbarui rekaman yang ada dan menambahkan yang baru.",
   "page.data_view.import_btn": "Impor",
   "page.data_view.previous": "Sebelumnya",
-  "page.data_view.next": "Berikutnya"
+  "page.data_view.next": "Berikutnya",
+  "public.about_ai_model_label": "Model AI",
+  "public.about_stgnn_title": "Spatio-Temporal Graph Neural Network",
+  "public.about_stgnn_desc": "Model ini secara bersamaan menangkap <strong>dependensi spasial</strong> antar kabupaten melalui struktur graf, dan <strong>pola temporal</strong> seperti musiman serta tren historis melalui <i>recurrent layers</i>  — menggabungkan keduanya dalam satu prediksi end-to-end.",
+  "public.about_model_arch_title": "Arsitektur Model",
+  "public.about_arch_gcn": "Graph Convolution",
+  "public.about_arch_gcn_desc": "Hubungan spasial antar kabupaten",
+  "public.about_arch_lstm": "LSTM / GRU",
+  "public.about_arch_lstm_desc": "Pemodelan sekuens temporal",
+  "public.about_arch_attention": "Attention",
+  "public.about_arch_attention_desc": "Mempelajari tetangga yang paling relevan",
+  "public.about_arch_zinb": "Zero-inflated",
+  "public.about_arch_zinb_desc": "Menangani bulan dengan nol kasus",
+  "public.about_risk_class_title": "Klasifikasi Risiko",
+  "public.about_alert_desc": "Prediksi kasus > μ + 1,25 σ (baseline historis)",
+  "public.about_no_alert_desc": "Prediksi kasus ≤ μ + 1,25 σ (baseline historis)",
+  "public.about_threshold_note": "Ambang batas dihitung per kabupaten per bulan menggunakan data dari 2021 hingga tahun sebelum target prediksi.",
+  "public.about_data_sources_subtitle": "Tiga aliran data pelengkap yang digunakan oleh model prediksi.",
+  "public.about_pill_monthly": "Bulanan",
+  "public.about_pill_regencies": "5 Kabupaten",
+  "public.about_pill_from_2021": "Sejak 2021",
+  "public.about_pill_monthly_avg": "Rata-rata bulanan",
+  "public.about_pill_resolution": "Resolusi 250m",
+  "public.about_tech_subtitle": "Alat open-source yang menggerakkan sistem dari ujung ke ujung.",
+  "public.about_role_web_framework": "Kerangka web",
+  "public.about_role_deep_learning": "Pembelajaran mendalam",
+  "public.about_role_db_orm": "ORM basis data",
+  "public.about_role_data_processing": "Pemrosesan data",
+  "public.about_role_metrics": "Metrik & utilitas",
+  "public.about_role_graph": "Struktur graf",
+  "public.about_role_ui_framework": "Kerangka antarmuka",
+  "public.about_role_viz": "Visualisasi data",
+  "public.about_role_icons": "Pustaka ikon",
+  "public.about_role_responsive": "Desain responsif",
+  "public.about_role_i18n": "Bilingual ID / EN",
+  "public.about_role_dark_mode": "Pergantian tema"
 }
