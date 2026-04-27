@@ -612,5 +612,7 @@
   "public.about_role_icons": "Icon library",
   "public.about_role_responsive": "Mobile-friendly design",
   "public.about_role_i18n": "ID / EN bilingual",
-  "public.about_role_dark_mode": "Theme switching"
+  "public.about_role_dark_mode": "Theme switching",
+  "auth.login_required_analysis": "Login Required",
+  "auth.login_required_analysis_desc": "Please log in as <strong>Admin</strong> or <strong>Health District Officer</strong> to view the full risk analysis."
 }

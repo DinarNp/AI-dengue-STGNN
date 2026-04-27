@@ -4,6 +4,7 @@ User login, logout, and registration
 """
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_user, logout_user, current_user
+from urllib.parse import urlparse
 from datetime import datetime
 
 from ..models import db, User
@@ -16,24 +17,33 @@ def login():
     """User login"""
     if current_user.is_authenticated:
         return redirect(url_for('public.dashboard'))
-    
+
+    next_url = request.args.get('next') or request.form.get('next')
+    msg      = request.args.get('msg')
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         remember = request.form.get('remember', False)
-        
+
         user = User.query.filter_by(username=username).first()
-        
+
         if user and user.check_password(password):
             if not user.is_active:
                 flash('Your account is inactive. Please contact administrator.', 'danger')
                 return redirect(url_for('auth.login'))
-            
+
             login_user(user, remember=remember)
             user.last_login = datetime.utcnow()
             db.session.commit()
-            
-            # Redirect based on role
+
+            # If a safe next URL was provided, honour it
+            if next_url:
+                parsed = urlparse(next_url)
+                if not parsed.netloc and not parsed.scheme:
+                    return redirect(next_url)
+
+            # Default redirect based on role
             if user.is_admin():
                 return redirect(url_for('admin.dashboard'))
             elif user.is_health_district():
@@ -42,8 +52,8 @@ def login():
                 return redirect(url_for('public.dashboard'))
         else:
             flash('Invalid username or password', 'danger')
-    
-    return render_template('auth/login.html')
+
+    return render_template('auth/login.html', msg=msg, next_url=next_url)
 
 
 @auth.route('/logout')

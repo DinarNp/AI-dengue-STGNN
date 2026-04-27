@@ -224,7 +224,7 @@
           {% set frl = fm.prediction.risk_level %}
           {% if frl == 'alert' %}{% set fc = '#ef4444' %}{% set fbg = 'rgba(239,68,68,0.1)' %}
           {% else %}{% set fc = '#10b981' %}{% set fbg = 'rgba(16,185,129,0.1)' %}{% endif %}
-          <a href="{{ url_for('admin.risk_monitor_detail', regency_id=data.regency.id) }}"
+          <a href="{{ url_for('auth.login', msg='analysis', next=url_for('admin.risk_monitor_detail', regency_id=data.regency.id)) }}"
              style="background:{{ fbg }};border:1px solid {{ fc }}40;border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;text-decoration:none;display:block;transition:box-shadow .15s;"
              onmouseover="this.style.boxShadow='0 2px 8px {{ fc }}40'" onmouseout="this.style.boxShadow='none'">
             <div style="font-size:10px;color:var(--text-muted);">{{ fm.month_name[:3] }} {{ fm.year }}</div>
@@ -267,7 +267,7 @@
     </div>
 
     <div class="card-footer" style="padding:10px 16px;">
-      <a href="{{ url_for('admin.risk_monitor_detail', regency_id=data.regency.id) }}" class="btn btn-primary btn-sm btn-w">
+      <a href="{{ url_for('auth.login', msg='analysis', next=url_for('admin.risk_monitor_detail', regency_id=data.regency.id)) }}" class="btn btn-primary btn-sm btn-w">
         <i class="fas fa-search-plus"></i> {{ t('common.view_full_analysis') }}
       </a>
     </div>

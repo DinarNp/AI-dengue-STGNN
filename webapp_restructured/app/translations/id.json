@@ -612,5 +612,7 @@
   "public.about_role_icons": "Pustaka ikon",
   "public.about_role_responsive": "Desain responsif",
   "public.about_role_i18n": "Bilingual ID / EN",
-  "public.about_role_dark_mode": "Pergantian tema"
+  "public.about_role_dark_mode": "Pergantian tema",
+  "auth.login_required_analysis": "Login Diperlukan",
+  "auth.login_required_analysis_desc": "Silakan masuk sebagai <strong>Admin</strong> atau <strong>Petugas Dinas Kesehatan</strong> untuk melihat analisis risiko lengkap."
 }
