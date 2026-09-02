@@ -26,7 +26,7 @@ def dashboard():
 
     if not regency:
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('public.index'))
 
     current_year = datetime.now().year
 
@@ -140,7 +140,7 @@ def update_cases():
 
     if not regency:
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('public.index'))
 
     current_year = datetime.now().year
     selected_year = request.args.get('year', current_year, type=int)
@@ -260,7 +260,7 @@ def view_risk_monitor():
     regency = Regency.query.filter_by(name=current_user.regency).first()
     if not regency:
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('public.index'))
 
     prediction_service = PredictionService(_ca.config)
 
@@ -593,7 +593,7 @@ def view_reports():
     
     if not regency:
         flash('Your regency assignment is invalid. Please contact admin.', 'danger')
-        return redirect(url_for('main.index'))
+        return redirect(url_for('public.index'))
     
     current_year = datetime.now().year
 

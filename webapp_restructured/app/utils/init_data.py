@@ -6,13 +6,36 @@ from ..models import db, User, Regency
 from flask import current_app
 
 
+def _ensure_guest_user():
+    """
+    Ensure the default view-only 'guest' account exists.
+
+    Runs on every startup (not just first init) so it also gets created in
+    databases that were already initialized before the guest role existed.
+    """
+    if User.query.filter_by(username='guest').first() is not None:
+        return
+
+    guest = User(
+        username='guest',
+        email='guest@dengue-predict.local',
+        role='guest'
+    )
+    guest.set_password('guest')
+    db.session.add(guest)
+    db.session.commit()
+    print("Default guest account created (username: guest / password: guest)")
+
+
 def initialize_default_data():
     """Initialize default data if database is empty"""
-    
-    # Check if data already exists
-    if User.query.first() is not None:
+
+    _ensure_guest_user()
+
+    # Check if other data already exists
+    if User.query.filter(User.role != 'guest').first() is not None:
         return  # Data already initialized
-    
+
     print("Initializing default data...")
     
     # Create default admin user
@@ -66,6 +89,9 @@ def initialize_default_data():
             print(f"    Username: {username}")
             print(f"    Password: health123")
             print(f"    Regency: {regency_data['name']}")
+        print("  Guest:")
+        print("    Username: guest")
+        print("    Password: guest")
         print("\n⚠️  IMPORTANT: Change these default passwords before deploying to production!")
         
     except Exception as e:

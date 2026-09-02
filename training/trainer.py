@@ -428,52 +428,60 @@ class DengueTrainer:
     def _create_location_aware_split(self, n_total: int, n_nodes: int,
                                      samples_per_node: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
-        FIXED: Split data while keeping location groups intact
-        Strategy:
-        1. Split time indices for EACH location separately
-        2. Combine the indices to maintain location structure
+        Chronological (forward-chaining) split, per location.
+
+        DengueDataPreprocessor.create_lag_features sorts each location's rows
+        by [location, Year, Week/Month] before this point, so within each
+        location's contiguous block of `samples_per_node` rows, index order
+        IS time order. We therefore take the leading block of each location's
+        rows as train, the next block as val, and the trailing block as test
+        -- no shuffling. This guarantees:
+          (a) every test-period week comes strictly after every training-period
+              week for that location, so lag/rolling-mean features and the
+              STGNN's sequence windows cannot see test-period information
+              during training, and
+          (b) sliding-window sequences built downstream (DengueDataset) never
+              splice together weeks that are far apart in real time, since
+              each split's slice is itself a contiguous run of calendar weeks.
+
+        A prior version of this method shuffled each location's weeks
+        (seed=42+node_idx) before taking the 70/15/15 split, then sorted the
+        resulting index arrays -- which only cosmetically re-orders an
+        already-randomized subset and does not restore contiguity. That
+        produced in-sample interpolation dressed up as a forecast; this
+        replacement is a genuine held-out-future evaluation.
         """
 
-        print(f"\n🎲 Creating LOCATION-AWARE stratified split...")
+        print(f"\n📅 Creating CHRONOLOGICAL per-location split (no shuffling)...")
 
         train_indices = []
         val_indices = []
         test_indices = []
 
+        n_train = int(self.config.TRAIN_FRACTION * samples_per_node) if hasattr(self.config, 'TRAIN_FRACTION') else int(0.70 * samples_per_node)
+        n_val = int(self.config.VAL_FRACTION * samples_per_node) if hasattr(self.config, 'VAL_FRACTION') else int(0.15 * samples_per_node)
+
         # For each location (node)
         for node_idx in range(n_nodes):
-            # Get the index range for this location
+            # Get the index range for this location (already time-ordered)
             node_start = node_idx * samples_per_node
             node_end = node_start + samples_per_node
             node_indices = np.arange(node_start, node_end)
 
-            # Split this location's data: 70% train, 15% val, 15% test
-            # Use random shuffle but keep location together
-            np.random.seed(42 + node_idx)  # Different seed per location
-            shuffled = node_indices.copy()
-            np.random.shuffle(shuffled)
+            train_indices.extend(node_indices[:n_train])
+            val_indices.extend(node_indices[n_train:n_train + n_val])
+            test_indices.extend(node_indices[n_train + n_val:])
 
-            n_train = int(0.70 * samples_per_node)
-            n_val = int(0.15 * samples_per_node)
-
-            train_indices.extend(shuffled[:n_train])
-            val_indices.extend(shuffled[n_train:n_train + n_val])
-            test_indices.extend(shuffled[n_train + n_val:])
-
-        # Convert to arrays
+        # Convert to arrays (already in ascending time order per location, and
+        # locations themselves appear in a fixed order, so no re-sort needed)
         train_idx = np.array(train_indices)
         val_idx = np.array(val_indices)
         test_idx = np.array(test_indices)
 
-        # Sort to maintain some temporal ordering within each location
-        train_idx.sort()
-        val_idx.sort()
-        test_idx.sort()
-
-        print(f"   Split created:")
-        print(f"      Train: {len(train_idx)} indices")
-        print(f"      Val:   {len(val_idx)} indices")
-        print(f"      Test:  {len(test_idx)} indices")
+        print(f"   Split created (per-location weeks {n_train}/{n_val}/{samples_per_node - n_train - n_val}):")
+        print(f"      Train: {len(train_idx)} indices (earliest weeks per location)")
+        print(f"      Val:   {len(val_idx)} indices (middle weeks per location)")
+        print(f"      Test:  {len(test_idx)} indices (latest weeks per location, held out)")
 
         return train_idx, val_idx, test_idx
 

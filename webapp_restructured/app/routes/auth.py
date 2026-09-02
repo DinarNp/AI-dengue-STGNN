@@ -15,11 +15,17 @@ auth = Blueprint('auth', __name__, url_prefix='/auth')
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     """User login"""
-    if current_user.is_authenticated:
-        return redirect(url_for('public.dashboard'))
-
     next_url = request.args.get('next') or request.form.get('next')
     msg      = request.args.get('msg')
+
+    if current_user.is_authenticated:
+        if msg == 'analysis' and not (current_user.is_admin() or current_user.is_health_district()):
+            # Logged in as a role that can't view the full analysis (e.g. guest) —
+            # sign them out so the "login as Admin/Health District" prompt shows,
+            # instead of silently bouncing back to the dashboard.
+            logout_user()
+        else:
+            return redirect(url_for('public.dashboard'))
 
     if request.method == 'POST':
         username = request.form.get('username')

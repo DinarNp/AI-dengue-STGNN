@@ -27,7 +27,7 @@ def admin_required(f):
             return redirect(url_for('auth.login'))
         if not current_user.is_admin():
             flash('You need admin privileges to access this page.', 'danger')
-            return redirect(url_for('main.index'))
+            return redirect(url_for('public.index'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -41,7 +41,7 @@ def health_district_required(f):
             return redirect(url_for('auth.login'))
         if not (current_user.is_admin() or current_user.is_health_district()):
             flash('You need health district office privileges to access this page.', 'danger')
-            return redirect(url_for('main.index'))
+            return redirect(url_for('public.index'))
         return f(*args, **kwargs)
     return decorated_function
 

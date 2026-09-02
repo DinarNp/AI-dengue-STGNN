@@ -166,15 +166,8 @@
       </div>
 
       {% else %}
-      <!-- DEFAULT AUTH NAV -->
+      <!-- DEFAULT AUTH NAV (guest) -->
       <div class="nav-section-label">{{ t('nav.navigation') }}</div>
-      <div class="nav-item-wrapper">
-        <a class="nav-link-item {% if request.endpoint == 'public.index' %}active{% endif %}"
-           href="{{ url_for('public.index') }}">
-          <span class="nav-icon"><i class="fas fa-home"></i></span>
-          <span class="nav-text">{{ t('nav.home') }}</span>
-        </a>
-      </div>
       <div class="nav-item-wrapper">
         <a class="nav-link-item {% if request.endpoint == 'public.dashboard' %}active{% endif %}"
            href="{{ url_for('public.dashboard') }}">
@@ -308,10 +301,6 @@
   <nav class="public-navbar-links">
     <a class="public-nav-link {% if request.endpoint == 'public.index' %}active{% endif %}"
        href="{{ url_for('public.index') }}">{{ t('nav.home') }}</a>
-    <a class="public-nav-link {% if request.endpoint == 'public.dashboard' %}active{% endif %}"
-       href="{{ url_for('public.dashboard') }}">{{ t('nav.dashboard') }}</a>
-    <a class="public-nav-link {% if request.endpoint == 'public.statistics' %}active{% endif %}"
-       href="{{ url_for('public.statistics') }}">{{ t('nav.statistics') }}</a>
     <a class="public-nav-link {% if request.endpoint == 'public.about' %}active{% endif %}"
        href="{{ url_for('public.about') }}">{{ t('nav.about') }}</a>
   </nav>
@@ -339,10 +328,6 @@
 <div class="public-mobile-menu" id="publicMobileMenu">
   <a class="public-mobile-link {% if request.endpoint == 'public.index' %}active{% endif %}"
      href="{{ url_for('public.index') }}">{{ t('nav.home') }}</a>
-  <a class="public-mobile-link {% if request.endpoint == 'public.dashboard' %}active{% endif %}"
-     href="{{ url_for('public.dashboard') }}">{{ t('nav.dashboard') }}</a>
-  <a class="public-mobile-link {% if request.endpoint == 'public.statistics' %}active{% endif %}"
-     href="{{ url_for('public.statistics') }}">{{ t('nav.statistics') }}</a>
   <a class="public-mobile-link {% if request.endpoint == 'public.about' %}active{% endif %}"
      href="{{ url_for('public.about') }}">{{ t('nav.about') }}</a>
 </div>

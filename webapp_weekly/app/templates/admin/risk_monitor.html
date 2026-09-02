@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Risk Monitor — Admin{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Risk Monitor</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1 class="page-title">
+      <i class="fas fa-shield-alt" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.risk_monitor.title') }}
+    </h1>
+    <p class="page-subtitle">{{ t('page.risk_monitor.subtitle') }}</p>
+  </div>
+  <span class="pill" style="background:rgba(14,165,233,0.1);color:var(--primary);">
+    <i class="fas fa-brain" style="margin-right:5px;"></i>{{ t('page.risk_monitor.ai_powered') }}
+  </span>
+</div>
+
+<!-- ===== PROVINCIAL SUMMARY CARDS ===== -->
+<div class="grid-4" style="margin-bottom:24px;">
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-city"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ regency_forecasts | length }}</div>
+      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
+    </div>
+  </div>
+  <div class="stat-card border-left-danger">
+    <div class="stat-icon icon-danger"><i class="fas fa-bell"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ province_risk.get('alert', 0) }}</div>
+      <div class="stat-label">{{ t('common.alert_regencies') }}</div>
+    </div>
+  </div>
+  <div class="stat-card border-left-success">
+    <div class="stat-icon icon-success"><i class="fas fa-check-circle"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">{{ province_risk.get('no_alert', 0) }}</div>
+      <div class="stat-label">{{ t('common.no_alert_regencies') }}</div>
+    </div>
+  </div>
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-chart-line"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">μ + 1.25σ</div>
+      <div class="stat-label">{{ t('risk.threshold_desc') }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RISK LEGEND ===== -->
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-body" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:12px 20px;">
+    <span style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ t('risk.levels') }}</span>
+    <span class="risk-badge risk-alert" style="padding:3px 8px;white-space:nowrap;"><span class="risk-dot alert"></span>{{ t('risk.alert') }}</span>
+    <span class="risk-badge risk-no_alert" style="padding:3px 8px;white-space:nowrap;"><span class="risk-dot no_alert"></span>{{ t('risk.no_alert') }}</span>
+    <span style="font-size:11.5px;color:#94a3b8;">— {{ t('risk.threshold_method') }}</span>
+    <span style="margin-left:auto;font-size:11.5px;color:#94a3b8;">
+      <i class="fas fa-info-circle"></i> {{ t('risk.badge_info') }}
+    </span>
+  </div>
+</div>
+
+<!-- ===== REGENCY CARDS GRID ===== -->
+<div class="grid-3">
+  {% for rf in regency_forecasts %}
+  {% set risk = rf.risk_level %}
+  {% if risk == 'alert' %}
+    {% set rl_color = '#ef4444' %}
+  {% elif risk == 'no_alert' %}
+    {% set rl_color = '#10b981' %}
+  {% else %}
+    {% set rl_color = '#94a3b8' %}
+  {% endif %}
+
+  <div class="card" style="margin-bottom:0;border-top:3px solid {{ rl_color }};">
+
+    <!-- Card Header -->
+    <div class="card-header" style="background:var(--sidebar-bg);">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;">
+        <i class="fas fa-map-marker-alt" style="color:{{ rl_color }};"></i>
+        <span style="color:white;font-weight:700;font-size:14px;">{{ rf.regency.name }}</span>
+      </div>
+      {% if risk %}
+      <span class="risk-badge risk-{{ risk }}" style="padding:3px 8px;white-space:nowrap;">
+        <span class="risk-dot {{ risk }}"></span>{{ t('risk.' + risk) }}
+      </span>
+      {% else %}
+      <span class="pill" style="font-size:11px;">{{ t('risk.no_data') }}</span>
+      {% endif %}
+    </div>
+
+    <div class="card-body" style="padding:16px;">
+
+      <!-- Data up-to label -->
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">
+        <i class="fas fa-clock" style="margin-right:4px;"></i>
+        {{ t('common.data_up_to') }} <strong>{{ rf.latest_epi_year }}-W{{ '%02d'|format(rf.latest_epi_week) }}</strong>
+      </div>
+
+      <!-- 3-month forecast pills -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+        {% for fm in rf.forecast_weeks %}
+        {% if fm.prediction %}
+          {% set frl = fm.prediction.risk_level %}
+          {% if frl == 'alert' %}{% set fc = '#ef4444' %}{% set fbg = 'rgba(239,68,68,0.1)' %}
+          {% else %}{% set fc = '#10b981' %}{% set fbg = 'rgba(16,185,129,0.1)' %}{% endif %}
+          <div style="background:{{ fbg }};border:1px solid {{ fc }}40;border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
+            <div style="font-size:10px;color:var(--text-muted);">W{{ '%02d'|format(fm.epi_week) }} {{ fm.epi_year }}</div>
+            <div style="font-size:18px;font-weight:800;color:{{ fc }};line-height:1.2;">{{ "%.0f"|format(fm.prediction.predicted_cases) }}</div>
+            {% if fm.prediction.case_probability is defined and fm.prediction.case_probability is not none %}
+            <div style="font-size:9px;color:var(--text-muted);">{{ "%.0f"|format((1 - fm.prediction.zero_probability) * 100) if fm.prediction.zero_probability is not none else '—' }}% {{ t('risk.prob_cases') }}</div>
+            {% endif %}
+            <div style="font-size:9px;color:{{ fc }};font-weight:600;text-transform:uppercase;margin-top:2px;">{{ t('risk.' + frl) }}</div>
+          </div>
+        {% else %}
+          <div style="background:var(--body-bg);border:1px solid var(--border-color);border-radius:8px;padding:6px 10px;text-align:center;flex:1;min-width:70px;">
+            <div style="font-size:10px;color:var(--text-muted);">W{{ '%02d'|format(fm.epi_week) }} {{ fm.epi_year }}</div>
+            <div style="font-size:13px;color:#94a3b8;margin:4px 0;">—</div>
+            <div style="font-size:9px;color:#94a3b8;">{{ t('common.no_pred') }}</div>
+          </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      <!-- Alert count pills -->
+      <div style="display:flex;gap:6px;margin-bottom:12px;">
+        {% if rf.risk_counts.get('alert', 0) > 0 %}
+        <span style="font-size:11px;background:rgba(239,68,68,0.15);color:#ef4444;padding:2px 10px;border-radius:20px;font-weight:600;">
+          {{ rf.risk_counts.get('alert', 0) }} {{ t('risk.alert') }}
+        </span>
+        {% endif %}
+        {% if rf.risk_counts.get('no_alert', 0) > 0 %}
+        <span style="font-size:11px;background:rgba(16,185,129,0.15);color:#10b981;padding:2px 10px;border-radius:20px;font-weight:600;">
+          {{ rf.risk_counts.get('no_alert', 0) }} {{ t('risk.no_alert') }}
+        </span>
+        {% endif %}
+        {% if rf.risk_counts.get('alert', 0) == 0 and rf.risk_counts.get('no_alert', 0) == 0 %}
+        <span style="font-size:11px;color:#94a3b8;">{{ t('common.no_predictions') }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Sparkline chart -->
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">{{ t('page.risk_monitor.trend_label') }}</div>
+        <canvas id="trendChart{{ loop.index }}" height="70"></canvas>
+      </div>
+
+    </div>
+
+    <div class="card-footer" style="padding:10px 16px;">
+      <a href="{{ url_for('admin.risk_monitor_detail', regency_id=rf.regency.id) }}" class="btn btn-primary btn-sm btn-w">
+        <i class="fas fa-search-plus"></i> {{ t('common.view_full_analysis') }}
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var _tPredicted = {{ t('page.risk_monitor.predicted') | tojson }};
+var _tActual    = {{ t('page.risk_monitor.actual')    | tojson }};
+var _tCases     = {{ t('page.risk_monitor.cases_suffix') | tojson }};
+
+{% for rf in regency_forecasts %}
+(function() {
+  var el = document.getElementById('trendChart{{ loop.index }}');
+  if (!el) return;
+
+  var actual       = {{ rf.weekly_trend    | tojson }};
+  var predRaw      = {{ rf.prediction_trend | tojson }};
+  var thresholdAll = {{ rf.threshold_trend  | tojson }};
+  var nActual      = actual.length;
+
+  var labels = actual.map(function(d) { return d.week; })
+                     .concat(predRaw.map(function(d) { return d.week; }));
+
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
+
+  var thresholdData = thresholdAll.slice();
+
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  var verticalSepPlugin = {
+    id: 'verticalSep{{ loop.index }}',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx, xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.5)';
+      c.lineWidth = 1;
+      c.setLineDash([4, 3]);
+      c.stroke();
+      c.setLineDash([]);
+      c.restore();
+    }
+  };
+
+  new Chart(el, {
+    type: 'line',
+    plugins: [verticalSepPlugin],
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Mean + 1.25 SD',
+          data: thresholdData,
+          borderColor: '#f59e0b',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          pointStyle: 'rectRot',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 3 : 2; },
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#f59e0b',
+          tension: 0.3,
+          fill: false,
+          spanGaps: true,
+          order: 3,
+        },
+        {
+          label: _tActual,
+          data: reportedData,
+          borderColor: '#1e293b',
+          backgroundColor: 'rgba(30,41,59,0.07)',
+          borderWidth: 1.5,
+          pointStyle: 'rect',
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          pointBackgroundColor: '#1e293b',
+          tension: 0.3,
+          fill: true,
+          spanGaps: false,
+          order: 1,
+        },
+        {
+          label: _tPredicted,
+          data: forecastAvgData,
+          borderColor: '#6366f1',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 3],
+          pointStyle: 'circle',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 3 : 0; },
+          pointHoverRadius: 5,
+          pointBackgroundColor: 'white',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 1.5,
+          tension: 0.3,
+          fill: false,
+          spanGaps: false,
+          order: 2,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              if (item.dataset.label === 'Mean + 1.25 SD')
+                return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { display: false },
+        y: { display: false, beginAtZero: true }
+      }
+    }
+  });
+})();
+{% endfor %}
+</script>
+{% endblock %}

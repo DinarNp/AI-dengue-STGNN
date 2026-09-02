@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('page.hd_update_cases.title') }} — {{ regency.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('health_district.dashboard') }}">{{ t('nav.dashboard') }}</a></li>
+<li class="breadcrumb-item active">{{ t('page.hd_update_cases.title') }}</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">
+      <i class="fas fa-notes-medical" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.hd_update_cases.title') }} — {{ regency.name }}
+    </h1>
+    <p class="page-subtitle">{{ t('page.hd_update_cases.subtitle') }}</p>
+  </div>
+  <button class="btn btn-success" onclick="openAddModal()">
+    <i class="fas fa-plus"></i> {{ t('page.hd_update_cases.add_case') }}
+  </button>
+</div>
+
+<!-- Summary Cards -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-body" style="padding:16px 20px;">
+      <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+        <i class="fas fa-calendar-alt" style="margin-right:4px;"></i> {{ selected_year }} {{ t('page.hd_update_cases.year_total_label') }}
+      </div>
+      <div style="font-size:28px;font-weight:700;color:var(--primary);">{{ '{:,}'.format(total_selected_year) }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ cases|length }} {{ t('page.hd_update_cases.months_recorded') }}</div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-body" style="padding:16px 20px;">
+      <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+        <i class="fas fa-database" style="margin-right:4px;"></i> {{ t('page.hd_update_cases.all_time_total') }}
+      </div>
+      <div style="font-size:28px;font-weight:700;color:var(--text-primary);">{{ '{:,}'.format(total_all_time) }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ t('page.hd_update_cases.across_years') }}</div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-body" style="padding:16px 20px;">
+      <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">
+        <i class="fas fa-map-marker-alt" style="margin-right:4px;"></i> {{ t('common.regency') }}
+      </div>
+      <div style="font-size:18px;font-weight:700;color:var(--text-primary);">{{ regency.name }}</div>
+      <div style="font-size:12px;color:var(--text-muted);">{{ available_years|length }} {{ t('page.hd_update_cases.years_of_data') }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Year Filter + Table -->
+<div class="card">
+  <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <h5 class="card-header-title">
+      <i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>
+      {{ t('page.hd_update_cases.case_records') }} — {{ selected_year }}
+    </h5>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <form method="get" style="display:flex;align-items:center;gap:8px;margin:0;">
+        <label style="font-size:13px;color:var(--text-muted);white-space:nowrap;">{{ t('page.hd_update_cases.year_filter') }}</label>
+        <select name="year" class="form-select" style="width:auto;min-width:100px;" onchange="this.form.submit()">
+          {% for y in available_years %}
+          <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </form>
+      <span class="pill">{{ cases|length }} {{ t('page.hd_update_cases.records') }}</span>
+    </div>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t('common.period') }}</th>
+            <th>Epi Week</th>
+            <th>{{ t('common.cases') }}</th>
+            <th>{{ t('common.notes') }}</th>
+            <th>{{ t('common.last_updated') }}</th>
+            <th style="width:100px;">{{ t('common.actions') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for case in cases %}
+          <tr>
+            <td><strong>{{ case.epi_year }}-W{{ "%02d"|format(case.epi_week) }}</strong></td>
+            <td>Week {{ case.epi_week }}</td>
+            <td>
+              <span style="font-weight:700;font-size:15px;" id="cases-val-{{ case.id }}">
+                {{ case.cases }}
+              </span>
+            </td>
+            <td style="color:var(--text-muted);font-size:13px;">
+              {{ case.notes if case.notes else '—' }}
+            </td>
+            <td style="font-size:13px;color:var(--text-muted);">
+              {{ case.updated_at.strftime('%Y-%m-%d') if case.updated_at else 'N/A' }}
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary"
+                      onclick="openEditModal({{ case.id }}, {{ case.epi_year }}, {{ case.epi_week }}, {{ case.cases }})">
+                <i class="fas fa-edit"></i> {{ t('common.edit') }}
+              </button>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="table-empty">
+              <i class="fas fa-inbox"></i> {{ t('page.hd_update_cases.no_data_year') }}
+              <button class="btn btn-sm btn-success ms-2" onclick="openAddModal()">
+                <i class="fas fa-plus"></i> {{ t('page.hd_update_cases.add_now') }}
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD CASE MODAL ===== -->
+<div class="modal fade" id="addCaseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title">
+          <i class="fas fa-plus-circle" style="color:var(--success);margin-right:8px;"></i>{{ t('page.hd_update_cases.add_case') }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert-box info mb-16">
+          <i class="fas fa-map-marker-alt alert-icon"></i>
+          <div class="alert-text">{{ t('page.hd_update_cases.adding_for') }} <strong>{{ regency.name }}</strong></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">{{ t('common.year') }}</label>
+            <input type="number" id="addYear" class="form-control"
+                   value="{{ current_epi_year }}" min="2000" max="2100">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Epi Week (ISO)</label>
+            <input type="number" id="addWeek" class="form-control"
+                   value="{{ current_epi_week }}" min="1" max="53">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.number_of_cases') }}</label>
+          <input type="number" id="addCases" class="form-control" min="0" placeholder="e.g. 45">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.notes') }} <span style="color:var(--text-muted);font-weight:400;">{{ t('common.optional') }}</span></label>
+          <input type="text" id="addNotes" class="form-control" placeholder="e.g. from SKDR report">
+        </div>
+        <div id="addResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+        <button type="button" class="btn btn-success" onclick="submitAdd()" id="addSubmitBtn">
+          <i class="fas fa-save"></i> {{ t('common.save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT CASE MODAL ===== -->
+<div class="modal fade" id="editCaseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title">
+          <i class="fas fa-edit" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.hd_update_cases.edit_cases') }}
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3" id="editInfo" style="font-size:14px;"></p>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.number_of_cases') }}</label>
+          <input type="number" id="editCasesInput" class="form-control" min="0">
+        </div>
+        <div id="editResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="submitEdit()" id="editSubmitBtn">
+          <i class="fas fa-save"></i> {{ t('common.update') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let _editCaseId = null;
+
+// ── ADD ──────────────────────────────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('addResult').innerHTML = '';
+  document.getElementById('addCases').value = '';
+  document.getElementById('addNotes').value = '';
+  new bootstrap.Modal(document.getElementById('addCaseModal')).show();
+}
+
+function submitAdd() {
+  const epi_year = parseInt(document.getElementById('addYear').value);
+  const epi_week = parseInt(document.getElementById('addWeek').value);
+  const cases = document.getElementById('addCases').value;
+  const notes = document.getElementById('addNotes').value;
+
+  if (!epi_year || !epi_week || cases === '') {
+    document.getElementById('addResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i>' +
+      '<div class="alert-text">Please fill in all required fields.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('addSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/district/cases/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ epi_year, epi_week, cases: parseInt(cases), notes })
+  })
+  .then(r => r.json())
+  .then(data => {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      showToast(data.message, 'success', 'Saved');
+      bootstrap.Modal.getInstance(document.getElementById('addCaseModal')).hide();
+      setTimeout(() => location.reload(), 800);
+    } else {
+      document.getElementById('addResult').innerHTML =
+        '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i>' +
+        '<div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(err => {
+    setButtonLoading(btn, false);
+    document.getElementById('addResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i>' +
+      '<div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+
+// ── EDIT ─────────────────────────────────────────────────────────────────────
+function openEditModal(caseId, epiYear, epiWeek, currentCases) {
+  _editCaseId = caseId;
+  document.getElementById('editInfo').textContent =
+    '{{ regency.name }} — ' + epiYear + '-W' + String(epiWeek).padStart(2, '0');
+  document.getElementById('editCasesInput').value = currentCases;
+  document.getElementById('editResult').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('editCaseModal')).show();
+}
+
+function submitEdit() {
+  const newVal = parseInt(document.getElementById('editCasesInput').value);
+  if (isNaN(newVal) || newVal < 0) {
+    document.getElementById('editResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i>' +
+      '<div class="alert-text">Please enter a valid non-negative number.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('editSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/district/cases/' + _editCaseId + '/edit', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cases: newVal })
+  })
+  .then(r => r.json())
+  .then(data => {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      // Update value in table without full reload
+      const cell = document.getElementById('cases-val-' + _editCaseId);
+      if (cell) cell.textContent = data.cases;
+      showToast('Cases updated successfully', 'success', 'Updated');
+      bootstrap.Modal.getInstance(document.getElementById('editCaseModal')).hide();
+    } else {
+      document.getElementById('editResult').innerHTML =
+        '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i>' +
+        '<div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(err => {
+    setButtonLoading(btn, false);
+    document.getElementById('editResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i>' +
+      '<div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+</script>
+{% endblock %}

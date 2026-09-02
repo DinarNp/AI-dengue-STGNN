@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Login — Explain Dengue {% endblock %}
+
+{% block extra_css %}
+<style>
+  body { overflow: hidden; }
+  .public-navbar, .public-footer, footer { display: none !important; }
+  main { padding: 0; }
+
+  /* ---- Access-required modal ---- */
+  #accessModal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #accessModalBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(4px);
+    animation: fadeInBd .25s ease;
+  }
+  #accessModalCard {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid rgba(14,165,233,0.25);
+    border-radius: 16px;
+    padding: 36px 32px 28px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(14,165,233,0.15);
+    animation: slideUpIn .3s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes fadeInBd  { from { opacity:0 } to { opacity:1 } }
+  @keyframes slideUpIn { from { opacity:0; transform:translateY(20px) scale(.97) } to { opacity:1; transform:none } }
+
+  #accessModalCard .modal-icon-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(14,165,233,0.1);
+    border: 2px solid rgba(14,165,233,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  #accessModalCard .modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 10px;
+  }
+  #accessModalCard .modal-body-text {
+    font-size: 13.5px;
+    color: #475569;
+    line-height: 1.65;
+    margin-bottom: 22px;
+  }
+  #accessModalCard .modal-body-text strong {
+    color: #0f172a;
+    font-weight: 700;
+  }
+  #accessModalCard .modal-roles {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  #accessModalCard .role-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  #accessModalCard .modal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 28px;
+    border-radius: 8px;
+    background: var(--primary, #0ea5e9);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s;
+    width: 100%;
+    justify-content: center;
+  }
+  #accessModalCard .modal-btn:hover { opacity: .88; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+
+  <!-- LEFT: Branded panel -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="auth-brand-icon"><i class="fas fa-virus"></i></div>
+      <div>
+        <div class="auth-brand-name">Explain Dengue</div>
+        <div class="auth-brand-sub">{{ t('auth.system') }}</div>
+      </div>
+    </div>
+
+    <h1 class="auth-headline">
+      {{ t('auth.predict_monitor') }}<br>
+      <span style="color:var(--primary);">{{ t('auth.protect') }}</span>
+    </h1>
+
+    <p class="auth-desc">
+      {{ t('auth.description') }}
+    </p>
+
+    <div class="auth-features">
+      <div class="auth-feature-item">
+        <i class="fas fa-brain"></i>
+        {{ t('auth.feature1') }}
+      </div>
+      <div class="auth-feature-item">
+        <i class="fas fa-map-marked-alt"></i>
+        {{ t('auth.feature2') }}
+      </div>
+      <div class="auth-feature-item">
+        <i class="fas fa-cloud-sun-rain"></i>
+        {{ t('auth.feature3') }}
+      </div>
+      <div class="auth-feature-item">
+        <i class="fas fa-shield-alt"></i>
+        {{ t('auth.feature4') }}
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Login form -->
+  <div class="auth-right">
+    <h2 class="auth-form-title">{{ t('auth.login_title') }}</h2>
+    <p class="auth-form-subtitle">{{ t('auth.login_subtitle') }}</p>
+
+    <form method="POST" action="{{ url_for('auth.login') }}" id="loginForm">
+      {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+      <div class="form-group">
+        <label class="form-label" for="username">{{ t('auth.username') }}</label>
+        <div class="input-icon-wrapper">
+          <i class="fas fa-user input-icon"></i>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            name="username"
+            placeholder="{{ t('auth.username') }}"
+            autocomplete="username"
+            required
+            autofocus>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">
+          {{ t('auth.password') }}
+        </label>
+        <div class="input-icon-wrapper" style="position:relative;">
+          <i class="fas fa-lock input-icon"></i>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            placeholder="{{ t('auth.password') }}"
+            autocomplete="current-password"
+            required
+            style="padding-right:44px;">
+          <button type="button" id="togglePwd"
+            style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:14px;"
+            tabindex="-1">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-w" id="loginBtn" style="padding:12px;font-size:15px;border-radius:8px;margin-top:4px;">
+        <i class="fas fa-sign-in-alt"></i> {{ t('auth.login_btn') }}
+      </button>
+    </form>
+
+    <!-- Demo credentials -->
+    <div class="demo-creds mt-16">
+      <div class="demo-creds-title"><i class="fas fa-info-circle"></i> {{ t('auth.demo_credentials') }}</div>
+      <div class="demo-cred-row">
+        <span>Admin</span>
+        <span><code>admin</code> / <code>admin123</code></span>
+      </div>
+      <div class="demo-cred-row">
+        <span>Sleman Officer</span>
+        <span><code>sleman</code> / <code>health123</code></span>
+      </div>
+      <div class="demo-cred-row">
+        <span>Bantul Officer</span>
+        <span><code>bantul</code> / <code>health123</code></span>
+      </div>
+    </div>
+
+    <p style="text-align:center;margin-top:28px;font-size:12px;color:var(--text-muted);">
+      &copy; 2026 Explain Dengue — Yogyakarta Special Region
+    </p>
+  </div>
+
+</div>
+
+{% if msg == 'analysis' %}
+<!-- ===== ACCESS-REQUIRED MODAL ===== -->
+<div id="accessModal">
+  <div id="accessModalBackdrop"></div>
+  <div id="accessModalCard">
+
+    <div class="modal-icon-ring">
+      <i class="fas fa-shield-alt" style="font-size:28px;color:#0ea5e9;"></i>
+    </div>
+
+    <div class="modal-title">{{ t('auth.login_required_analysis') }}</div>
+
+    <p class="modal-body-text">{{ t('auth.login_required_analysis_desc') | safe }}</p>
+
+    <button class="modal-btn" id="accessModalClose">
+      <i class="fas fa-sign-in-alt"></i> {{ t('auth.login_btn') }}
+    </button>
+
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle password visibility
+document.getElementById('togglePwd').addEventListener('click', function () {
+  const pwd = document.getElementById('password');
+  const icon = this.querySelector('i');
+  if (pwd.type === 'password') {
+    pwd.type = 'text';
+    icon.className = 'fas fa-eye-slash';
+  } else {
+    pwd.type = 'password';
+    icon.className = 'fas fa-eye';
+  }
+});
+
+// Loading state on submit
+document.getElementById('loginForm').addEventListener('submit', function () {
+  setButtonLoading(document.getElementById('loginBtn'), true, 'Signing in...');
+});
+
+// Dismiss modal on button click or backdrop click
+(function () {
+  var modal   = document.getElementById('accessModal');
+  var btnClose = document.getElementById('accessModalClose');
+  var backdrop = document.getElementById('accessModalBackdrop');
+  if (!modal) return;
+
+  function dismiss() {
+    modal.style.animation = 'fadeInBd .2s ease reverse forwards';
+    var card = document.getElementById('accessModalCard');
+    card.style.animation = 'slideUpIn .2s ease reverse forwards';
+    setTimeout(function () {
+      modal.remove();
+      document.getElementById('username').focus();
+    }, 200);
+  }
+
+  btnClose.addEventListener('click', dismiss);
+  backdrop.addEventListener('click', dismiss);
+})();
+</script>
+{% endblock %}

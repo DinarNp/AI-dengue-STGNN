@@ -17,7 +17,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # 'admin', 'health_district', 'public'
+    role = db.Column(db.String(20), nullable=False)  # 'admin', 'health_district', 'public', 'guest'
     regency = db.Column(db.String(100), nullable=True)  # For health district office users
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -41,7 +41,11 @@ class User(UserMixin, db.Model):
     def is_health_district(self):
         """Check if user is health district office"""
         return self.role == 'health_district'
-    
+
+    def is_guest(self):
+        """Check if user is a guest (view-only: Dashboard & Statistics)"""
+        return self.role == 'guest'
+
     def can_edit_regency(self, regency_name):
         """Check if user can edit data for specific regency"""
         if self.is_admin():

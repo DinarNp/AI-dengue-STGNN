@@ -1,0 +1,566 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management — Admin{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+<li class="breadcrumb-item active">Data Management</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h1 class="page-title"><i class="fas fa-database" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.data_management.title') }}</h1>
+  <p class="page-subtitle">{{ t('page.data_management.subtitle') }}</p>
+</div>
+
+<!-- ===== DATA STATUS OVERVIEW ===== -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('page.data_management.overview') }}</h5>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t('common.regency') }}</th>
+            <th>{{ t('page.data_management.latest_cases') }}</th>
+            <th>{{ t('page.data_management.latest_climate') }}</th>
+            <th>{{ t('page.data_management.latest_ndvi') }}</th>
+            <th>{{ t('common.overall') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stat in data_stats %}
+          <tr>
+            <td><strong>{{ stat.regency }}</strong></td>
+            <td>
+              <div class="data-status-indicator">
+                {% if stat.latest_dengue and stat.latest_dengue != 'N/A' %}
+                  <span class="status-dot green"></span>{{ stat.latest_dengue }}
+                {% else %}
+                  <span class="status-dot red"></span><span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <div class="data-status-indicator">
+                {% if stat.latest_climate and stat.latest_climate != 'N/A' %}
+                  <span class="status-dot green"></span>{{ stat.latest_climate }}
+                {% else %}
+                  <span class="status-dot yellow"></span><span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <div class="data-status-indicator">
+                {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}
+                  <span class="status-dot green"></span>{{ stat.latest_ndvi }}
+                {% else %}
+                  <span class="status-dot red"></span><span style="color:var(--text-muted);">{{ t('common.missing') }}</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% set pct = stat.completeness_pct %}
+              <div class="progress-track" style="height:6px;width:80px;">
+                <div class="progress-fill {% if pct == 100 %}success{% elif pct >= 50 %}warning{% else %}danger{% endif %}"
+                     style="width:{{ pct }}%;"></div>
+              </div>
+              <span style="font-size:11px;color:var(--text-muted);">{{ pct }}%</span>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="table-empty"><i class="fas fa-database"></i>{{ t('common.no_data_available') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TABS ===== -->
+<div class="card">
+  <div class="card-header" style="flex-direction:column;align-items:flex-start;padding-bottom:0;">
+    <h5 class="card-header-title" style="margin-bottom:12px;"><i class="fas fa-layer-group" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.data_management.tools') }}</h5>
+    <div class="tab-nav" style="width:100%;margin-bottom:0;border-bottom:none;">
+      <button class="tab-btn active" data-tab-target="tabCases" data-tabs="dm">
+        <i class="fas fa-notes-medical"></i> {{ t('page.data_management.case_tab') }}
+      </button>
+      <button class="tab-btn" data-tab-target="tabClimate">
+        <i class="fas fa-cloud-sun-rain"></i> {{ t('page.data_management.climate_tab') }}
+      </button>
+      <button class="tab-btn" data-tab-target="tabNDVI">
+        <i class="fas fa-leaf"></i> {{ t('page.data_management.ndvi_tab') }}
+      </button>
+      <button class="tab-btn" data-tab-target="tabExport">
+        <i class="fas fa-file-export"></i> {{ t('page.data_management.export_tab') }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <!-- TAB 1: CASE DATA -->
+    <div class="tab-panel active" id="tabCases" data-tabs="dm">
+      <div class="alert-box info mb-16">
+        <i class="fas fa-info-circle alert-icon"></i>
+        <div class="alert-text">
+          <div class="alert-title">{{ t('page.data_management.case_info') }}</div>
+          {{ t('page.data_management.case_info_desc') }}
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+        {% for stat in data_stats %}
+        <div style="border:1px solid var(--border-color);border-radius:var(--radius);padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <div>
+            <div style="font-weight:600;font-size:14px;">{{ stat.regency }}</div>
+            <div style="font-size:12px;color:var(--text-muted);">
+              {{ t('common.latest') }}: {{ stat.latest_dengue if stat.latest_dengue else t('common.no_data') }}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-sm btn-success" onclick="openAddCaseModal({{ stat.regency_id }}, '{{ stat.regency }}')">
+              <i class="fas fa-plus"></i> {{ t('common.add') }}
+            </button>
+            <a href="{{ url_for('admin.view_data', data_type='dengue', regency_id=stat.regency_id) }}" class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-table"></i> {{ t('common.view') }}
+            </a>
+          </div>
+        </div>
+        {% else %}
+        <div style="grid-column:1/-1;" class="table-empty">
+          <i class="fas fa-database"></i>{{ t('page.data_management.no_regency_data') }}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="{{ url_for('admin.view_data', data_type='dengue') }}" class="btn btn-primary">
+          <i class="fas fa-table"></i> {{ t('page.data_management.view_edit_all') }}
+        </a>
+        <button class="btn btn-success" onclick="openAddCaseModal(null, null)">
+          <i class="fas fa-plus"></i> {{ t('page.data_management.add_case_data') }}
+        </button>
+        <a href="{{ url_for('admin.export_csv', data_type='dengue') }}" class="btn btn-outline-secondary">
+          <i class="fas fa-download"></i> {{ t('page.data_management.export_cases') }}
+        </a>
+      </div>
+    </div>
+
+    <!-- TAB 2: CLIMATE DATA -->
+    <div class="tab-panel" id="tabClimate">
+      <div class="alert-box info mb-16">
+        <i class="fas fa-satellite alert-icon"></i>
+        <div class="alert-text">
+          <div class="alert-title">{{ t('page.data_management.climate_info') }}</div>
+          {{ t('page.data_management.climate_info_desc') }}
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <!-- Manual Fetch Form -->
+        <div>
+          <h6 style="font-weight:600;margin-bottom:16px;">{{ t('page.data_management.manual_fetch') }}</h6>
+          <div class="form-group">
+            <label class="form-label">{{ t('common.year') }}</label>
+            <input type="number" id="climateYear" class="form-control" value="2026" min="2020" max="2050">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Epi-Week</label>
+            <input type="number" id="climateWeek" class="form-control" min="1" max="53" placeholder="1-53">
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ t('common.regency') }}</label>
+            <select id="climateRegency" class="form-select">
+              <option value="all">{{ t('common.all_regencies') }}</option>
+              {% for stat in data_stats %}
+              <option value="{{ stat.regency }}">{{ stat.regency }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="fetchClimateData()" id="fetchBtn">
+            <i class="fas fa-download"></i> {{ t('page.data_management.fetch_climate_btn') }}
+          </button>
+          <div id="climateResult" class="mt-12"></div>
+        </div>
+
+        <!-- Data completeness per regency -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h6 style="font-weight:600;margin:0;">{{ t('page.data_management.data_completeness') }}</h6>
+            <a href="{{ url_for('admin.view_data', data_type='climate') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-table"></i> {{ t('common.view_all') }}
+            </a>
+          </div>
+          {% for stat in data_stats %}
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-label">
+              <span class="label-name" style="font-size:12.5px;">{{ stat.regency }}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="label-value">
+                  {% if stat.latest_climate and stat.latest_climate != 'N/A' %}{{ stat.latest_climate }}{% else %}{{ t('common.no_data') }}{% endif %}
+                </span>
+                <a href="{{ url_for('admin.view_data', data_type='climate', regency_id=stat.regency_id) }}"
+                   class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;line-height:1.4;">
+                  <i class="fas fa-eye"></i> {{ t('common.view') }}
+                </a>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill {% if stat.latest_climate and stat.latest_climate != 'N/A' %}success{% else %}danger{% endif %}"
+                   style="width:{% if stat.latest_climate and stat.latest_climate != 'N/A' %}100{% else %}0{% endif %}%;"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: NDVI DATA -->
+    <div class="tab-panel" id="tabNDVI">
+      <div class="alert-box info mb-16">
+        <i class="fas fa-satellite alert-icon"></i>
+        <div class="alert-text">
+          <div class="alert-title">{{ t('page.data_management.ndvi_info') }}</div>
+          NDVI is fetched automatically from the <strong>NASA NEO CSV archive</strong> (MOD_NDVI_16, 16-day composites) for the
+          epi-week's start date. If no composite has been published yet for that date, the most recent prior composite is
+          carried forward and flagged as imputed.
+        </div>
+      </div>
+
+      <!-- How It Works (full width, above fetch form) -->
+      <div style="margin-bottom:20px;">
+        <h6 style="font-weight:600;margin-bottom:12px;">{{ t('page.data_management.how_it_works') }}</h6>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:180px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">1</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Pick an epi-week</div>
+              <div style="font-size:12px;color:var(--text-muted);">Enter the year and epidemiological week you want NDVI for.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:180px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">2</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Automatic download</div>
+              <div style="font-size:12px;color:var(--text-muted);">The matching MOD_NDVI_16 composite is downloaded from the NASA NEO CSV archive and read for each regency's centroid, no manual file download needed.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;flex:1;min-width:180px;">
+            <div style="min-width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">3</div>
+            <div>
+              <div style="font-weight:600;font-size:13px;">Saved per regency</div>
+              <div style="font-size:12px;color:var(--text-muted);">NDVI values are written to the database for all 5 regencies for that epi-week.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+        <!-- Fetch Form -->
+        <div>
+          <h6 style="font-weight:600;margin-bottom:16px;">Fetch NDVI</h6>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">{{ t('common.year') }}</label>
+              <input type="number" id="ndviYear" class="form-control"
+                     value="{{ now.year }}" min="2000" max="2100">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Epi-Week</label>
+              <input type="number" id="ndviWeek" class="form-control" min="1" max="53" placeholder="1-53">
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="fetchNDVIData()" id="ndviFetchBtn">
+            <i class="fas fa-satellite-dish"></i> Fetch NDVI
+          </button>
+          <div id="ndviResult" class="mt-12"></div>
+        </div>
+
+        <!-- Data Completeness per regency -->
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <h6 style="font-weight:600;margin:0;">{{ t('page.data_management.data_completeness') }}</h6>
+            <a href="{{ url_for('admin.view_data', data_type='ndvi') }}" class="btn btn-primary btn-sm">
+              <i class="fas fa-table"></i> {{ t('common.view_all') }}
+            </a>
+          </div>
+          {% for stat in data_stats %}
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-label">
+              <span class="label-name" style="font-size:12.5px;">{{ stat.regency }}</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="label-value">
+                  {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}{{ stat.latest_ndvi }}{% else %}{{ t('common.no_data') }}{% endif %}
+                </span>
+                <a href="{{ url_for('admin.view_data', data_type='ndvi', regency_id=stat.regency_id) }}"
+                   class="btn btn-sm btn-outline-secondary" style="padding:2px 8px;font-size:11px;line-height:1.4;">
+                  <i class="fas fa-eye"></i> {{ t('common.view') }}
+                </a>
+              </div>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill {% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}success{% else %}danger{% endif %}"
+                   style="width:{% if stat.latest_ndvi and stat.latest_ndvi != 'N/A' %}100{% else %}0{% endif %}%;"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: EXPORT -->
+    <div class="tab-panel" id="tabExport">
+      <div class="alert-box info mb-16">
+        <i class="fas fa-info-circle alert-icon"></i>
+        <div class="alert-text">
+          <div class="alert-title">{{ t('page.data_management.export_info') }}</div>
+          {{ t('page.data_management.export_info_desc') }}
+        </div>
+      </div>
+
+      <div style="max-width:480px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">{{ t('common.start_year') }}</label>
+            <input type="number" id="exportYearStart" class="form-control" value="2021" min="2018" max="2050">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">{{ t('common.end_year') }}</label>
+            <input type="number" id="exportYearEnd" class="form-control" value="2025" min="2018" max="2050">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="exportData()" id="exportBtn">
+          <i class="fas fa-download"></i> {{ t('page.data_management.export_to_csv') }}
+        </button>
+        <div id="exportResult" class="mt-12"></div>
+      </div>
+    </div>
+
+  </div><!-- card-body -->
+</div><!-- card -->
+
+<!-- Add Dengue Case Modal -->
+<div class="modal fade" id="addCaseModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title"><i class="fas fa-plus-circle" style="color:var(--success);margin-right:8px;"></i>{{ t('page.data_management.add_case_modal') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">{{ t('common.regency') }}</label>
+          <select id="addCaseRegency" class="form-select">
+            {% for r in regencies %}
+            <option value="{{ r.id }}">{{ r.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label">{{ t('common.year') }}</label>
+            <input type="number" id="addCaseEpiYear" class="form-control" min="2000" max="2100" value="{{ now.year if now else 2024 }}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Epi-Week</label>
+            <input type="number" id="addCaseEpiWeek" class="form-control" min="1" max="53" placeholder="1-53">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.cases') }}</label>
+          <input type="number" id="addCaseCases" class="form-control" min="0" placeholder="{{ t('common.number_of_cases') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.notes') }} <span style="color:var(--text-muted);font-weight:400;">{{ t('common.optional') }}</span></label>
+          <input type="text" id="addCaseNotes" class="form-control" placeholder="e.g. from SKDR">
+        </div>
+        <div id="addCaseResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+        <button type="button" class="btn btn-success" onclick="submitAddCase()" id="addCaseSubmitBtn">
+          <i class="fas fa-save"></i> {{ t('common.save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openAddCaseModal(regencyId, regencyName) {
+  document.getElementById('addCaseResult').innerHTML = '';
+  document.getElementById('addCaseCases').value = '';
+  document.getElementById('addCaseNotes').value = '';
+
+  const select = document.getElementById('addCaseRegency');
+  if (regencyId) {
+    select.value = regencyId;
+    select.disabled = true;
+  } else {
+    select.disabled = false;
+  }
+
+  // Default to current calendar year; epi-week left for the user to fill in
+  const now = new Date();
+  document.getElementById('addCaseEpiYear').value = now.getFullYear();
+  document.getElementById('addCaseEpiWeek').value = '';
+
+  new bootstrap.Modal(document.getElementById('addCaseModal')).show();
+}
+
+function submitAddCase() {
+  const select = document.getElementById('addCaseRegency');
+  const regencyId = select.value;
+  const epiYear   = parseInt(document.getElementById('addCaseEpiYear').value);
+  const epiWeek   = parseInt(document.getElementById('addCaseEpiWeek').value);
+  const cases     = document.getElementById('addCaseCases').value;
+  const notes     = document.getElementById('addCaseNotes').value;
+
+  if (!regencyId || !epiYear || !epiWeek || cases === '') {
+    document.getElementById('addCaseResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Please fill in all required fields.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('addCaseSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/admin/data/dengue/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      regency_id: parseInt(regencyId),
+      epi_year: epiYear,
+      epi_week: epiWeek,
+      cases: parseInt(cases),
+      notes: notes
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      showToast(data.message, 'success', 'Case Data Saved');
+      bootstrap.Modal.getInstance(document.getElementById('addCaseModal')).hide();
+      setTimeout(function() { location.reload(); }, 800);
+    } else {
+      document.getElementById('addCaseResult').innerHTML =
+        '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(function(err) {
+    setButtonLoading(btn, false);
+    document.getElementById('addCaseResult').innerHTML =
+      '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+
+// Tab activation on page load via URL param
+document.addEventListener('DOMContentLoaded', function() {
+  const tab = new URLSearchParams(window.location.search).get('tab');
+  const tabMap = { cases: 'tabCases', climate: 'tabClimate', ndvi: 'tabNDVI', export: 'tabExport' };
+  if (tab && tabMap[tab]) {
+    document.querySelector(`[data-tab-target="${tabMap[tab]}"]`).click();
+  }
+});
+
+function fetchClimateData() {
+  const epiYear = document.getElementById('climateYear').value;
+  const epiWeek = document.getElementById('climateWeek').value;
+
+  if (!epiYear || !epiWeek) {
+    showToast('Please enter year and epi-week', 'warning');
+    return;
+  }
+
+  const btn = document.getElementById('fetchBtn');
+  setButtonLoading(btn, true, 'Fetching...');
+  showLoader('Fetching Climate Data', 'This may take a few minutes...');
+
+  fetch('/admin/data/climate/fetch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ epi_year: parseInt(epiYear), epi_week: parseInt(epiWeek) })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    hideLoader();
+    setButtonLoading(btn, false);
+    showToast(`Success: ${data.success} regencies fetched, ${data.failed} failed`, 'success', 'Climate Fetch Complete');
+    document.getElementById('climateResult').innerHTML =
+      `<div class="alert-box success"><i class="fas fa-check-circle alert-icon"></i>
+       <div class="alert-text">Fetched ${data.success} regencies. Failed: ${data.failed}</div></div>`;
+  })
+  .catch(function(err) {
+    hideLoader();
+    setButtonLoading(btn, false);
+    showToast('Fetch failed: ' + err, 'danger', 'Error');
+  });
+}
+
+function fetchNDVIData() {
+  const epiYear = document.getElementById('ndviYear').value;
+  const epiWeek = document.getElementById('ndviWeek').value;
+  const result  = document.getElementById('ndviResult');
+
+  if (!epiYear || !epiWeek) {
+    result.innerHTML = '<div class="alert-box warning mt-12"><i class="fas fa-exclamation-triangle alert-icon"></i><div class="alert-text">Please enter year and epi-week.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('ndviFetchBtn');
+  setButtonLoading(btn, true, 'Fetching...');
+  showLoader('Fetching NDVI', 'Downloading and extracting NDVI values per regency — this may take a moment...');
+  result.innerHTML = '';
+
+  fetch('/admin/data/ndvi/fetch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ epi_year: parseInt(epiYear), epi_week: parseInt(epiWeek) })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    hideLoader();
+    setButtonLoading(btn, false);
+    if (!data.success && data.written === 0) {
+      result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">NDVI fetch failed for all regencies.' +
+        (data.failed_regions && data.failed_regions.length ? ' (' + data.failed_regions.join(', ') + ')' : '') + '</div></div>';
+      showToast('NDVI fetch failed', 'danger', 'Error');
+    } else {
+      const imputedNote = data.is_imputed ? ' (carried forward from ' + data.composite_date + ')' : ' (composite date ' + data.composite_date + ')';
+      result.innerHTML = '<div class="alert-box success mt-12"><i class="fas fa-check-circle alert-icon"></i><div class="alert-text">Fetched NDVI for ' + data.written + ' regencies' + imputedNote + '.' +
+        (data.failed_regions && data.failed_regions.length ? ' Failed: ' + data.failed_regions.join(', ') + '.' : '') + '</div></div>';
+      showToast('NDVI data saved for ' + data.written + ' regencies', 'success', 'NDVI Fetched');
+    }
+  })
+  .catch(function(err) {
+    hideLoader();
+    setButtonLoading(btn, false);
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+    showToast('Fetch failed', 'danger', 'Error');
+  });
+}
+
+function exportData() {
+  const yearStart = document.getElementById('exportYearStart').value;
+  const yearEnd   = document.getElementById('exportYearEnd').value;
+  if (!yearStart || !yearEnd) {
+    showToast('Please enter both years', 'warning');
+    return;
+  }
+  showToast('Preparing export...', 'info');
+  window.location.href = `/admin/data/export?year_start=${yearStart}&year_end=${yearEnd}`;
+}
+</script>
+{% endblock %}

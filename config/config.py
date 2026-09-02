@@ -5,7 +5,21 @@ class Config:
     DATA_PATH = "data/fix.csv"
     WINDOW_SIZE = 8  # For weekly data - Increased from 4 to capture longer temporal patterns
     WINDOW_SIZE_MONTHLY = 4  # For monthly data - Reduced to work with smaller datasets (4 months history)
-    FORECAST_HORIZON = 1
+    FORECAST_HORIZON = 4  # Weeks ahead to predict (~1 month), matching the manuscript's "one month ahead" claim
+    FORECAST_HORIZON_MONTHLY = 1  # For monthly-cadence data, 1 step = 1 month ahead
+
+    # Chronological (forward-chaining) split fractions, applied per-location.
+    # No shuffling: each location's samples are already time-ordered when this
+    # is applied (see DengueDataPreprocessor.create_lag_features), so the first
+    # TRAIN_FRACTION weeks train, the next VAL_FRACTION validate, and the
+    # remaining weeks are held out as test.
+    TRAIN_FRACTION = 0.70
+    VAL_FRACTION = 0.15
+
+    # Optional caps for quick experiments/CV folds (None = use the scale-based
+    # adaptive defaults in DengueDataPreprocessor._get_adaptive_config).
+    EPOCHS_OVERRIDE = None
+    PATIENCE_OVERRIDE = None
     
     # Model architecture - Optimized configuration
     NODE_FEATURE_DIM = 128  # Increased from 64

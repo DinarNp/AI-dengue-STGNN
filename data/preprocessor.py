@@ -498,7 +498,14 @@ class DengueDataPreprocessor:
                 'K_NEIGHBORS': 4,
                 'scale_type': 'low'
             }
-        
+
+        # Allow callers (e.g. quick experiments/CV folds) to cap epochs/patience
+        # without editing this method's hardcoded scale-based defaults.
+        if getattr(self.config, 'EPOCHS_OVERRIDE', None) is not None:
+            adaptive_config['EPOCHS'] = self.config.EPOCHS_OVERRIDE
+        if getattr(self.config, 'PATIENCE_OVERRIDE', None) is not None:
+            adaptive_config['PATIENCE'] = self.config.PATIENCE_OVERRIDE
+
         return adaptive_config
 
     def preprocess_data(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray, Dict]:
@@ -665,8 +672,6 @@ class DengueDataPreprocessor:
         print(f"   Number of nodes: {metadata['n_nodes']}")
         print(f"   Target transform: {metadata['target_transform']}")
 
-        self.debug_data_split_detailed(df, target_values)
-        
         return features_scaled, target_values_normalized, metadata
     
     def analyze_dataset_characteristics(self, df: pd.DataFrame, targets: np.ndarray):

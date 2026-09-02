@@ -1,0 +1,112 @@
+{
+  "seed": 44,
+  "test_mae": 5.92579984664917,
+  "test_r2": 0.25979650020599365,
+  "baseline_mae": 5.92579984664917,
+  "importances": {
+    "Temperature_Min": {
+      "mean_increase": 0.21632936000823974,
+      "std_increase": 0.08088323097832423
+    },
+    "Week_cos": {
+      "mean_increase": 0.2025308132171631,
+      "std_increase": 0.14601209097831844
+    },
+    "Cases_lag_2": {
+      "mean_increase": 0.06066117286682129,
+      "std_increase": 0.10230345133055539
+    },
+    "Month_sin": {
+      "mean_increase": 0.055402493476867674,
+      "std_increase": 0.114758778298173
+    },
+    "Cases_lag_1": {
+      "mean_increase": 0.050816702842712405,
+      "std_increase": 0.0979940730403199
+    },
+    "Precipitation_Total": {
+      "mean_increase": 0.01972811222076416,
+      "std_increase": 0.020404636327915178
+    },
+    "Cases_rolling_mean_4w": {
+      "mean_increase": 0.0023422479629516602,
+      "std_increase": 0.09885130604645374
+    },
+    "Latitude": {
+      "mean_increase": 0.0,
+      "std_increase": 0.0
+    },
+    "Longitude": {
+      "mean_increase": 0.0,
+      "std_increase": 0.0
+    },
+    "Cases_binary_lag_4": {
+      "mean_increase": 0.0,
+      "std_increase": 0.0
+    },
+    "Kecamatan_encoded": {
+      "mean_increase": 0.0,
+      "std_increase": 0.0
+    },
+    "Pressure": {
+      "mean_increase": -0.002992391586303711,
+      "std_increase": 0.011519811014111795
+    },
+    "Humidity": {
+      "mean_increase": -0.0032350778579711913,
+      "std_increase": 0.07717125889315812
+    },
+    "Cases_binary_lag_2": {
+      "mean_increase": -0.0033568620681762697,
+      "std_increase": 0.0037833211329284387
+    },
+    "Cases_lag_3": {
+      "mean_increase": -0.0067943096160888675,
+      "std_increase": 0.024822931361220622
+    },
+    "Cases_binary_lag_1": {
+      "mean_increase": -0.01874508857727051,
+      "std_increase": 0.016401623988351512
+    },
+    "Cases_binary_lag_3": {
+      "mean_increase": -0.019998979568481446,
+      "std_increase": 0.00786914853637266
+    },
+    "Cases_lag_4": {
+      "mean_increase": -0.03673851490020752,
+      "std_increase": 0.025370883168586534
+    },
+    "Cloud_Cover": {
+      "mean_increase": -0.041655230522155764,
+      "std_increase": 0.07330610827884386
+    },
+    "Wind_Direction": {
+      "mean_increase": -0.041675472259521486,
+      "std_increase": 0.04182620930750742
+    },
+    "Wind_Speed": {
+      "mean_increase": -0.07882254123687744,
+      "std_increase": 0.11184940996516675
+    },
+    "Month_cos": {
+      "mean_increase": -0.1067042350769043,
+      "std_increase": 0.08116360256473906
+    },
+    "NDVI": {
+      "mean_increase": -0.10997581481933594,
+      "std_increase": 0.13914508574526097
+    },
+    "Week_sin": {
+      "mean_increase": -0.16044652462005615,
+      "std_increase": 0.09301519239434658
+    },
+    "Temperature_Avg": {
+      "mean_increase": -0.25159306526184083,
+      "std_increase": 0.05389091600674021
+    },
+    "Temperature_Max": {
+      "mean_increase": -0.4256249666213989,
+      "std_increase": 0.1557845908311833
+    }
+  }
+}

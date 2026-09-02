@@ -8,6 +8,7 @@ from sqlalchemy import func
 
 from ..models import db, Regency, DengueCase, Prediction, ClimateData, NDVIData
 from ..i18n import get_lang, make_t
+from ..services.auth import login_required
 
 _FULL_MONTH_KEYS = ['january','february','march','april','may','june',
                     'july','august','september','october','november','december']
@@ -23,6 +24,7 @@ def index():
 
 
 @public.route('/dashboard')
+@login_required
 def dashboard():
     """
     Public dashboard showing dengue conditions for all regencies
@@ -301,6 +303,7 @@ def dashboard():
 
 
 @public.route('/regency/<int:regency_id>')
+@login_required
 def regency_detail(regency_id):
     """Detailed view for a specific regency"""
     regency = Regency.query.get_or_404(regency_id)
@@ -346,6 +349,7 @@ def regency_detail(regency_id):
 
 
 @public.route('/statistics')
+@login_required
 def statistics():
     """Provincial-level statistics and analysis"""
     current_year = datetime.now().year

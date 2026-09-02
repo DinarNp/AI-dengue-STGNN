@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}{{ regency.name }} - {{ t('public.regency_detail_title') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{{ url_for('public.dashboard') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> {{ t('public.back_to_dashboard') }}
+            </a>
+        </div>
+    </div>
+
+    <h2><i class="fas fa-map-marker-alt"></i> {{ regency.name }}</h2>
+    <hr>
+
+    <!-- Regency Info -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5>{{ t('public.information') }}</h5>
+                    <p><strong>{{ t('common.population') }}:</strong> {{ "{:,}".format(regency.population) if regency.population else 'N/A' }}</p>
+                    <p><strong>{{ t('public.area') }}:</strong> {{ regency.area_km2 }} km²</p>
+                    <p><strong>{{ t('common.coordinates') }}:</strong> {{ "%.4f"|format(regency.latitude) }}, {{ "%.4f"|format(regency.longitude) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h5>{{ t('public.monthly_trend_chart') }}</h5>
+                    <canvas id="monthlyTrendChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yearly Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('public.yearly_stats') }}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{ t('common.year') }}</th>
+                                <th>{{ t('public.total_cases') }}</th>
+                                <th>{{ t('common.avg_per_month') }}</th>
+                                <th>{{ t('common.peak_cases') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in yearly_stats %}
+                            <tr>
+                                <td><strong>{{ stat.epi_year }}</strong></td>
+                                <td>{{ stat.total_cases }}</td>
+                                <td>{{ "%.1f"|format(stat.avg_cases) }}</td>
+                                <td>{{ stat.max_cases }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Data -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('public.recent_cases_table') }}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>{{ t('common.date') }}</th>
+                                <th>{{ t('common.cases') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for case in all_cases[:12] %}
+                            <tr>
+                                <td>{{ case.epi_year }}-W{{ "%02d"|format(case.epi_week) }}</td>
+                                <td><strong>{{ case.cases }}</strong></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ t('common.predictions') }}</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>{{ t('common.date') }}</th>
+                                <th>{{ t('public.predicted_short') }}</th>
+                                <th>{{ t('risk.level') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pred in all_predictions[:12] %}
+                            <tr>
+                                <td>{{ pred.epi_year }}-W{{ "%02d"|format(pred.epi_week) }}</td>
+                                <td><strong>{{ "%.0f"|format(pred.predicted_cases) }}</strong></td>
+                                <td>
+                                    {% set rl = pred.risk_level %}
+                                    <span class="risk-badge risk-{{ rl }}">
+                                        {{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">{{ t('public.no_predictions_available') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ctx = document.getElementById('monthlyTrendChart');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ weekly_trend | map(attribute='week') | list | tojson }},
+        datasets: [{
+            label: 'Cases',
+            data: {{ weekly_trend | map(attribute='cases') | list | tojson }},
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { display: true }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+{% endblock %}

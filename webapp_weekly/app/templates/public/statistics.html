@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('public.statistics_title') }} — Explain Dengue{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">{{ t('nav.statistics') }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="public-content">
+
+<!-- Page Header -->
+<div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1 class="page-title"><i class="fas fa-chart-pie" style="color:var(--secondary);margin-right:8px;"></i>{{ t('public.statistics_title') }}</h1>
+    <p class="page-subtitle">{{ t('public.statistics_subtitle') }}</p>
+  </div>
+  <div>
+    <span class="pill"><i class="fas fa-calendar" style="margin-right:5px;"></i>{{ t('common.year') }}: {{ current_year }}</span>
+  </div>
+</div>
+
+<!-- ===== STAT CARDS ===== -->
+<div class="grid-3">
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-virus"></i></div>
+    <div class="stat-content">
+      <div class="stat-value" data-counter="{{ total_cases_this_year }}">{{ total_cases_this_year }}</div>
+      <div class="stat-label">{{ t('public.total_cases') }} {{ current_year }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-warning">
+    <div class="stat-icon icon-warning"><i class="fas fa-calendar-alt"></i></div>
+    <div class="stat-content">
+      <div class="stat-value" style="font-size:20px;">{{ highest_risk_week }}</div>
+      <div class="stat-label">{{ t('public.highest_risk_month') }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-success">
+    <div class="stat-icon icon-success"><i class="fas fa-city"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">5</div>
+      <div class="stat-label">{{ t('common.regencies_monitored') }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHARTS ROW 1: Yearly Comparison ===== -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-calendar-alt" style="color:var(--primary);margin-right:8px;"></i>{{ t('public.yearly_comparison') }}</h5>
+  </div>
+  <div class="card-body">
+    <div class="chart-container" style="height:260px;">
+      <canvas id="yearlyChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHARTS ROW 2: Monthly Pattern + Regency Comparison ===== -->
+<div class="grid-2">
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-header">
+      <h5 class="card-header-title"><i class="fas fa-chart-line" style="color:var(--success);margin-right:8px;"></i>{{ t('public.monthly_pattern') }}</h5>
+    </div>
+    <div class="card-body">
+      <div class="chart-container" style="height:240px;">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:0;">
+    <div class="card-header">
+      <h5 class="card-header-title"><i class="fas fa-map" style="color:var(--secondary);margin-right:8px;"></i>{{ t('public.regency_comparison') }} {{ current_year }}</h5>
+    </div>
+    <div class="card-body">
+      <div class="chart-container" style="height:240px;">
+        <canvas id="regencyChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== DATA TABLE ===== -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-table" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('public.regency_details') }} — {{ current_year }}</h5>
+    <div class="card-header-actions">
+      <div class="table-search">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" class="form-control" id="tableSearch" placeholder="{{ t('public.search_regency') }}">
+      </div>
+    </div>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table" id="statsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ t('common.regency') }}</th>
+            <th>{{ t('public.total_cases') }}</th>
+            <th>{{ t('common.risk_status') }}</th>
+            <th>{{ t('common.proportion') }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% set grand_total = namespace(v=0) %}
+          {% for item in regency_totals %}{% set grand_total.v = grand_total.v + item.total_cases %}{% endfor %}
+          {% for item in regency_totals %}
+          <tr>
+            <td style="color:var(--text-muted);">{{ loop.index }}</td>
+            <td><strong>{{ item.regency }}</strong></td>
+            <td><span style="font-weight:600;font-size:15px;">{{ item.total_cases | int }}</span></td>
+            <td>
+              {% set rl = item.risk_level %}
+              {% if rl in ('alert','no_alert') %}
+              <span class="risk-badge risk-{{ rl }}"><span class="risk-dot {{ rl }}"></span>{{ t('risk.' + rl) }}</span>
+              {% else %}
+              <span style="color:#94a3b8;font-size:12px;">—</span>
+              {% endif %}
+            </td>
+            <td style="min-width:160px;">
+              <div class="progress-bar-wrapper" style="margin:0;">
+                <div class="progress-track">
+                  {% set pct = ((item.total_cases / grand_total.v) * 100) | int if grand_total.v > 0 else 0 %}
+                  <div class="progress-fill {% if pct > 40 %}danger{% elif pct > 25 %}warning{% else %}success{% endif %}"
+                       style="width:{{ pct }}%;"></div>
+                </div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">{{ pct }}%</div>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="table-empty">
+              <i class="fas fa-database"></i>No statistics data available
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Table search
+initTableSearch('tableSearch', 'statsTable');
+
+// ---- Yearly Comparison Chart ----
+const yearlyCtx = document.getElementById('yearlyChart');
+if (yearlyCtx) {
+  new Chart(yearlyCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ yearly_comparison | map(attribute='year') | list | tojson }},
+      datasets: [{
+        label: 'Total Cases',
+        data:  {{ yearly_comparison | map(attribute='total_cases') | list | tojson }},
+        backgroundColor: 'rgba(14,165,233,0.7)',
+        borderColor: '#0ea5e9',
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+}
+
+// ---- Monthly Pattern Chart ----
+const monthlyCtx = document.getElementById('monthlyChart');
+if (monthlyCtx) {
+  new Chart(monthlyCtx, {
+    type: 'line',
+    data: {
+      labels: {{ weekly_avg | map(attribute='week') | list | tojson }},
+      datasets: [{
+        label: 'Avg Cases',
+        data:  {{ weekly_avg | map(attribute='avg_cases') | list | tojson }},
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16,185,129,0.1)',
+        borderWidth: 2.5,
+        tension: 0.4,
+        fill: true,
+        pointBackgroundColor: '#10b981',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+}
+
+// ---- Regency Comparison Chart ----
+const regencyCtx = document.getElementById('regencyChart');
+if (regencyCtx) {
+  const palette = ['#0ea5e9','#8b5cf6','#10b981','#f59e0b','#ef4444'];
+  new Chart(regencyCtx, {
+    type: 'bar',
+    data: {
+      labels: {{ regency_totals | map(attribute='regency') | list | tojson }},
+      datasets: [{
+        label: 'Total Cases',
+        data:  {{ regency_totals | map(attribute='total_cases') | list | tojson }},
+        backgroundColor: palette.map(function(c){return c+'bb';}),
+        borderColor: palette,
+        borderWidth: 2,
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { precision: 0 } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

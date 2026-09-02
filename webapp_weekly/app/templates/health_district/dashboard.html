@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('page.hd_dashboard.title') }} — {{ regency.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">{{ t('nav.dashboard') }}</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="page-header d-flex align-center justify-between" style="flex-wrap:wrap;gap:12px;">
+  <div>
+    <h1 class="page-title">
+      <i class="fas fa-hospital" style="color:var(--primary);margin-right:8px;"></i>
+      {{ regency.name }}
+    </h1>
+    <p class="page-subtitle">{{ t('page.hd_dashboard.title') }} — {{ current_year }}</p>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <a href="{{ url_for('health_district.view_risk_monitor') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-shield-alt"></i> {{ t('nav.risk_monitor') }}
+    </a>
+    <a href="{{ url_for('health_district.view_reports') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-file-alt"></i> {{ t('nav.reports') }}
+    </a>
+    <a href="{{ url_for('health_district.update_cases') }}" class="btn btn-primary btn-sm">
+      <i class="fas fa-edit"></i> {{ t('nav.input_cases') }}
+    </a>
+  </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid-3">
+  <div class="stat-card border-left-primary">
+    <div class="stat-icon icon-primary"><i class="fas fa-notes-medical"></i></div>
+    <div class="stat-content">
+      <div class="stat-value" data-counter="{{ total_cases_this_year }}">{{ total_cases_this_year }}</div>
+      <div class="stat-label">{{ t('page.hd_dashboard.total_cases_year') }} {{ current_year }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card border-left-secondary">
+    <div class="stat-icon icon-secondary"><i class="fas fa-brain"></i></div>
+    <div class="stat-content">
+      <div class="stat-value">
+        {% if latest_prediction %}{{ "%.0f"|format(latest_prediction.predicted_cases) }}{% else %}<span style="font-size:18px;color:#94a3b8;">N/A</span>{% endif %}
+      </div>
+      <div class="stat-label">{{ t('page.hd_dashboard.next_month_pred') }}</div>
+    </div>
+  </div>
+
+  <div class="stat-card {% if latest_prediction %}border-left-{% if latest_prediction.risk_level == 'alert' %}danger{% else %}success{% endif %}{% else %}border-left-primary{% endif %}">
+    <div class="stat-icon {% if latest_prediction %}icon-{% if latest_prediction.risk_level == 'alert' %}danger{% else %}success{% endif %}{% else %}icon-primary{% endif %}">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <div class="stat-content">
+      <div class="stat-value" style="font-size:18px;">
+        {% if latest_prediction %}
+          {% set rl = latest_prediction.risk_level %}
+          <span class="risk-badge risk-{{ rl }}">
+            <span class="risk-dot {{ rl }}"></span>
+            {{ t('risk.' + rl) if rl in ('alert','no_alert') else rl.upper() }}
+          </span>
+        {% else %}
+          <span style="color:#94a3b8;">N/A</span>
+        {% endif %}
+      </div>
+      <div class="stat-label">{{ t('page.hd_dashboard.risk_level') }}</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Trend Chart -->
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-chart-area" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.hd_risk_monitor.trend_title') }}
+    </h5>
+    <div class="card-header-actions">
+      <span class="badge badge-primary">{{ regency.name }}</span>
+    </div>
+  </div>
+
+  <!-- legend -->
+  <div style="padding:8px 20px 0;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#1e293b;border-radius:2px;"></span>
+      {{ t('page.hd_dashboard.actual_cases') }}
+    </span>
+    <span style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted);">
+      <span style="display:inline-block;width:22px;height:3px;background:#6366f1;border-radius:2px;border-top:2px dashed #6366f1;"></span>
+      {{ t('page.hd_dashboard.predicted_cases') }}
+    </span>
+    {% if weekly_trend %}
+    <span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">
+      {{ t('page.hd_dashboard.actual_up_to') }} <strong>{{ weekly_trend[-1].week }}</strong>
+      {% set pred_available = [] %}
+      {% for p in prediction_trend %}{% if p.cases is not none %}{% set _ = pred_available.append(p) %}{% endif %}{% endfor %}
+      {% if pred_available %}
+        &nbsp;· {{ t('page.hd_dashboard.forecast') }}: {{ pred_available[0].week }}{% if pred_available|length > 1 %} – {{ pred_available[-1].week }}{% endif %}
+      {% endif %}
+    </span>
+    {% endif %}
+  </div>
+
+  <div class="card-body">
+    <div class="chart-container" style="height:260px;">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- 3-Week Forecast Summary Table -->
+{% if forecast_weeks %}
+<div class="card" style="margin-bottom:24px;">
+  <div class="card-header">
+    <h5 class="card-header-title">
+      <i class="fas fa-table" style="color:var(--primary);margin-right:8px;"></i>
+      {{ t('page.risk_monitor_detail.forecast_table_title') }}
+    </h5>
+  </div>
+  <div class="card-body" style="padding:0;overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Epi Week</th>
+          <th>{{ t('page.hd_dashboard.predicted_cases') }}</th>
+          <th>{{ t('risk.level') }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for fw in forecast_weeks %}
+        <tr>
+          <td><strong>{{ fw.epi_year }}-W{{ "%02d"|format(fw.epi_week) }}</strong></td>
+          {% if fw.prediction %}
+            {% set pred = fw.prediction %}
+            {% set rl = pred.risk_level if pred.risk_level else 'no_alert' %}
+            <td>{{ "%.0f"|format(pred.predicted_cases) }}</td>
+            <td style="white-space:nowrap;">
+              <span class="risk-badge risk-{{ rl|lower }}" style="padding:3px 8px;">
+                <span class="risk-dot {{ rl|lower }}"></span>
+                {{ rl }}
+              </span>
+            </td>
+          {% else %}
+            <td colspan="2" style="color:#94a3b8;text-align:center;">—</td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  var ctx = document.getElementById('trendChart');
+  if (!ctx) return;
+
+  var actual       = {{ weekly_trend     | tojson }};
+  var predRaw      = {{ prediction_trend | tojson }};
+  var nActual      = actual.length;
+
+  var _tActual    = {{ t('page.hd_dashboard.actual_cases')    | tojson }};
+  var _tPredicted = {{ t('page.hd_dashboard.predicted_cases') | tojson }};
+  var _tCases     = {{ t('page.risk_monitor.cases_suffix')    | tojson }};
+
+  var labels = actual.map(function(d) { return d.week; })
+                     .concat(predRaw.map(function(d) { return d.week; }));
+
+  var reportedData = actual.map(function(d) { return d.cases; })
+                           .concat(predRaw.map(function() { return null; }));
+
+  var forecastAvgData = actual.map(function(d, i) { return i === nActual - 1 ? d.cases : null; })
+                              .concat(predRaw.map(function(d) { return d.cases; }));
+
+  var verticalSepPlugin = {
+    id: 'verticalSep',
+    afterDraw: function(chart) {
+      if (nActual >= labels.length) return;
+      var c = chart.ctx, xScale = chart.scales.x;
+      var x = (xScale.getPixelForValue(nActual - 1) + xScale.getPixelForValue(nActual)) / 2;
+      c.save();
+      c.beginPath();
+      c.moveTo(x, chart.chartArea.top);
+      c.lineTo(x, chart.chartArea.bottom);
+      c.strokeStyle = 'rgba(100,116,139,0.6)';
+      c.lineWidth = 1.5;
+      c.setLineDash([6, 4]);
+      c.stroke();
+      c.setLineDash([]);
+      c.fillStyle = 'rgba(100,116,139,0.75)';
+      c.font = '11px sans-serif';
+      c.fillText('Forecast →', x + 6, chart.chartArea.top + 14);
+      c.restore();
+    }
+  };
+
+  new Chart(ctx, {
+    type: 'line',
+    plugins: [verticalSepPlugin],
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: _tActual,
+          data: reportedData,
+          borderColor: '#1e293b',
+          backgroundColor: 'rgba(30,41,59,0.07)',
+          borderWidth: 2.5,
+          pointStyle: 'rect',
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          pointBackgroundColor: '#1e293b',
+          tension: 0.3,
+          fill: true,
+          spanGaps: false,
+          order: 1,
+        },
+        {
+          label: _tPredicted,
+          data: forecastAvgData,
+          borderColor: '#6366f1',
+          backgroundColor: 'rgba(99,102,241,0.05)',
+          borderWidth: 2.5,
+          borderDash: [7, 4],
+          pointStyle: 'circle',
+          pointRadius: function(c) { return c.dataIndex >= nActual ? 6 : 0; },
+          pointHoverRadius: 8,
+          pointBackgroundColor: 'white',
+          pointBorderColor: '#6366f1',
+          pointBorderWidth: 2,
+          tension: 0.3,
+          fill: false,
+          spanGaps: false,
+          order: 2,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(item) {
+              if (item.raw === null || item.raw === undefined) return '';
+              if (item.dataset.label === 'Mean + 1.25 SD')
+                return 'Mean + 1.25 SD: ' + item.raw + ' ' + _tCases;
+              return item.dataset.label + ': ' + item.raw + ' ' + _tCases;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 14, maxRotation: 45, font: { size: 11 } } },
+        y: { beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

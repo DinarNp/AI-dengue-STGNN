@@ -1,0 +1,1301 @@
+Epi_Year,Epi_Week,Region,NDVI,Data_Source,Is_Imputed
+2021,1,KAB BANTUL,0.813,modis_neo_csv,No
+2021,1,KAB GUNUNG KIDUL,0.825,modis_neo_csv,No
+2021,1,KAB KULON PROGO,0.782,modis_neo_csv,No
+2021,1,KAB SLEMAN,0.715,modis_neo_csv,No
+2021,1,KOTA YOGYAKARTA,0.648,modis_neo_csv,No
+2021,2,KAB BANTUL,0.813,modis_neo_csv,No
+2021,2,KAB GUNUNG KIDUL,0.825,modis_neo_csv,No
+2021,2,KAB KULON PROGO,0.782,modis_neo_csv,No
+2021,2,KAB SLEMAN,0.715,modis_neo_csv,No
+2021,2,KOTA YOGYAKARTA,0.648,modis_neo_csv,No
+2021,3,KAB BANTUL,0.786,modis_neo_csv,No
+2021,3,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2021,3,KAB KULON PROGO,0.829,modis_neo_csv,No
+2021,3,KAB SLEMAN,0.715,modis_neo_csv,No
+2021,3,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2021,4,KAB BANTUL,0.786,modis_neo_csv,No
+2021,4,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2021,4,KAB KULON PROGO,0.829,modis_neo_csv,No
+2021,4,KAB SLEMAN,0.715,modis_neo_csv,No
+2021,4,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2021,5,KAB BANTUL,0.786,modis_neo_csv,No
+2021,5,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2021,5,KAB KULON PROGO,0.829,modis_neo_csv,No
+2021,5,KAB SLEMAN,0.715,modis_neo_csv,No
+2021,5,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2021,6,KAB BANTUL,0.743,modis_neo_csv,No
+2021,6,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2021,6,KAB KULON PROGO,0.79,modis_neo_csv,No
+2021,6,KAB SLEMAN,0.723,modis_neo_csv,No
+2021,6,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2021,7,KAB BANTUL,0.743,modis_neo_csv,No
+2021,7,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2021,7,KAB KULON PROGO,0.79,modis_neo_csv,No
+2021,7,KAB SLEMAN,0.723,modis_neo_csv,No
+2021,7,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2021,8,KAB BANTUL,0.735,modis_neo_csv,No
+2021,8,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2021,8,KAB KULON PROGO,0.853,modis_neo_csv,No
+2021,8,KAB SLEMAN,0.613,modis_neo_csv,No
+2021,8,KOTA YOGYAKARTA,0.699,modis_neo_csv,No
+2021,9,KAB BANTUL,0.735,modis_neo_csv,No
+2021,9,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2021,9,KAB KULON PROGO,0.853,modis_neo_csv,No
+2021,9,KAB SLEMAN,0.613,modis_neo_csv,No
+2021,9,KOTA YOGYAKARTA,0.699,modis_neo_csv,No
+2021,10,KAB BANTUL,0.691,modis_neo_csv,No
+2021,10,KAB GUNUNG KIDUL,0.794,modis_neo_csv,No
+2021,10,KAB KULON PROGO,0.837,modis_neo_csv,No
+2021,10,KAB SLEMAN,0.711,modis_neo_csv,No
+2021,10,KOTA YOGYAKARTA,0.707,modis_neo_csv,No
+2021,11,KAB BANTUL,0.691,modis_neo_csv,No
+2021,11,KAB GUNUNG KIDUL,0.794,modis_neo_csv,No
+2021,11,KAB KULON PROGO,0.837,modis_neo_csv,No
+2021,11,KAB SLEMAN,0.711,modis_neo_csv,No
+2021,11,KOTA YOGYAKARTA,0.707,modis_neo_csv,No
+2021,12,KAB BANTUL,0.652,modis_neo_csv,No
+2021,12,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2021,12,KAB KULON PROGO,0.802,modis_neo_csv,No
+2021,12,KAB SLEMAN,0.628,modis_neo_csv,No
+2021,12,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2021,13,KAB BANTUL,0.652,modis_neo_csv,No
+2021,13,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2021,13,KAB KULON PROGO,0.802,modis_neo_csv,No
+2021,13,KAB SLEMAN,0.628,modis_neo_csv,No
+2021,13,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2021,14,KAB BANTUL,0.652,modis_neo_csv,No
+2021,14,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2021,14,KAB KULON PROGO,0.802,modis_neo_csv,No
+2021,14,KAB SLEMAN,0.628,modis_neo_csv,No
+2021,14,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2021,15,KAB BANTUL,0.652,modis_neo_csv,No
+2021,15,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2021,15,KAB KULON PROGO,0.743,modis_neo_csv,No
+2021,15,KAB SLEMAN,0.62,modis_neo_csv,No
+2021,15,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2021,16,KAB BANTUL,0.652,modis_neo_csv,No
+2021,16,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2021,16,KAB KULON PROGO,0.743,modis_neo_csv,No
+2021,16,KAB SLEMAN,0.62,modis_neo_csv,No
+2021,16,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2021,17,KAB BANTUL,0.64,modis_neo_csv,No
+2021,17,KAB GUNUNG KIDUL,0.758,modis_neo_csv,No
+2021,17,KAB KULON PROGO,0.75,modis_neo_csv,No
+2021,17,KAB SLEMAN,0.601,modis_neo_csv,No
+2021,17,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2021,18,KAB BANTUL,0.64,modis_neo_csv,No
+2021,18,KAB GUNUNG KIDUL,0.758,modis_neo_csv,No
+2021,18,KAB KULON PROGO,0.75,modis_neo_csv,No
+2021,18,KAB SLEMAN,0.601,modis_neo_csv,No
+2021,18,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2021,19,KAB BANTUL,0.64,modis_neo_csv,No
+2021,19,KAB GUNUNG KIDUL,0.664,modis_neo_csv,No
+2021,19,KAB KULON PROGO,0.774,modis_neo_csv,No
+2021,19,KAB SLEMAN,0.585,modis_neo_csv,No
+2021,19,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2021,20,KAB BANTUL,0.64,modis_neo_csv,No
+2021,20,KAB GUNUNG KIDUL,0.664,modis_neo_csv,No
+2021,20,KAB KULON PROGO,0.774,modis_neo_csv,No
+2021,20,KAB SLEMAN,0.585,modis_neo_csv,No
+2021,20,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2021,21,KAB BANTUL,0.64,modis_neo_csv,No
+2021,21,KAB GUNUNG KIDUL,0.664,modis_neo_csv,No
+2021,21,KAB KULON PROGO,0.774,modis_neo_csv,No
+2021,21,KAB SLEMAN,0.585,modis_neo_csv,No
+2021,21,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2021,22,KAB BANTUL,0.699,modis_neo_csv,No
+2021,22,KAB GUNUNG KIDUL,0.609,modis_neo_csv,No
+2021,22,KAB KULON PROGO,0.766,modis_neo_csv,No
+2021,22,KAB SLEMAN,0.652,modis_neo_csv,No
+2021,22,KOTA YOGYAKARTA,0.644,modis_neo_csv,No
+2021,23,KAB BANTUL,0.699,modis_neo_csv,No
+2021,23,KAB GUNUNG KIDUL,0.609,modis_neo_csv,No
+2021,23,KAB KULON PROGO,0.766,modis_neo_csv,No
+2021,23,KAB SLEMAN,0.652,modis_neo_csv,No
+2021,23,KOTA YOGYAKARTA,0.644,modis_neo_csv,No
+2021,24,KAB BANTUL,0.66,modis_neo_csv,No
+2021,24,KAB GUNUNG KIDUL,0.664,modis_neo_csv,No
+2021,24,KAB KULON PROGO,0.746,modis_neo_csv,No
+2021,24,KAB SLEMAN,0.719,modis_neo_csv,No
+2021,24,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2021,25,KAB BANTUL,0.66,modis_neo_csv,No
+2021,25,KAB GUNUNG KIDUL,0.664,modis_neo_csv,No
+2021,25,KAB KULON PROGO,0.746,modis_neo_csv,No
+2021,25,KAB SLEMAN,0.719,modis_neo_csv,No
+2021,25,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2021,26,KAB BANTUL,0.687,modis_neo_csv,No
+2021,26,KAB GUNUNG KIDUL,0.676,modis_neo_csv,No
+2021,26,KAB KULON PROGO,0.739,modis_neo_csv,No
+2021,26,KAB SLEMAN,0.648,modis_neo_csv,No
+2021,26,KOTA YOGYAKARTA,0.605,modis_neo_csv,No
+2021,27,KAB BANTUL,0.687,modis_neo_csv,No
+2021,27,KAB GUNUNG KIDUL,0.676,modis_neo_csv,No
+2021,27,KAB KULON PROGO,0.739,modis_neo_csv,No
+2021,27,KAB SLEMAN,0.648,modis_neo_csv,No
+2021,27,KOTA YOGYAKARTA,0.605,modis_neo_csv,No
+2021,28,KAB BANTUL,0.636,modis_neo_csv,No
+2021,28,KAB GUNUNG KIDUL,0.711,modis_neo_csv,No
+2021,28,KAB KULON PROGO,0.699,modis_neo_csv,No
+2021,28,KAB SLEMAN,0.624,modis_neo_csv,No
+2021,28,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2021,29,KAB BANTUL,0.636,modis_neo_csv,No
+2021,29,KAB GUNUNG KIDUL,0.711,modis_neo_csv,No
+2021,29,KAB KULON PROGO,0.699,modis_neo_csv,No
+2021,29,KAB SLEMAN,0.624,modis_neo_csv,No
+2021,29,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2021,30,KAB BANTUL,0.636,modis_neo_csv,No
+2021,30,KAB GUNUNG KIDUL,0.711,modis_neo_csv,No
+2021,30,KAB KULON PROGO,0.699,modis_neo_csv,No
+2021,30,KAB SLEMAN,0.624,modis_neo_csv,No
+2021,30,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2021,31,KAB BANTUL,0.668,modis_neo_csv,No
+2021,31,KAB GUNUNG KIDUL,0.715,modis_neo_csv,No
+2021,31,KAB KULON PROGO,0.731,modis_neo_csv,No
+2021,31,KAB SLEMAN,0.589,modis_neo_csv,No
+2021,31,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2021,32,KAB BANTUL,0.668,modis_neo_csv,No
+2021,32,KAB GUNUNG KIDUL,0.715,modis_neo_csv,No
+2021,32,KAB KULON PROGO,0.731,modis_neo_csv,No
+2021,32,KAB SLEMAN,0.589,modis_neo_csv,No
+2021,32,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2021,33,KAB BANTUL,0.68,modis_neo_csv,No
+2021,33,KAB GUNUNG KIDUL,0.68,modis_neo_csv,No
+2021,33,KAB KULON PROGO,0.707,modis_neo_csv,No
+2021,33,KAB SLEMAN,0.605,modis_neo_csv,No
+2021,33,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2021,34,KAB BANTUL,0.68,modis_neo_csv,No
+2021,34,KAB GUNUNG KIDUL,0.68,modis_neo_csv,No
+2021,34,KAB KULON PROGO,0.707,modis_neo_csv,No
+2021,34,KAB SLEMAN,0.605,modis_neo_csv,No
+2021,34,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2021,35,KAB BANTUL,0.601,modis_neo_csv,No
+2021,35,KAB GUNUNG KIDUL,0.64,modis_neo_csv,No
+2021,35,KAB KULON PROGO,0.68,modis_neo_csv,No
+2021,35,KAB SLEMAN,0.518,modis_neo_csv,No
+2021,35,KOTA YOGYAKARTA,0.51,modis_neo_csv,No
+2021,36,KAB BANTUL,0.601,modis_neo_csv,No
+2021,36,KAB GUNUNG KIDUL,0.64,modis_neo_csv,No
+2021,36,KAB KULON PROGO,0.68,modis_neo_csv,No
+2021,36,KAB SLEMAN,0.518,modis_neo_csv,No
+2021,36,KOTA YOGYAKARTA,0.51,modis_neo_csv,No
+2021,37,KAB BANTUL,0.601,modis_neo_csv,No
+2021,37,KAB GUNUNG KIDUL,0.64,modis_neo_csv,No
+2021,37,KAB KULON PROGO,0.68,modis_neo_csv,No
+2021,37,KAB SLEMAN,0.518,modis_neo_csv,No
+2021,37,KOTA YOGYAKARTA,0.51,modis_neo_csv,No
+2021,38,KAB BANTUL,0.664,modis_neo_csv,No
+2021,38,KAB GUNUNG KIDUL,0.561,modis_neo_csv,No
+2021,38,KAB KULON PROGO,0.695,modis_neo_csv,No
+2021,38,KAB SLEMAN,0.569,modis_neo_csv,No
+2021,38,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2021,39,KAB BANTUL,0.664,modis_neo_csv,No
+2021,39,KAB GUNUNG KIDUL,0.561,modis_neo_csv,No
+2021,39,KAB KULON PROGO,0.695,modis_neo_csv,No
+2021,39,KAB SLEMAN,0.569,modis_neo_csv,No
+2021,39,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2021,40,KAB BANTUL,0.636,modis_neo_csv,No
+2021,40,KAB GUNUNG KIDUL,0.522,modis_neo_csv,No
+2021,40,KAB KULON PROGO,0.68,modis_neo_csv,No
+2021,40,KAB SLEMAN,0.573,modis_neo_csv,No
+2021,40,KOTA YOGYAKARTA,0.546,modis_neo_csv,No
+2021,41,KAB BANTUL,0.636,modis_neo_csv,No
+2021,41,KAB GUNUNG KIDUL,0.522,modis_neo_csv,No
+2021,41,KAB KULON PROGO,0.68,modis_neo_csv,No
+2021,41,KAB SLEMAN,0.573,modis_neo_csv,No
+2021,41,KOTA YOGYAKARTA,0.546,modis_neo_csv,No
+2021,42,KAB BANTUL,0.605,modis_neo_csv,No
+2021,42,KAB GUNUNG KIDUL,0.506,modis_neo_csv,No
+2021,42,KAB KULON PROGO,0.687,modis_neo_csv,No
+2021,42,KAB SLEMAN,0.561,modis_neo_csv,No
+2021,42,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2021,43,KAB BANTUL,0.605,modis_neo_csv,No
+2021,43,KAB GUNUNG KIDUL,0.506,modis_neo_csv,No
+2021,43,KAB KULON PROGO,0.687,modis_neo_csv,No
+2021,43,KAB SLEMAN,0.561,modis_neo_csv,No
+2021,43,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2021,44,KAB BANTUL,0.672,modis_neo_csv,No
+2021,44,KAB GUNUNG KIDUL,0.538,modis_neo_csv,No
+2021,44,KAB KULON PROGO,0.735,modis_neo_csv,No
+2021,44,KAB SLEMAN,0.624,modis_neo_csv,No
+2021,44,KOTA YOGYAKARTA,0.691,modis_neo_csv,No
+2021,45,KAB BANTUL,0.672,modis_neo_csv,No
+2021,45,KAB GUNUNG KIDUL,0.538,modis_neo_csv,No
+2021,45,KAB KULON PROGO,0.735,modis_neo_csv,No
+2021,45,KAB SLEMAN,0.624,modis_neo_csv,No
+2021,45,KOTA YOGYAKARTA,0.691,modis_neo_csv,No
+2021,46,KAB BANTUL,0.672,modis_neo_csv,No
+2021,46,KAB GUNUNG KIDUL,0.538,modis_neo_csv,No
+2021,46,KAB KULON PROGO,0.735,modis_neo_csv,No
+2021,46,KAB SLEMAN,0.624,modis_neo_csv,No
+2021,46,KOTA YOGYAKARTA,0.691,modis_neo_csv,No
+2021,47,KAB BANTUL,0.695,modis_neo_csv,No
+2021,47,KAB GUNUNG KIDUL,0.774,modis_neo_csv,No
+2021,47,KAB KULON PROGO,0.9,modis_neo_csv,No
+2021,47,KAB SLEMAN,0.66,modis_neo_csv,No
+2021,47,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2021,48,KAB BANTUL,0.695,modis_neo_csv,No
+2021,48,KAB GUNUNG KIDUL,0.774,modis_neo_csv,No
+2021,48,KAB KULON PROGO,0.9,modis_neo_csv,No
+2021,48,KAB SLEMAN,0.66,modis_neo_csv,No
+2021,48,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2021,49,KAB BANTUL,0.66,modis_neo_csv,No
+2021,49,KAB GUNUNG KIDUL,0.79,modis_neo_csv,No
+2021,49,KAB KULON PROGO,0.735,modis_neo_csv,No
+2021,49,KAB SLEMAN,0.676,modis_neo_csv,No
+2021,49,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2021,50,KAB BANTUL,0.66,modis_neo_csv,No
+2021,50,KAB GUNUNG KIDUL,0.79,modis_neo_csv,No
+2021,50,KAB KULON PROGO,0.735,modis_neo_csv,No
+2021,50,KAB SLEMAN,0.676,modis_neo_csv,No
+2021,50,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2021,51,KAB BANTUL,0.695,modis_neo_csv,No
+2021,51,KAB GUNUNG KIDUL,0.833,modis_neo_csv,No
+2021,51,KAB KULON PROGO,0.794,modis_neo_csv,No
+2021,51,KAB SLEMAN,0.687,modis_neo_csv,No
+2021,51,KOTA YOGYAKARTA,0.719,modis_neo_csv,No
+2021,52,KAB BANTUL,0.695,modis_neo_csv,No
+2021,52,KAB GUNUNG KIDUL,0.833,modis_neo_csv,No
+2021,52,KAB KULON PROGO,0.794,modis_neo_csv,No
+2021,52,KAB SLEMAN,0.687,modis_neo_csv,No
+2021,52,KOTA YOGYAKARTA,0.719,modis_neo_csv,No
+2022,1,KAB BANTUL,0.695,modis_neo_csv,No
+2022,1,KAB GUNUNG KIDUL,0.813,modis_neo_csv,No
+2022,1,KAB KULON PROGO,0.79,modis_neo_csv,No
+2022,1,KAB SLEMAN,0.585,modis_neo_csv,No
+2022,1,KOTA YOGYAKARTA,0.593,modis_neo_csv,No
+2022,2,KAB BANTUL,0.695,modis_neo_csv,No
+2022,2,KAB GUNUNG KIDUL,0.813,modis_neo_csv,No
+2022,2,KAB KULON PROGO,0.79,modis_neo_csv,No
+2022,2,KAB SLEMAN,0.585,modis_neo_csv,No
+2022,2,KOTA YOGYAKARTA,0.593,modis_neo_csv,No
+2022,3,KAB BANTUL,0.719,modis_neo_csv,No
+2022,3,KAB GUNUNG KIDUL,0.841,modis_neo_csv,No
+2022,3,KAB KULON PROGO,0.652,modis_neo_csv,No
+2022,3,KAB SLEMAN,0.715,modis_neo_csv,No
+2022,3,KOTA YOGYAKARTA,0.743,modis_neo_csv,No
+2022,4,KAB BANTUL,0.719,modis_neo_csv,No
+2022,4,KAB GUNUNG KIDUL,0.841,modis_neo_csv,No
+2022,4,KAB KULON PROGO,0.652,modis_neo_csv,No
+2022,4,KAB SLEMAN,0.715,modis_neo_csv,No
+2022,4,KOTA YOGYAKARTA,0.743,modis_neo_csv,No
+2022,5,KAB BANTUL,0.719,modis_neo_csv,No
+2022,5,KAB GUNUNG KIDUL,0.841,modis_neo_csv,No
+2022,5,KAB KULON PROGO,0.652,modis_neo_csv,No
+2022,5,KAB SLEMAN,0.715,modis_neo_csv,No
+2022,5,KOTA YOGYAKARTA,0.743,modis_neo_csv,No
+2022,6,KAB BANTUL,0.727,modis_neo_csv,No
+2022,6,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2022,6,KAB KULON PROGO,0.802,modis_neo_csv,No
+2022,6,KAB SLEMAN,0.731,modis_neo_csv,No
+2022,6,KOTA YOGYAKARTA,0.77,modis_neo_csv,No
+2022,7,KAB BANTUL,0.727,modis_neo_csv,No
+2022,7,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2022,7,KAB KULON PROGO,0.802,modis_neo_csv,No
+2022,7,KAB SLEMAN,0.731,modis_neo_csv,No
+2022,7,KOTA YOGYAKARTA,0.77,modis_neo_csv,No
+2022,8,KAB BANTUL,0.703,modis_neo_csv,No
+2022,8,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2022,8,KAB KULON PROGO,0.743,modis_neo_csv,No
+2022,8,KAB SLEMAN,0.652,modis_neo_csv,No
+2022,8,KOTA YOGYAKARTA,0.617,modis_neo_csv,No
+2022,9,KAB BANTUL,0.703,modis_neo_csv,No
+2022,9,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2022,9,KAB KULON PROGO,0.743,modis_neo_csv,No
+2022,9,KAB SLEMAN,0.652,modis_neo_csv,No
+2022,9,KOTA YOGYAKARTA,0.617,modis_neo_csv,No
+2022,10,KAB BANTUL,0.739,modis_neo_csv,No
+2022,10,KAB GUNUNG KIDUL,0.794,modis_neo_csv,No
+2022,10,KAB KULON PROGO,0.825,modis_neo_csv,No
+2022,10,KAB SLEMAN,0.719,modis_neo_csv,No
+2022,10,KOTA YOGYAKARTA,0.715,modis_neo_csv,No
+2022,11,KAB BANTUL,0.739,modis_neo_csv,No
+2022,11,KAB GUNUNG KIDUL,0.794,modis_neo_csv,No
+2022,11,KAB KULON PROGO,0.825,modis_neo_csv,No
+2022,11,KAB SLEMAN,0.719,modis_neo_csv,No
+2022,11,KOTA YOGYAKARTA,0.715,modis_neo_csv,No
+2022,12,KAB BANTUL,0.739,modis_neo_csv,No
+2022,12,KAB GUNUNG KIDUL,0.794,modis_neo_csv,No
+2022,12,KAB KULON PROGO,0.825,modis_neo_csv,No
+2022,12,KAB SLEMAN,0.719,modis_neo_csv,No
+2022,12,KOTA YOGYAKARTA,0.715,modis_neo_csv,No
+2022,13,KAB BANTUL,0.668,modis_neo_csv,No
+2022,13,KAB GUNUNG KIDUL,0.809,modis_neo_csv,No
+2022,13,KAB KULON PROGO,0.699,modis_neo_csv,No
+2022,13,KAB SLEMAN,0.624,modis_neo_csv,No
+2022,13,KOTA YOGYAKARTA,0.605,modis_neo_csv,No
+2022,14,KAB BANTUL,0.668,modis_neo_csv,No
+2022,14,KAB GUNUNG KIDUL,0.809,modis_neo_csv,No
+2022,14,KAB KULON PROGO,0.699,modis_neo_csv,No
+2022,14,KAB SLEMAN,0.624,modis_neo_csv,No
+2022,14,KOTA YOGYAKARTA,0.605,modis_neo_csv,No
+2022,15,KAB BANTUL,0.652,modis_neo_csv,No
+2022,15,KAB GUNUNG KIDUL,0.806,modis_neo_csv,No
+2022,15,KAB KULON PROGO,0.746,modis_neo_csv,No
+2022,15,KAB SLEMAN,0.597,modis_neo_csv,No
+2022,15,KOTA YOGYAKARTA,0.624,modis_neo_csv,No
+2022,16,KAB BANTUL,0.652,modis_neo_csv,No
+2022,16,KAB GUNUNG KIDUL,0.806,modis_neo_csv,No
+2022,16,KAB KULON PROGO,0.746,modis_neo_csv,No
+2022,16,KAB SLEMAN,0.597,modis_neo_csv,No
+2022,16,KOTA YOGYAKARTA,0.624,modis_neo_csv,No
+2022,17,KAB BANTUL,0.691,modis_neo_csv,No
+2022,17,KAB GUNUNG KIDUL,0.754,modis_neo_csv,No
+2022,17,KAB KULON PROGO,0.778,modis_neo_csv,No
+2022,17,KAB SLEMAN,0.601,modis_neo_csv,No
+2022,17,KOTA YOGYAKARTA,0.617,modis_neo_csv,No
+2022,18,KAB BANTUL,0.691,modis_neo_csv,No
+2022,18,KAB GUNUNG KIDUL,0.754,modis_neo_csv,No
+2022,18,KAB KULON PROGO,0.778,modis_neo_csv,No
+2022,18,KAB SLEMAN,0.601,modis_neo_csv,No
+2022,18,KOTA YOGYAKARTA,0.617,modis_neo_csv,No
+2022,19,KAB BANTUL,0.668,modis_neo_csv,No
+2022,19,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2022,19,KAB KULON PROGO,0.794,modis_neo_csv,No
+2022,19,KAB SLEMAN,0.62,modis_neo_csv,No
+2022,19,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2022,20,KAB BANTUL,0.668,modis_neo_csv,No
+2022,20,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2022,20,KAB KULON PROGO,0.794,modis_neo_csv,No
+2022,20,KAB SLEMAN,0.62,modis_neo_csv,No
+2022,20,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2022,21,KAB BANTUL,0.668,modis_neo_csv,No
+2022,21,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2022,21,KAB KULON PROGO,0.794,modis_neo_csv,No
+2022,21,KAB SLEMAN,0.62,modis_neo_csv,No
+2022,21,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2022,22,KAB BANTUL,0.723,modis_neo_csv,No
+2022,22,KAB GUNUNG KIDUL,0.75,modis_neo_csv,No
+2022,22,KAB KULON PROGO,0.794,modis_neo_csv,No
+2022,22,KAB SLEMAN,0.66,modis_neo_csv,No
+2022,22,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2022,23,KAB BANTUL,0.723,modis_neo_csv,No
+2022,23,KAB GUNUNG KIDUL,0.75,modis_neo_csv,No
+2022,23,KAB KULON PROGO,0.794,modis_neo_csv,No
+2022,23,KAB SLEMAN,0.66,modis_neo_csv,No
+2022,23,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2022,24,KAB BANTUL,0.699,modis_neo_csv,No
+2022,24,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2022,24,KAB KULON PROGO,0.778,modis_neo_csv,No
+2022,24,KAB SLEMAN,0.711,modis_neo_csv,No
+2022,24,KOTA YOGYAKARTA,0.711,modis_neo_csv,No
+2022,25,KAB BANTUL,0.699,modis_neo_csv,No
+2022,25,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2022,25,KAB KULON PROGO,0.778,modis_neo_csv,No
+2022,25,KAB SLEMAN,0.711,modis_neo_csv,No
+2022,25,KOTA YOGYAKARTA,0.711,modis_neo_csv,No
+2022,26,KAB BANTUL,0.628,modis_neo_csv,No
+2022,26,KAB GUNUNG KIDUL,0.691,modis_neo_csv,No
+2022,26,KAB KULON PROGO,0.711,modis_neo_csv,No
+2022,26,KAB SLEMAN,0.62,modis_neo_csv,No
+2022,26,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2022,27,KAB BANTUL,0.628,modis_neo_csv,No
+2022,27,KAB GUNUNG KIDUL,0.691,modis_neo_csv,No
+2022,27,KAB KULON PROGO,0.711,modis_neo_csv,No
+2022,27,KAB SLEMAN,0.62,modis_neo_csv,No
+2022,27,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2022,28,KAB BANTUL,0.628,modis_neo_csv,No
+2022,28,KAB GUNUNG KIDUL,0.691,modis_neo_csv,No
+2022,28,KAB KULON PROGO,0.711,modis_neo_csv,No
+2022,28,KAB SLEMAN,0.62,modis_neo_csv,No
+2022,28,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2022,29,KAB BANTUL,0.581,modis_neo_csv,No
+2022,29,KAB GUNUNG KIDUL,0.695,modis_neo_csv,No
+2022,29,KAB KULON PROGO,0.707,modis_neo_csv,No
+2022,29,KAB SLEMAN,0.577,modis_neo_csv,No
+2022,29,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2022,30,KAB BANTUL,0.581,modis_neo_csv,No
+2022,30,KAB GUNUNG KIDUL,0.695,modis_neo_csv,No
+2022,30,KAB KULON PROGO,0.707,modis_neo_csv,No
+2022,30,KAB SLEMAN,0.577,modis_neo_csv,No
+2022,30,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2022,31,KAB BANTUL,0.613,modis_neo_csv,No
+2022,31,KAB GUNUNG KIDUL,0.628,modis_neo_csv,No
+2022,31,KAB KULON PROGO,0.731,modis_neo_csv,No
+2022,31,KAB SLEMAN,0.542,modis_neo_csv,No
+2022,31,KOTA YOGYAKARTA,0.577,modis_neo_csv,No
+2022,32,KAB BANTUL,0.613,modis_neo_csv,No
+2022,32,KAB GUNUNG KIDUL,0.628,modis_neo_csv,No
+2022,32,KAB KULON PROGO,0.731,modis_neo_csv,No
+2022,32,KAB SLEMAN,0.542,modis_neo_csv,No
+2022,32,KOTA YOGYAKARTA,0.577,modis_neo_csv,No
+2022,33,KAB BANTUL,0.699,modis_neo_csv,No
+2022,33,KAB GUNUNG KIDUL,0.585,modis_neo_csv,No
+2022,33,KAB KULON PROGO,0.723,modis_neo_csv,No
+2022,33,KAB SLEMAN,0.569,modis_neo_csv,No
+2022,33,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2022,34,KAB BANTUL,0.699,modis_neo_csv,No
+2022,34,KAB GUNUNG KIDUL,0.585,modis_neo_csv,No
+2022,34,KAB KULON PROGO,0.723,modis_neo_csv,No
+2022,34,KAB SLEMAN,0.569,modis_neo_csv,No
+2022,34,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2022,35,KAB BANTUL,0.707,modis_neo_csv,No
+2022,35,KAB GUNUNG KIDUL,0.514,modis_neo_csv,No
+2022,35,KAB KULON PROGO,0.735,modis_neo_csv,No
+2022,35,KAB SLEMAN,0.605,modis_neo_csv,No
+2022,35,KOTA YOGYAKARTA,0.581,modis_neo_csv,No
+2022,36,KAB BANTUL,0.707,modis_neo_csv,No
+2022,36,KAB GUNUNG KIDUL,0.514,modis_neo_csv,No
+2022,36,KAB KULON PROGO,0.735,modis_neo_csv,No
+2022,36,KAB SLEMAN,0.605,modis_neo_csv,No
+2022,36,KOTA YOGYAKARTA,0.581,modis_neo_csv,No
+2022,37,KAB BANTUL,0.707,modis_neo_csv,No
+2022,37,KAB GUNUNG KIDUL,0.514,modis_neo_csv,No
+2022,37,KAB KULON PROGO,0.735,modis_neo_csv,No
+2022,37,KAB SLEMAN,0.605,modis_neo_csv,No
+2022,37,KOTA YOGYAKARTA,0.581,modis_neo_csv,No
+2022,38,KAB BANTUL,0.707,modis_neo_csv,No
+2022,38,KAB GUNUNG KIDUL,0.542,modis_neo_csv,No
+2022,38,KAB KULON PROGO,0.766,modis_neo_csv,No
+2022,38,KAB SLEMAN,0.557,modis_neo_csv,No
+2022,38,KOTA YOGYAKARTA,0.546,modis_neo_csv,No
+2022,39,KAB BANTUL,0.707,modis_neo_csv,No
+2022,39,KAB GUNUNG KIDUL,0.542,modis_neo_csv,No
+2022,39,KAB KULON PROGO,0.766,modis_neo_csv,No
+2022,39,KAB SLEMAN,0.557,modis_neo_csv,No
+2022,39,KOTA YOGYAKARTA,0.546,modis_neo_csv,No
+2022,40,KAB BANTUL,0.62,modis_neo_csv,No
+2022,40,KAB GUNUNG KIDUL,0.463,modis_neo_csv,No
+2022,40,KAB KULON PROGO,0.774,modis_neo_csv,No
+2022,40,KAB SLEMAN,0.554,modis_neo_csv,No
+2022,40,KOTA YOGYAKARTA,0.526,modis_neo_csv,No
+2022,41,KAB BANTUL,0.62,modis_neo_csv,No
+2022,41,KAB GUNUNG KIDUL,0.463,modis_neo_csv,No
+2022,41,KAB KULON PROGO,0.774,modis_neo_csv,No
+2022,41,KAB SLEMAN,0.554,modis_neo_csv,No
+2022,41,KOTA YOGYAKARTA,0.526,modis_neo_csv,No
+2022,42,KAB BANTUL,0.605,modis_neo_csv,No
+2022,42,KAB GUNUNG KIDUL,0.376,modis_neo_csv,No
+2022,42,KAB KULON PROGO,0.719,modis_neo_csv,No
+2022,42,KAB SLEMAN,0.561,modis_neo_csv,No
+2022,42,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2022,43,KAB BANTUL,0.605,modis_neo_csv,No
+2022,43,KAB GUNUNG KIDUL,0.376,modis_neo_csv,No
+2022,43,KAB KULON PROGO,0.719,modis_neo_csv,No
+2022,43,KAB SLEMAN,0.561,modis_neo_csv,No
+2022,43,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2022,44,KAB BANTUL,0.605,modis_neo_csv,No
+2022,44,KAB GUNUNG KIDUL,0.376,modis_neo_csv,No
+2022,44,KAB KULON PROGO,0.719,modis_neo_csv,No
+2022,44,KAB SLEMAN,0.561,modis_neo_csv,No
+2022,44,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2022,45,KAB BANTUL,0.672,modis_neo_csv,No
+2022,45,KAB GUNUNG KIDUL,0.557,modis_neo_csv,No
+2022,45,KAB KULON PROGO,0.66,modis_neo_csv,No
+2022,45,KAB SLEMAN,0.624,modis_neo_csv,No
+2022,45,KOTA YOGYAKARTA,0.577,modis_neo_csv,No
+2022,46,KAB BANTUL,0.672,modis_neo_csv,No
+2022,46,KAB GUNUNG KIDUL,0.557,modis_neo_csv,No
+2022,46,KAB KULON PROGO,0.66,modis_neo_csv,No
+2022,46,KAB SLEMAN,0.624,modis_neo_csv,No
+2022,46,KOTA YOGYAKARTA,0.577,modis_neo_csv,No
+2022,47,KAB BANTUL,0.695,modis_neo_csv,No
+2022,47,KAB GUNUNG KIDUL,0.778,modis_neo_csv,No
+2022,47,KAB KULON PROGO,0.884,modis_neo_csv,No
+2022,47,KAB SLEMAN,0.66,modis_neo_csv,No
+2022,47,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2022,48,KAB BANTUL,0.695,modis_neo_csv,No
+2022,48,KAB GUNUNG KIDUL,0.778,modis_neo_csv,No
+2022,48,KAB KULON PROGO,0.884,modis_neo_csv,No
+2022,48,KAB SLEMAN,0.66,modis_neo_csv,No
+2022,48,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2022,49,KAB BANTUL,0.62,modis_neo_csv,No
+2022,49,KAB GUNUNG KIDUL,0.79,modis_neo_csv,No
+2022,49,KAB KULON PROGO,0.758,modis_neo_csv,No
+2022,49,KAB SLEMAN,0.605,modis_neo_csv,No
+2022,49,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2022,50,KAB BANTUL,0.62,modis_neo_csv,No
+2022,50,KAB GUNUNG KIDUL,0.79,modis_neo_csv,No
+2022,50,KAB KULON PROGO,0.758,modis_neo_csv,No
+2022,50,KAB SLEMAN,0.605,modis_neo_csv,No
+2022,50,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2022,51,KAB BANTUL,0.68,modis_neo_csv,No
+2022,51,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2022,51,KAB KULON PROGO,0.825,modis_neo_csv,No
+2022,51,KAB SLEMAN,0.447,modis_neo_csv,No
+2022,51,KOTA YOGYAKARTA,0.703,modis_neo_csv,No
+2022,52,KAB BANTUL,0.68,modis_neo_csv,No
+2022,52,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2022,52,KAB KULON PROGO,0.825,modis_neo_csv,No
+2022,52,KAB SLEMAN,0.447,modis_neo_csv,No
+2022,52,KOTA YOGYAKARTA,0.703,modis_neo_csv,No
+2023,1,KAB BANTUL,0.774,modis_neo_csv,No
+2023,1,KAB GUNUNG KIDUL,0.711,modis_neo_csv,No
+2023,1,KAB KULON PROGO,0.798,modis_neo_csv,No
+2023,1,KAB SLEMAN,0.68,modis_neo_csv,No
+2023,1,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2023,2,KAB BANTUL,0.774,modis_neo_csv,No
+2023,2,KAB GUNUNG KIDUL,0.711,modis_neo_csv,No
+2023,2,KAB KULON PROGO,0.798,modis_neo_csv,No
+2023,2,KAB SLEMAN,0.68,modis_neo_csv,No
+2023,2,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2023,3,KAB BANTUL,0.774,modis_neo_csv,No
+2023,3,KAB GUNUNG KIDUL,0.711,modis_neo_csv,No
+2023,3,KAB KULON PROGO,0.798,modis_neo_csv,No
+2023,3,KAB SLEMAN,0.68,modis_neo_csv,No
+2023,3,KOTA YOGYAKARTA,0.66,modis_neo_csv,No
+2023,4,KAB BANTUL,0.786,modis_neo_csv,No
+2023,4,KAB GUNUNG KIDUL,0.746,modis_neo_csv,No
+2023,4,KAB KULON PROGO,0.802,modis_neo_csv,No
+2023,4,KAB SLEMAN,0.715,modis_neo_csv,No
+2023,4,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2023,5,KAB BANTUL,0.786,modis_neo_csv,No
+2023,5,KAB GUNUNG KIDUL,0.746,modis_neo_csv,No
+2023,5,KAB KULON PROGO,0.802,modis_neo_csv,No
+2023,5,KAB SLEMAN,0.715,modis_neo_csv,No
+2023,5,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2023,6,KAB BANTUL,0.703,modis_neo_csv,No
+2023,6,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2023,6,KAB KULON PROGO,0.762,modis_neo_csv,No
+2023,6,KAB SLEMAN,0.743,modis_neo_csv,No
+2023,6,KOTA YOGYAKARTA,0.711,modis_neo_csv,No
+2023,7,KAB BANTUL,0.703,modis_neo_csv,No
+2023,7,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2023,7,KAB KULON PROGO,0.762,modis_neo_csv,No
+2023,7,KAB SLEMAN,0.743,modis_neo_csv,No
+2023,7,KOTA YOGYAKARTA,0.711,modis_neo_csv,No
+2023,8,KAB BANTUL,0.743,modis_neo_csv,No
+2023,8,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2023,8,KAB KULON PROGO,0.778,modis_neo_csv,No
+2023,8,KAB SLEMAN,0.683,modis_neo_csv,No
+2023,8,KOTA YOGYAKARTA,0.719,modis_neo_csv,No
+2023,9,KAB BANTUL,0.743,modis_neo_csv,No
+2023,9,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2023,9,KAB KULON PROGO,0.778,modis_neo_csv,No
+2023,9,KAB SLEMAN,0.683,modis_neo_csv,No
+2023,9,KOTA YOGYAKARTA,0.719,modis_neo_csv,No
+2023,10,KAB BANTUL,0.664,modis_neo_csv,No
+2023,10,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2023,10,KAB KULON PROGO,0.699,modis_neo_csv,No
+2023,10,KAB SLEMAN,0.597,modis_neo_csv,No
+2023,10,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2023,11,KAB BANTUL,0.664,modis_neo_csv,No
+2023,11,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2023,11,KAB KULON PROGO,0.699,modis_neo_csv,No
+2023,11,KAB SLEMAN,0.597,modis_neo_csv,No
+2023,11,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2023,12,KAB BANTUL,0.664,modis_neo_csv,No
+2023,12,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2023,12,KAB KULON PROGO,0.699,modis_neo_csv,No
+2023,12,KAB SLEMAN,0.597,modis_neo_csv,No
+2023,12,KOTA YOGYAKARTA,0.628,modis_neo_csv,No
+2023,13,KAB BANTUL,0.605,modis_neo_csv,No
+2023,13,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2023,13,KAB KULON PROGO,0.758,modis_neo_csv,No
+2023,13,KAB SLEMAN,0.546,modis_neo_csv,No
+2023,13,KOTA YOGYAKARTA,0.64,modis_neo_csv,No
+2023,14,KAB BANTUL,0.605,modis_neo_csv,No
+2023,14,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2023,14,KAB KULON PROGO,0.758,modis_neo_csv,No
+2023,14,KAB SLEMAN,0.546,modis_neo_csv,No
+2023,14,KOTA YOGYAKARTA,0.64,modis_neo_csv,No
+2023,15,KAB BANTUL,0.624,modis_neo_csv,No
+2023,15,KAB GUNUNG KIDUL,0.735,modis_neo_csv,No
+2023,15,KAB KULON PROGO,0.75,modis_neo_csv,No
+2023,15,KAB SLEMAN,0.577,modis_neo_csv,No
+2023,15,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2023,16,KAB BANTUL,0.624,modis_neo_csv,No
+2023,16,KAB GUNUNG KIDUL,0.735,modis_neo_csv,No
+2023,16,KAB KULON PROGO,0.75,modis_neo_csv,No
+2023,16,KAB SLEMAN,0.577,modis_neo_csv,No
+2023,16,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2023,17,KAB BANTUL,0.64,modis_neo_csv,No
+2023,17,KAB GUNUNG KIDUL,0.715,modis_neo_csv,No
+2023,17,KAB KULON PROGO,0.79,modis_neo_csv,No
+2023,17,KAB SLEMAN,0.617,modis_neo_csv,No
+2023,17,KOTA YOGYAKARTA,0.644,modis_neo_csv,No
+2023,18,KAB BANTUL,0.64,modis_neo_csv,No
+2023,18,KAB GUNUNG KIDUL,0.715,modis_neo_csv,No
+2023,18,KAB KULON PROGO,0.79,modis_neo_csv,No
+2023,18,KAB SLEMAN,0.617,modis_neo_csv,No
+2023,18,KOTA YOGYAKARTA,0.644,modis_neo_csv,No
+2023,19,KAB BANTUL,0.64,modis_neo_csv,No
+2023,19,KAB GUNUNG KIDUL,0.715,modis_neo_csv,No
+2023,19,KAB KULON PROGO,0.79,modis_neo_csv,No
+2023,19,KAB SLEMAN,0.617,modis_neo_csv,No
+2023,19,KOTA YOGYAKARTA,0.644,modis_neo_csv,No
+2023,20,KAB BANTUL,0.672,modis_neo_csv,No
+2023,20,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2023,20,KAB KULON PROGO,0.786,modis_neo_csv,No
+2023,20,KAB SLEMAN,0.652,modis_neo_csv,No
+2023,20,KOTA YOGYAKARTA,0.609,modis_neo_csv,No
+2023,21,KAB BANTUL,0.672,modis_neo_csv,No
+2023,21,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2023,21,KAB KULON PROGO,0.786,modis_neo_csv,No
+2023,21,KAB SLEMAN,0.652,modis_neo_csv,No
+2023,21,KOTA YOGYAKARTA,0.609,modis_neo_csv,No
+2023,22,KAB BANTUL,0.664,modis_neo_csv,No
+2023,22,KAB GUNUNG KIDUL,0.691,modis_neo_csv,No
+2023,22,KAB KULON PROGO,0.786,modis_neo_csv,No
+2023,22,KAB SLEMAN,0.597,modis_neo_csv,No
+2023,22,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2023,23,KAB BANTUL,0.664,modis_neo_csv,No
+2023,23,KAB GUNUNG KIDUL,0.691,modis_neo_csv,No
+2023,23,KAB KULON PROGO,0.786,modis_neo_csv,No
+2023,23,KAB SLEMAN,0.597,modis_neo_csv,No
+2023,23,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2023,24,KAB BANTUL,0.664,modis_neo_csv,No
+2023,24,KAB GUNUNG KIDUL,0.64,modis_neo_csv,No
+2023,24,KAB KULON PROGO,0.731,modis_neo_csv,No
+2023,24,KAB SLEMAN,0.62,modis_neo_csv,No
+2023,24,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2023,25,KAB BANTUL,0.664,modis_neo_csv,No
+2023,25,KAB GUNUNG KIDUL,0.64,modis_neo_csv,No
+2023,25,KAB KULON PROGO,0.731,modis_neo_csv,No
+2023,25,KAB SLEMAN,0.62,modis_neo_csv,No
+2023,25,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2023,26,KAB BANTUL,0.664,modis_neo_csv,No
+2023,26,KAB GUNUNG KIDUL,0.605,modis_neo_csv,No
+2023,26,KAB KULON PROGO,0.746,modis_neo_csv,No
+2023,26,KAB SLEMAN,0.628,modis_neo_csv,No
+2023,26,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2023,27,KAB BANTUL,0.664,modis_neo_csv,No
+2023,27,KAB GUNUNG KIDUL,0.605,modis_neo_csv,No
+2023,27,KAB KULON PROGO,0.746,modis_neo_csv,No
+2023,27,KAB SLEMAN,0.628,modis_neo_csv,No
+2023,27,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2023,28,KAB BANTUL,0.664,modis_neo_csv,No
+2023,28,KAB GUNUNG KIDUL,0.605,modis_neo_csv,No
+2023,28,KAB KULON PROGO,0.746,modis_neo_csv,No
+2023,28,KAB SLEMAN,0.628,modis_neo_csv,No
+2023,28,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2023,29,KAB BANTUL,0.62,modis_neo_csv,No
+2023,29,KAB GUNUNG KIDUL,0.585,modis_neo_csv,No
+2023,29,KAB KULON PROGO,0.691,modis_neo_csv,No
+2023,29,KAB SLEMAN,0.573,modis_neo_csv,No
+2023,29,KOTA YOGYAKARTA,0.55,modis_neo_csv,No
+2023,30,KAB BANTUL,0.62,modis_neo_csv,No
+2023,30,KAB GUNUNG KIDUL,0.585,modis_neo_csv,No
+2023,30,KAB KULON PROGO,0.691,modis_neo_csv,No
+2023,30,KAB SLEMAN,0.573,modis_neo_csv,No
+2023,30,KOTA YOGYAKARTA,0.55,modis_neo_csv,No
+2023,31,KAB BANTUL,0.589,modis_neo_csv,No
+2023,31,KAB GUNUNG KIDUL,0.55,modis_neo_csv,No
+2023,31,KAB KULON PROGO,0.676,modis_neo_csv,No
+2023,31,KAB SLEMAN,0.534,modis_neo_csv,No
+2023,31,KOTA YOGYAKARTA,0.55,modis_neo_csv,No
+2023,32,KAB BANTUL,0.589,modis_neo_csv,No
+2023,32,KAB GUNUNG KIDUL,0.55,modis_neo_csv,No
+2023,32,KAB KULON PROGO,0.676,modis_neo_csv,No
+2023,32,KAB SLEMAN,0.534,modis_neo_csv,No
+2023,32,KOTA YOGYAKARTA,0.55,modis_neo_csv,No
+2023,33,KAB BANTUL,0.581,modis_neo_csv,No
+2023,33,KAB GUNUNG KIDUL,0.51,modis_neo_csv,No
+2023,33,KAB KULON PROGO,0.664,modis_neo_csv,No
+2023,33,KAB SLEMAN,0.506,modis_neo_csv,No
+2023,33,KOTA YOGYAKARTA,0.53,modis_neo_csv,No
+2023,34,KAB BANTUL,0.581,modis_neo_csv,No
+2023,34,KAB GUNUNG KIDUL,0.51,modis_neo_csv,No
+2023,34,KAB KULON PROGO,0.664,modis_neo_csv,No
+2023,34,KAB SLEMAN,0.506,modis_neo_csv,No
+2023,34,KOTA YOGYAKARTA,0.53,modis_neo_csv,No
+2023,35,KAB BANTUL,0.581,modis_neo_csv,No
+2023,35,KAB GUNUNG KIDUL,0.51,modis_neo_csv,No
+2023,35,KAB KULON PROGO,0.664,modis_neo_csv,No
+2023,35,KAB SLEMAN,0.506,modis_neo_csv,No
+2023,35,KOTA YOGYAKARTA,0.53,modis_neo_csv,No
+2023,36,KAB BANTUL,0.589,modis_neo_csv,No
+2023,36,KAB GUNUNG KIDUL,0.498,modis_neo_csv,No
+2023,36,KAB KULON PROGO,0.636,modis_neo_csv,No
+2023,36,KAB SLEMAN,0.487,modis_neo_csv,No
+2023,36,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2023,37,KAB BANTUL,0.589,modis_neo_csv,No
+2023,37,KAB GUNUNG KIDUL,0.498,modis_neo_csv,No
+2023,37,KAB KULON PROGO,0.636,modis_neo_csv,No
+2023,37,KAB SLEMAN,0.487,modis_neo_csv,No
+2023,37,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2023,38,KAB BANTUL,0.554,modis_neo_csv,No
+2023,38,KAB GUNUNG KIDUL,0.459,modis_neo_csv,No
+2023,38,KAB KULON PROGO,0.585,modis_neo_csv,No
+2023,38,KAB SLEMAN,0.467,modis_neo_csv,No
+2023,38,KOTA YOGYAKARTA,0.475,modis_neo_csv,No
+2023,39,KAB BANTUL,0.554,modis_neo_csv,No
+2023,39,KAB GUNUNG KIDUL,0.459,modis_neo_csv,No
+2023,39,KAB KULON PROGO,0.585,modis_neo_csv,No
+2023,39,KAB SLEMAN,0.467,modis_neo_csv,No
+2023,39,KOTA YOGYAKARTA,0.475,modis_neo_csv,No
+2023,40,KAB BANTUL,0.628,modis_neo_csv,No
+2023,40,KAB GUNUNG KIDUL,0.491,modis_neo_csv,No
+2023,40,KAB KULON PROGO,0.62,modis_neo_csv,No
+2023,40,KAB SLEMAN,0.483,modis_neo_csv,No
+2023,40,KOTA YOGYAKARTA,0.483,modis_neo_csv,No
+2023,41,KAB BANTUL,0.628,modis_neo_csv,No
+2023,41,KAB GUNUNG KIDUL,0.491,modis_neo_csv,No
+2023,41,KAB KULON PROGO,0.62,modis_neo_csv,No
+2023,41,KAB SLEMAN,0.483,modis_neo_csv,No
+2023,41,KOTA YOGYAKARTA,0.483,modis_neo_csv,No
+2023,42,KAB BANTUL,0.546,modis_neo_csv,No
+2023,42,KAB GUNUNG KIDUL,0.4,modis_neo_csv,No
+2023,42,KAB KULON PROGO,0.593,modis_neo_csv,No
+2023,42,KAB SLEMAN,0.451,modis_neo_csv,No
+2023,42,KOTA YOGYAKARTA,0.467,modis_neo_csv,No
+2023,43,KAB BANTUL,0.546,modis_neo_csv,No
+2023,43,KAB GUNUNG KIDUL,0.4,modis_neo_csv,No
+2023,43,KAB KULON PROGO,0.593,modis_neo_csv,No
+2023,43,KAB SLEMAN,0.451,modis_neo_csv,No
+2023,43,KOTA YOGYAKARTA,0.467,modis_neo_csv,No
+2023,44,KAB BANTUL,0.546,modis_neo_csv,No
+2023,44,KAB GUNUNG KIDUL,0.4,modis_neo_csv,No
+2023,44,KAB KULON PROGO,0.593,modis_neo_csv,No
+2023,44,KAB SLEMAN,0.451,modis_neo_csv,No
+2023,44,KOTA YOGYAKARTA,0.467,modis_neo_csv,No
+2023,45,KAB BANTUL,0.554,modis_neo_csv,No
+2023,45,KAB GUNUNG KIDUL,0.384,modis_neo_csv,No
+2023,45,KAB KULON PROGO,0.479,modis_neo_csv,No
+2023,45,KAB SLEMAN,0.447,modis_neo_csv,No
+2023,45,KOTA YOGYAKARTA,0.463,modis_neo_csv,No
+2023,46,KAB BANTUL,0.554,modis_neo_csv,No
+2023,46,KAB GUNUNG KIDUL,0.384,modis_neo_csv,No
+2023,46,KAB KULON PROGO,0.479,modis_neo_csv,No
+2023,46,KAB SLEMAN,0.447,modis_neo_csv,No
+2023,46,KOTA YOGYAKARTA,0.463,modis_neo_csv,No
+2023,47,KAB BANTUL,0.565,modis_neo_csv,No
+2023,47,KAB GUNUNG KIDUL,0.42,modis_neo_csv,No
+2023,47,KAB KULON PROGO,0.617,modis_neo_csv,No
+2023,47,KAB SLEMAN,0.491,modis_neo_csv,No
+2023,47,KOTA YOGYAKARTA,0.447,modis_neo_csv,No
+2023,48,KAB BANTUL,0.565,modis_neo_csv,No
+2023,48,KAB GUNUNG KIDUL,0.42,modis_neo_csv,No
+2023,48,KAB KULON PROGO,0.617,modis_neo_csv,No
+2023,48,KAB SLEMAN,0.491,modis_neo_csv,No
+2023,48,KOTA YOGYAKARTA,0.447,modis_neo_csv,No
+2023,49,KAB BANTUL,0.628,modis_neo_csv,No
+2023,49,KAB GUNUNG KIDUL,0.408,modis_neo_csv,No
+2023,49,KAB KULON PROGO,0.656,modis_neo_csv,No
+2023,49,KAB SLEMAN,0.554,modis_neo_csv,No
+2023,49,KOTA YOGYAKARTA,0.557,modis_neo_csv,No
+2023,50,KAB BANTUL,0.628,modis_neo_csv,No
+2023,50,KAB GUNUNG KIDUL,0.408,modis_neo_csv,No
+2023,50,KAB KULON PROGO,0.656,modis_neo_csv,No
+2023,50,KAB SLEMAN,0.554,modis_neo_csv,No
+2023,50,KOTA YOGYAKARTA,0.557,modis_neo_csv,No
+2023,51,KAB BANTUL,0.628,modis_neo_csv,No
+2023,51,KAB GUNUNG KIDUL,0.408,modis_neo_csv,No
+2023,51,KAB KULON PROGO,0.656,modis_neo_csv,No
+2023,51,KAB SLEMAN,0.554,modis_neo_csv,No
+2023,51,KOTA YOGYAKARTA,0.557,modis_neo_csv,No
+2023,52,KAB BANTUL,0.609,modis_neo_csv,No
+2023,52,KAB GUNUNG KIDUL,0.463,modis_neo_csv,No
+2023,52,KAB KULON PROGO,0.652,modis_neo_csv,No
+2023,52,KAB SLEMAN,0.581,modis_neo_csv,No
+2023,52,KOTA YOGYAKARTA,0.542,modis_neo_csv,No
+2024,1,KAB BANTUL,0.617,modis_neo_csv,No
+2024,1,KAB GUNUNG KIDUL,0.483,modis_neo_csv,No
+2024,1,KAB KULON PROGO,0.739,modis_neo_csv,No
+2024,1,KAB SLEMAN,0.617,modis_neo_csv,No
+2024,1,KOTA YOGYAKARTA,0.561,modis_neo_csv,No
+2024,2,KAB BANTUL,0.617,modis_neo_csv,No
+2024,2,KAB GUNUNG KIDUL,0.483,modis_neo_csv,No
+2024,2,KAB KULON PROGO,0.739,modis_neo_csv,No
+2024,2,KAB SLEMAN,0.617,modis_neo_csv,No
+2024,2,KOTA YOGYAKARTA,0.561,modis_neo_csv,No
+2024,3,KAB BANTUL,0.617,modis_neo_csv,No
+2024,3,KAB GUNUNG KIDUL,0.483,modis_neo_csv,No
+2024,3,KAB KULON PROGO,0.739,modis_neo_csv,No
+2024,3,KAB SLEMAN,0.617,modis_neo_csv,No
+2024,3,KOTA YOGYAKARTA,0.561,modis_neo_csv,No
+2024,4,KAB BANTUL,0.786,modis_neo_csv,No
+2024,4,KAB GUNUNG KIDUL,0.624,modis_neo_csv,No
+2024,4,KAB KULON PROGO,0.77,modis_neo_csv,No
+2024,4,KAB SLEMAN,0.428,modis_neo_csv,No
+2024,4,KOTA YOGYAKARTA,0.656,modis_neo_csv,No
+2024,5,KAB BANTUL,0.786,modis_neo_csv,No
+2024,5,KAB GUNUNG KIDUL,0.624,modis_neo_csv,No
+2024,5,KAB KULON PROGO,0.77,modis_neo_csv,No
+2024,5,KAB SLEMAN,0.428,modis_neo_csv,No
+2024,5,KOTA YOGYAKARTA,0.656,modis_neo_csv,No
+2024,6,KAB BANTUL,0.648,modis_neo_csv,No
+2024,6,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2024,6,KAB KULON PROGO,0.766,modis_neo_csv,No
+2024,6,KAB SLEMAN,0.573,modis_neo_csv,No
+2024,6,KOTA YOGYAKARTA,0.636,modis_neo_csv,No
+2024,7,KAB BANTUL,0.648,modis_neo_csv,No
+2024,7,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2024,7,KAB KULON PROGO,0.766,modis_neo_csv,No
+2024,7,KAB SLEMAN,0.573,modis_neo_csv,No
+2024,7,KOTA YOGYAKARTA,0.636,modis_neo_csv,No
+2024,8,KAB BANTUL,0.652,modis_neo_csv,No
+2024,8,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2024,8,KAB KULON PROGO,0.813,modis_neo_csv,No
+2024,8,KAB SLEMAN,0.62,modis_neo_csv,No
+2024,8,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2024,9,KAB BANTUL,0.652,modis_neo_csv,No
+2024,9,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2024,9,KAB KULON PROGO,0.813,modis_neo_csv,No
+2024,9,KAB SLEMAN,0.62,modis_neo_csv,No
+2024,9,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2024,10,KAB BANTUL,0.652,modis_neo_csv,No
+2024,10,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2024,10,KAB KULON PROGO,0.813,modis_neo_csv,No
+2024,10,KAB SLEMAN,0.62,modis_neo_csv,No
+2024,10,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2024,11,KAB BANTUL,0.66,modis_neo_csv,No
+2024,11,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2024,11,KAB KULON PROGO,0.778,modis_neo_csv,No
+2024,11,KAB SLEMAN,0.628,modis_neo_csv,No
+2024,11,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2024,12,KAB BANTUL,0.66,modis_neo_csv,No
+2024,12,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2024,12,KAB KULON PROGO,0.778,modis_neo_csv,No
+2024,12,KAB SLEMAN,0.628,modis_neo_csv,No
+2024,12,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2024,13,KAB BANTUL,0.672,modis_neo_csv,No
+2024,13,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2024,13,KAB KULON PROGO,0.786,modis_neo_csv,No
+2024,13,KAB SLEMAN,0.628,modis_neo_csv,No
+2024,13,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2024,14,KAB BANTUL,0.672,modis_neo_csv,No
+2024,14,KAB GUNUNG KIDUL,0.727,modis_neo_csv,No
+2024,14,KAB KULON PROGO,0.786,modis_neo_csv,No
+2024,14,KAB SLEMAN,0.628,modis_neo_csv,No
+2024,14,KOTA YOGYAKARTA,0.632,modis_neo_csv,No
+2024,15,KAB BANTUL,0.683,modis_neo_csv,No
+2024,15,KAB GUNUNG KIDUL,0.766,modis_neo_csv,No
+2024,15,KAB KULON PROGO,0.743,modis_neo_csv,No
+2024,15,KAB SLEMAN,0.707,modis_neo_csv,No
+2024,15,KOTA YOGYAKARTA,0.739,modis_neo_csv,No
+2024,16,KAB BANTUL,0.683,modis_neo_csv,No
+2024,16,KAB GUNUNG KIDUL,0.766,modis_neo_csv,No
+2024,16,KAB KULON PROGO,0.743,modis_neo_csv,No
+2024,16,KAB SLEMAN,0.707,modis_neo_csv,No
+2024,16,KOTA YOGYAKARTA,0.739,modis_neo_csv,No
+2024,17,KAB BANTUL,0.632,modis_neo_csv,No
+2024,17,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2024,17,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,17,KAB SLEMAN,0.589,modis_neo_csv,No
+2024,17,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2024,18,KAB BANTUL,0.632,modis_neo_csv,No
+2024,18,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2024,18,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,18,KAB SLEMAN,0.589,modis_neo_csv,No
+2024,18,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2024,19,KAB BANTUL,0.632,modis_neo_csv,No
+2024,19,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2024,19,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,19,KAB SLEMAN,0.589,modis_neo_csv,No
+2024,19,KOTA YOGYAKARTA,0.597,modis_neo_csv,No
+2024,20,KAB BANTUL,0.632,modis_neo_csv,No
+2024,20,KAB GUNUNG KIDUL,0.703,modis_neo_csv,No
+2024,20,KAB KULON PROGO,0.727,modis_neo_csv,No
+2024,20,KAB SLEMAN,0.593,modis_neo_csv,No
+2024,20,KOTA YOGYAKARTA,0.581,modis_neo_csv,No
+2024,21,KAB BANTUL,0.632,modis_neo_csv,No
+2024,21,KAB GUNUNG KIDUL,0.703,modis_neo_csv,No
+2024,21,KAB KULON PROGO,0.727,modis_neo_csv,No
+2024,21,KAB SLEMAN,0.593,modis_neo_csv,No
+2024,21,KOTA YOGYAKARTA,0.581,modis_neo_csv,No
+2024,22,KAB BANTUL,0.66,modis_neo_csv,No
+2024,22,KAB GUNUNG KIDUL,0.66,modis_neo_csv,No
+2024,22,KAB KULON PROGO,0.754,modis_neo_csv,No
+2024,22,KAB SLEMAN,0.605,modis_neo_csv,No
+2024,22,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2024,23,KAB BANTUL,0.66,modis_neo_csv,No
+2024,23,KAB GUNUNG KIDUL,0.66,modis_neo_csv,No
+2024,23,KAB KULON PROGO,0.754,modis_neo_csv,No
+2024,23,KAB SLEMAN,0.605,modis_neo_csv,No
+2024,23,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2024,24,KAB BANTUL,0.652,modis_neo_csv,No
+2024,24,KAB GUNUNG KIDUL,0.644,modis_neo_csv,No
+2024,24,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,24,KAB SLEMAN,0.605,modis_neo_csv,No
+2024,24,KOTA YOGYAKARTA,0.565,modis_neo_csv,No
+2024,25,KAB BANTUL,0.652,modis_neo_csv,No
+2024,25,KAB GUNUNG KIDUL,0.644,modis_neo_csv,No
+2024,25,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,25,KAB SLEMAN,0.605,modis_neo_csv,No
+2024,25,KOTA YOGYAKARTA,0.565,modis_neo_csv,No
+2024,26,KAB BANTUL,0.652,modis_neo_csv,No
+2024,26,KAB GUNUNG KIDUL,0.644,modis_neo_csv,No
+2024,26,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,26,KAB SLEMAN,0.605,modis_neo_csv,No
+2024,26,KOTA YOGYAKARTA,0.565,modis_neo_csv,No
+2024,27,KAB BANTUL,0.656,modis_neo_csv,No
+2024,27,KAB GUNUNG KIDUL,0.585,modis_neo_csv,No
+2024,27,KAB KULON PROGO,0.703,modis_neo_csv,No
+2024,27,KAB SLEMAN,0.597,modis_neo_csv,No
+2024,27,KOTA YOGYAKARTA,0.554,modis_neo_csv,No
+2024,28,KAB BANTUL,0.656,modis_neo_csv,No
+2024,28,KAB GUNUNG KIDUL,0.585,modis_neo_csv,No
+2024,28,KAB KULON PROGO,0.703,modis_neo_csv,No
+2024,28,KAB SLEMAN,0.597,modis_neo_csv,No
+2024,28,KOTA YOGYAKARTA,0.554,modis_neo_csv,No
+2024,29,KAB BANTUL,0.672,modis_neo_csv,No
+2024,29,KAB GUNUNG KIDUL,0.644,modis_neo_csv,No
+2024,29,KAB KULON PROGO,0.715,modis_neo_csv,No
+2024,29,KAB SLEMAN,0.624,modis_neo_csv,No
+2024,29,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2024,30,KAB BANTUL,0.672,modis_neo_csv,No
+2024,30,KAB GUNUNG KIDUL,0.644,modis_neo_csv,No
+2024,30,KAB KULON PROGO,0.715,modis_neo_csv,No
+2024,30,KAB SLEMAN,0.624,modis_neo_csv,No
+2024,30,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2024,31,KAB BANTUL,0.628,modis_neo_csv,No
+2024,31,KAB GUNUNG KIDUL,0.534,modis_neo_csv,No
+2024,31,KAB KULON PROGO,0.668,modis_neo_csv,No
+2024,31,KAB SLEMAN,0.593,modis_neo_csv,No
+2024,31,KOTA YOGYAKARTA,0.546,modis_neo_csv,No
+2024,32,KAB BANTUL,0.628,modis_neo_csv,No
+2024,32,KAB GUNUNG KIDUL,0.534,modis_neo_csv,No
+2024,32,KAB KULON PROGO,0.668,modis_neo_csv,No
+2024,32,KAB SLEMAN,0.593,modis_neo_csv,No
+2024,32,KOTA YOGYAKARTA,0.546,modis_neo_csv,No
+2024,33,KAB BANTUL,0.617,modis_neo_csv,No
+2024,33,KAB GUNUNG KIDUL,0.518,modis_neo_csv,No
+2024,33,KAB KULON PROGO,0.652,modis_neo_csv,No
+2024,33,KAB SLEMAN,0.55,modis_neo_csv,No
+2024,33,KOTA YOGYAKARTA,0.522,modis_neo_csv,No
+2024,34,KAB BANTUL,0.617,modis_neo_csv,No
+2024,34,KAB GUNUNG KIDUL,0.518,modis_neo_csv,No
+2024,34,KAB KULON PROGO,0.652,modis_neo_csv,No
+2024,34,KAB SLEMAN,0.55,modis_neo_csv,No
+2024,34,KOTA YOGYAKARTA,0.522,modis_neo_csv,No
+2024,35,KAB BANTUL,0.617,modis_neo_csv,No
+2024,35,KAB GUNUNG KIDUL,0.518,modis_neo_csv,No
+2024,35,KAB KULON PROGO,0.652,modis_neo_csv,No
+2024,35,KAB SLEMAN,0.55,modis_neo_csv,No
+2024,35,KOTA YOGYAKARTA,0.522,modis_neo_csv,No
+2024,36,KAB BANTUL,0.577,modis_neo_csv,No
+2024,36,KAB GUNUNG KIDUL,0.439,modis_neo_csv,No
+2024,36,KAB KULON PROGO,0.593,modis_neo_csv,No
+2024,36,KAB SLEMAN,0.475,modis_neo_csv,No
+2024,36,KOTA YOGYAKARTA,0.487,modis_neo_csv,No
+2024,37,KAB BANTUL,0.577,modis_neo_csv,No
+2024,37,KAB GUNUNG KIDUL,0.439,modis_neo_csv,No
+2024,37,KAB KULON PROGO,0.593,modis_neo_csv,No
+2024,37,KAB SLEMAN,0.475,modis_neo_csv,No
+2024,37,KOTA YOGYAKARTA,0.487,modis_neo_csv,No
+2024,38,KAB BANTUL,0.605,modis_neo_csv,No
+2024,38,KAB GUNUNG KIDUL,0.479,modis_neo_csv,No
+2024,38,KAB KULON PROGO,0.593,modis_neo_csv,No
+2024,38,KAB SLEMAN,0.506,modis_neo_csv,No
+2024,38,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2024,39,KAB BANTUL,0.605,modis_neo_csv,No
+2024,39,KAB GUNUNG KIDUL,0.479,modis_neo_csv,No
+2024,39,KAB KULON PROGO,0.593,modis_neo_csv,No
+2024,39,KAB SLEMAN,0.506,modis_neo_csv,No
+2024,39,KOTA YOGYAKARTA,0.498,modis_neo_csv,No
+2024,40,KAB BANTUL,0.601,modis_neo_csv,No
+2024,40,KAB GUNUNG KIDUL,0.412,modis_neo_csv,No
+2024,40,KAB KULON PROGO,0.573,modis_neo_csv,No
+2024,40,KAB SLEMAN,0.53,modis_neo_csv,No
+2024,40,KOTA YOGYAKARTA,0.483,modis_neo_csv,No
+2024,41,KAB BANTUL,0.601,modis_neo_csv,No
+2024,41,KAB GUNUNG KIDUL,0.412,modis_neo_csv,No
+2024,41,KAB KULON PROGO,0.573,modis_neo_csv,No
+2024,41,KAB SLEMAN,0.53,modis_neo_csv,No
+2024,41,KOTA YOGYAKARTA,0.483,modis_neo_csv,No
+2024,42,KAB BANTUL,0.601,modis_neo_csv,No
+2024,42,KAB GUNUNG KIDUL,0.412,modis_neo_csv,No
+2024,42,KAB KULON PROGO,0.573,modis_neo_csv,No
+2024,42,KAB SLEMAN,0.53,modis_neo_csv,No
+2024,42,KOTA YOGYAKARTA,0.483,modis_neo_csv,No
+2024,43,KAB BANTUL,0.569,modis_neo_csv,No
+2024,43,KAB GUNUNG KIDUL,0.42,modis_neo_csv,No
+2024,43,KAB KULON PROGO,0.561,modis_neo_csv,No
+2024,43,KAB SLEMAN,0.538,modis_neo_csv,No
+2024,43,KOTA YOGYAKARTA,0.491,modis_neo_csv,No
+2024,44,KAB BANTUL,0.569,modis_neo_csv,No
+2024,44,KAB GUNUNG KIDUL,0.42,modis_neo_csv,No
+2024,44,KAB KULON PROGO,0.561,modis_neo_csv,No
+2024,44,KAB SLEMAN,0.538,modis_neo_csv,No
+2024,44,KOTA YOGYAKARTA,0.491,modis_neo_csv,No
+2024,45,KAB BANTUL,0.628,modis_neo_csv,No
+2024,45,KAB GUNUNG KIDUL,0.546,modis_neo_csv,No
+2024,45,KAB KULON PROGO,0.687,modis_neo_csv,No
+2024,45,KAB SLEMAN,0.617,modis_neo_csv,No
+2024,45,KOTA YOGYAKARTA,0.506,modis_neo_csv,No
+2024,46,KAB BANTUL,0.628,modis_neo_csv,No
+2024,46,KAB GUNUNG KIDUL,0.546,modis_neo_csv,No
+2024,46,KAB KULON PROGO,0.687,modis_neo_csv,No
+2024,46,KAB SLEMAN,0.617,modis_neo_csv,No
+2024,46,KOTA YOGYAKARTA,0.506,modis_neo_csv,No
+2024,47,KAB BANTUL,0.695,modis_neo_csv,No
+2024,47,KAB GUNUNG KIDUL,0.55,modis_neo_csv,No
+2024,47,KAB KULON PROGO,0.735,modis_neo_csv,No
+2024,47,KAB SLEMAN,0.66,modis_neo_csv,No
+2024,47,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2024,48,KAB BANTUL,0.695,modis_neo_csv,No
+2024,48,KAB GUNUNG KIDUL,0.55,modis_neo_csv,No
+2024,48,KAB KULON PROGO,0.735,modis_neo_csv,No
+2024,48,KAB SLEMAN,0.66,modis_neo_csv,No
+2024,48,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2024,49,KAB BANTUL,0.715,modis_neo_csv,No
+2024,49,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2024,49,KAB KULON PROGO,0.735,modis_neo_csv,No
+2024,49,KAB SLEMAN,0.676,modis_neo_csv,No
+2024,49,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2024,50,KAB BANTUL,0.715,modis_neo_csv,No
+2024,50,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2024,50,KAB KULON PROGO,0.735,modis_neo_csv,No
+2024,50,KAB SLEMAN,0.676,modis_neo_csv,No
+2024,50,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2024,51,KAB BANTUL,0.715,modis_neo_csv,No
+2024,51,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2024,51,KAB KULON PROGO,0.735,modis_neo_csv,No
+2024,51,KAB SLEMAN,0.676,modis_neo_csv,No
+2024,51,KOTA YOGYAKARTA,0.687,modis_neo_csv,No
+2024,52,KAB BANTUL,0.703,modis_neo_csv,No
+2024,52,KAB GUNUNG KIDUL,0.817,modis_neo_csv,No
+2024,52,KAB KULON PROGO,0.746,modis_neo_csv,No
+2024,52,KAB SLEMAN,0.687,modis_neo_csv,No
+2024,52,KOTA YOGYAKARTA,0.683,modis_neo_csv,No
+2025,1,KAB BANTUL,0.703,modis_neo_csv,No
+2025,1,KAB GUNUNG KIDUL,0.817,modis_neo_csv,No
+2025,1,KAB KULON PROGO,0.746,modis_neo_csv,No
+2025,1,KAB SLEMAN,0.687,modis_neo_csv,No
+2025,1,KOTA YOGYAKARTA,0.683,modis_neo_csv,No
+2025,2,KAB BANTUL,0.636,modis_neo_csv,No
+2025,2,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2025,2,KAB KULON PROGO,0.817,modis_neo_csv,No
+2025,2,KAB SLEMAN,0.589,modis_neo_csv,No
+2025,2,KOTA YOGYAKARTA,0.64,modis_neo_csv,No
+2025,3,KAB BANTUL,0.636,modis_neo_csv,No
+2025,3,KAB GUNUNG KIDUL,0.707,modis_neo_csv,No
+2025,3,KAB KULON PROGO,0.817,modis_neo_csv,No
+2025,3,KAB SLEMAN,0.589,modis_neo_csv,No
+2025,3,KOTA YOGYAKARTA,0.64,modis_neo_csv,No
+2025,4,KAB BANTUL,0.601,modis_neo_csv,No
+2025,4,KAB GUNUNG KIDUL,0.758,modis_neo_csv,No
+2025,4,KAB KULON PROGO,0.821,modis_neo_csv,No
+2025,4,KAB SLEMAN,0.715,modis_neo_csv,No
+2025,4,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2025,5,KAB BANTUL,0.601,modis_neo_csv,No
+2025,5,KAB GUNUNG KIDUL,0.758,modis_neo_csv,No
+2025,5,KAB KULON PROGO,0.821,modis_neo_csv,No
+2025,5,KAB SLEMAN,0.715,modis_neo_csv,No
+2025,5,KOTA YOGYAKARTA,0.723,modis_neo_csv,No
+2025,6,KAB BANTUL,0.695,modis_neo_csv,No
+2025,6,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2025,6,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,6,KAB SLEMAN,0.723,modis_neo_csv,No
+2025,6,KOTA YOGYAKARTA,0.727,modis_neo_csv,No
+2025,7,KAB BANTUL,0.695,modis_neo_csv,No
+2025,7,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2025,7,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,7,KAB SLEMAN,0.723,modis_neo_csv,No
+2025,7,KOTA YOGYAKARTA,0.727,modis_neo_csv,No
+2025,8,KAB BANTUL,0.695,modis_neo_csv,No
+2025,8,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2025,8,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,8,KAB SLEMAN,0.723,modis_neo_csv,No
+2025,8,KOTA YOGYAKARTA,0.727,modis_neo_csv,No
+2025,9,KAB BANTUL,0.711,modis_neo_csv,No
+2025,9,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2025,9,KAB KULON PROGO,0.762,modis_neo_csv,No
+2025,9,KAB SLEMAN,0.699,modis_neo_csv,No
+2025,9,KOTA YOGYAKARTA,0.695,modis_neo_csv,No
+2025,10,KAB BANTUL,0.711,modis_neo_csv,No
+2025,10,KAB GUNUNG KIDUL,0.743,modis_neo_csv,No
+2025,10,KAB KULON PROGO,0.762,modis_neo_csv,No
+2025,10,KAB SLEMAN,0.699,modis_neo_csv,No
+2025,10,KOTA YOGYAKARTA,0.695,modis_neo_csv,No
+2025,11,KAB BANTUL,0.695,modis_neo_csv,No
+2025,11,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2025,11,KAB KULON PROGO,0.723,modis_neo_csv,No
+2025,11,KAB SLEMAN,0.683,modis_neo_csv,No
+2025,11,KOTA YOGYAKARTA,0.648,modis_neo_csv,No
+2025,12,KAB BANTUL,0.695,modis_neo_csv,No
+2025,12,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2025,12,KAB KULON PROGO,0.723,modis_neo_csv,No
+2025,12,KAB SLEMAN,0.683,modis_neo_csv,No
+2025,12,KOTA YOGYAKARTA,0.648,modis_neo_csv,No
+2025,13,KAB BANTUL,0.683,modis_neo_csv,No
+2025,13,KAB GUNUNG KIDUL,0.766,modis_neo_csv,No
+2025,13,KAB KULON PROGO,0.739,modis_neo_csv,No
+2025,13,KAB SLEMAN,0.656,modis_neo_csv,No
+2025,13,KOTA YOGYAKARTA,0.652,modis_neo_csv,No
+2025,14,KAB BANTUL,0.683,modis_neo_csv,No
+2025,14,KAB GUNUNG KIDUL,0.766,modis_neo_csv,No
+2025,14,KAB KULON PROGO,0.739,modis_neo_csv,No
+2025,14,KAB SLEMAN,0.656,modis_neo_csv,No
+2025,14,KOTA YOGYAKARTA,0.652,modis_neo_csv,No
+2025,15,KAB BANTUL,0.648,modis_neo_csv,No
+2025,15,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2025,15,KAB KULON PROGO,0.746,modis_neo_csv,No
+2025,15,KAB SLEMAN,0.628,modis_neo_csv,No
+2025,15,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2025,16,KAB BANTUL,0.648,modis_neo_csv,No
+2025,16,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2025,16,KAB KULON PROGO,0.746,modis_neo_csv,No
+2025,16,KAB SLEMAN,0.628,modis_neo_csv,No
+2025,16,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2025,17,KAB BANTUL,0.648,modis_neo_csv,No
+2025,17,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2025,17,KAB KULON PROGO,0.746,modis_neo_csv,No
+2025,17,KAB SLEMAN,0.628,modis_neo_csv,No
+2025,17,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2025,18,KAB BANTUL,0.648,modis_neo_csv,No
+2025,18,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2025,18,KAB KULON PROGO,0.746,modis_neo_csv,No
+2025,18,KAB SLEMAN,0.628,modis_neo_csv,No
+2025,18,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2025,19,KAB BANTUL,0.648,modis_neo_csv,No
+2025,19,KAB GUNUNG KIDUL,0.786,modis_neo_csv,No
+2025,19,KAB KULON PROGO,0.746,modis_neo_csv,No
+2025,19,KAB SLEMAN,0.628,modis_neo_csv,No
+2025,19,KOTA YOGYAKARTA,0.62,modis_neo_csv,No
+2025,20,KAB BANTUL,0.632,modis_neo_csv,No
+2025,20,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2025,20,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,20,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,20,KOTA YOGYAKARTA,0.648,modis_neo_csv,No
+2025,21,KAB BANTUL,0.632,modis_neo_csv,No
+2025,21,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2025,21,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,21,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,21,KOTA YOGYAKARTA,0.648,modis_neo_csv,No
+2025,22,KAB BANTUL,0.676,modis_neo_csv,No
+2025,22,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2025,22,KAB KULON PROGO,0.833,modis_neo_csv,No
+2025,22,KAB SLEMAN,0.624,modis_neo_csv,No
+2025,22,KOTA YOGYAKARTA,0.609,modis_neo_csv,No
+2025,23,KAB BANTUL,0.676,modis_neo_csv,No
+2025,23,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2025,23,KAB KULON PROGO,0.833,modis_neo_csv,No
+2025,23,KAB SLEMAN,0.624,modis_neo_csv,No
+2025,23,KOTA YOGYAKARTA,0.609,modis_neo_csv,No
+2025,24,KAB BANTUL,0.676,modis_neo_csv,No
+2025,24,KAB GUNUNG KIDUL,0.77,modis_neo_csv,No
+2025,24,KAB KULON PROGO,0.833,modis_neo_csv,No
+2025,24,KAB SLEMAN,0.624,modis_neo_csv,No
+2025,24,KOTA YOGYAKARTA,0.609,modis_neo_csv,No
+2025,25,KAB BANTUL,0.66,modis_neo_csv,No
+2025,25,KAB GUNUNG KIDUL,0.719,modis_neo_csv,No
+2025,25,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,25,KAB SLEMAN,0.613,modis_neo_csv,No
+2025,25,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2025,26,KAB BANTUL,0.66,modis_neo_csv,No
+2025,26,KAB GUNUNG KIDUL,0.719,modis_neo_csv,No
+2025,26,KAB KULON PROGO,0.794,modis_neo_csv,No
+2025,26,KAB SLEMAN,0.613,modis_neo_csv,No
+2025,26,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2025,27,KAB BANTUL,0.691,modis_neo_csv,No
+2025,27,KAB GUNUNG KIDUL,0.746,modis_neo_csv,No
+2025,27,KAB KULON PROGO,0.727,modis_neo_csv,No
+2025,27,KAB SLEMAN,0.66,modis_neo_csv,No
+2025,27,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2025,28,KAB BANTUL,0.691,modis_neo_csv,No
+2025,28,KAB GUNUNG KIDUL,0.746,modis_neo_csv,No
+2025,28,KAB KULON PROGO,0.727,modis_neo_csv,No
+2025,28,KAB SLEMAN,0.66,modis_neo_csv,No
+2025,28,KOTA YOGYAKARTA,0.613,modis_neo_csv,No
+2025,29,KAB BANTUL,0.664,modis_neo_csv,No
+2025,29,KAB GUNUNG KIDUL,0.676,modis_neo_csv,No
+2025,29,KAB KULON PROGO,0.703,modis_neo_csv,No
+2025,29,KAB SLEMAN,0.613,modis_neo_csv,No
+2025,29,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2025,30,KAB BANTUL,0.664,modis_neo_csv,No
+2025,30,KAB GUNUNG KIDUL,0.676,modis_neo_csv,No
+2025,30,KAB KULON PROGO,0.703,modis_neo_csv,No
+2025,30,KAB SLEMAN,0.613,modis_neo_csv,No
+2025,30,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2025,31,KAB BANTUL,0.683,modis_neo_csv,No
+2025,31,KAB GUNUNG KIDUL,0.66,modis_neo_csv,No
+2025,31,KAB KULON PROGO,0.687,modis_neo_csv,No
+2025,31,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,31,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2025,32,KAB BANTUL,0.683,modis_neo_csv,No
+2025,32,KAB GUNUNG KIDUL,0.66,modis_neo_csv,No
+2025,32,KAB KULON PROGO,0.687,modis_neo_csv,No
+2025,32,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,32,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2025,33,KAB BANTUL,0.683,modis_neo_csv,No
+2025,33,KAB GUNUNG KIDUL,0.66,modis_neo_csv,No
+2025,33,KAB KULON PROGO,0.687,modis_neo_csv,No
+2025,33,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,33,KOTA YOGYAKARTA,0.573,modis_neo_csv,No
+2025,34,KAB BANTUL,0.636,modis_neo_csv,No
+2025,34,KAB GUNUNG KIDUL,0.581,modis_neo_csv,No
+2025,34,KAB KULON PROGO,0.719,modis_neo_csv,No
+2025,34,KAB SLEMAN,0.554,modis_neo_csv,No
+2025,34,KOTA YOGYAKARTA,0.565,modis_neo_csv,No
+2025,35,KAB BANTUL,0.636,modis_neo_csv,No
+2025,35,KAB GUNUNG KIDUL,0.581,modis_neo_csv,No
+2025,35,KAB KULON PROGO,0.719,modis_neo_csv,No
+2025,35,KAB SLEMAN,0.554,modis_neo_csv,No
+2025,35,KOTA YOGYAKARTA,0.565,modis_neo_csv,No
+2025,36,KAB BANTUL,0.664,modis_neo_csv,No
+2025,36,KAB GUNUNG KIDUL,0.605,modis_neo_csv,No
+2025,36,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,36,KAB SLEMAN,0.577,modis_neo_csv,No
+2025,36,KOTA YOGYAKARTA,0.569,modis_neo_csv,No
+2025,37,KAB BANTUL,0.664,modis_neo_csv,No
+2025,37,KAB GUNUNG KIDUL,0.605,modis_neo_csv,No
+2025,37,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,37,KAB SLEMAN,0.577,modis_neo_csv,No
+2025,37,KOTA YOGYAKARTA,0.569,modis_neo_csv,No
+2025,38,KAB BANTUL,0.648,modis_neo_csv,No
+2025,38,KAB GUNUNG KIDUL,0.62,modis_neo_csv,No
+2025,38,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,38,KAB SLEMAN,0.577,modis_neo_csv,No
+2025,38,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2025,39,KAB BANTUL,0.648,modis_neo_csv,No
+2025,39,KAB GUNUNG KIDUL,0.62,modis_neo_csv,No
+2025,39,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,39,KAB SLEMAN,0.577,modis_neo_csv,No
+2025,39,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2025,40,KAB BANTUL,0.648,modis_neo_csv,No
+2025,40,KAB GUNUNG KIDUL,0.62,modis_neo_csv,No
+2025,40,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,40,KAB SLEMAN,0.577,modis_neo_csv,No
+2025,40,KOTA YOGYAKARTA,0.601,modis_neo_csv,No
+2025,41,KAB BANTUL,0.648,modis_neo_csv,No
+2025,41,KAB GUNUNG KIDUL,0.687,modis_neo_csv,No
+2025,41,KAB KULON PROGO,0.766,modis_neo_csv,No
+2025,41,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,41,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2025,42,KAB BANTUL,0.648,modis_neo_csv,No
+2025,42,KAB GUNUNG KIDUL,0.687,modis_neo_csv,No
+2025,42,KAB KULON PROGO,0.766,modis_neo_csv,No
+2025,42,KAB SLEMAN,0.593,modis_neo_csv,No
+2025,42,KOTA YOGYAKARTA,0.589,modis_neo_csv,No
+2025,43,KAB BANTUL,0.644,modis_neo_csv,No
+2025,43,KAB GUNUNG KIDUL,0.652,modis_neo_csv,No
+2025,43,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,43,KAB SLEMAN,0.632,modis_neo_csv,No
+2025,43,KOTA YOGYAKARTA,0.554,modis_neo_csv,No
+2025,44,KAB BANTUL,0.644,modis_neo_csv,No
+2025,44,KAB GUNUNG KIDUL,0.652,modis_neo_csv,No
+2025,44,KAB KULON PROGO,0.743,modis_neo_csv,No
+2025,44,KAB SLEMAN,0.632,modis_neo_csv,No
+2025,44,KOTA YOGYAKARTA,0.554,modis_neo_csv,No
+2025,45,KAB BANTUL,0.672,modis_neo_csv,No
+2025,45,KAB GUNUNG KIDUL,0.557,modis_neo_csv,No
+2025,45,KAB KULON PROGO,0.672,modis_neo_csv,No
+2025,45,KAB SLEMAN,0.624,modis_neo_csv,No
+2025,45,KOTA YOGYAKARTA,0.577,modis_neo_csv,No
+2025,46,KAB BANTUL,0.672,modis_neo_csv,No
+2025,46,KAB GUNUNG KIDUL,0.557,modis_neo_csv,No
+2025,46,KAB KULON PROGO,0.672,modis_neo_csv,No
+2025,46,KAB SLEMAN,0.624,modis_neo_csv,No
+2025,46,KOTA YOGYAKARTA,0.577,modis_neo_csv,No
+2025,47,KAB BANTUL,0.695,modis_neo_csv,No
+2025,47,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2025,47,KAB KULON PROGO,0.77,modis_neo_csv,No
+2025,47,KAB SLEMAN,0.66,modis_neo_csv,No
+2025,47,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2025,48,KAB BANTUL,0.695,modis_neo_csv,No
+2025,48,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2025,48,KAB KULON PROGO,0.77,modis_neo_csv,No
+2025,48,KAB SLEMAN,0.66,modis_neo_csv,No
+2025,48,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2025,49,KAB BANTUL,0.695,modis_neo_csv,No
+2025,49,KAB GUNUNG KIDUL,0.782,modis_neo_csv,No
+2025,49,KAB KULON PROGO,0.77,modis_neo_csv,No
+2025,49,KAB SLEMAN,0.66,modis_neo_csv,No
+2025,49,KOTA YOGYAKARTA,0.538,modis_neo_csv,No
+2025,50,KAB BANTUL,0.687,modis_neo_csv,No
+2025,50,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2025,50,KAB KULON PROGO,0.735,modis_neo_csv,No
+2025,50,KAB SLEMAN,0.676,modis_neo_csv,No
+2025,50,KOTA YOGYAKARTA,0.664,modis_neo_csv,No
+2025,51,KAB BANTUL,0.687,modis_neo_csv,No
+2025,51,KAB GUNUNG KIDUL,0.802,modis_neo_csv,No
+2025,51,KAB KULON PROGO,0.735,modis_neo_csv,No
+2025,51,KAB SLEMAN,0.676,modis_neo_csv,No
+2025,51,KOTA YOGYAKARTA,0.664,modis_neo_csv,No
+2025,52,KAB BANTUL,0.68,modis_neo_csv,No
+2025,52,KAB GUNUNG KIDUL,0.798,modis_neo_csv,No
+2025,52,KAB KULON PROGO,0.813,modis_neo_csv,No
+2025,52,KAB SLEMAN,0.605,modis_neo_csv,No
+2025,52,KOTA YOGYAKARTA,0.64,modis_neo_csv,No

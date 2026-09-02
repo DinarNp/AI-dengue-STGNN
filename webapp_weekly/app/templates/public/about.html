@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('public.about_title') }} — Explain Dengue{% endblock %}
+
+{% block content %}
+
+<!-- ===== PAGE HEADER ===== -->
+<section style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0369a1 100%);padding:56px 32px 48px;margin:-24px -24px 0;">
+  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;" class="about-header-grid">
+    <div>
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);border-radius:99px;padding:5px 14px;font-size:12px;color:#7dd3fc;font-weight:500;margin-bottom:16px;">
+        <i class="fas fa-brain" style="font-size:11px;"></i>
+        {{ t('public.about_subtitle') }}
+      </div>
+      <h1 style="color:white;font-size:32px;font-weight:800;margin-bottom:12px;line-height:1.2;">{{ t('public.about_title') }}</h1>
+      <p style="color:rgba(255,255,255,0.65);font-size:16px;max-width:600px;margin:0 0 24px;">{{ t('public.about_desc1') }}</p>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#7dd3fc;">5</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);">{{ t('public.hero_kabupaten') }}</div>
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#7dd3fc;">STGNN</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);">{{ t('public.about_ai_model_label') }}</div>
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#7dd3fc;">3</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);">{{ t('page.risk_monitor_detail.months_forecast') }}</div>
+        </div>
+        <div style="width:1px;background:rgba(255,255,255,0.1);"></div>
+        <div style="text-align:center;">
+          <div style="font-size:28px;font-weight:800;color:#7dd3fc;">μ+1.25σ</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);">{{ t('risk.threshold_desc') }}</div>
+        </div>
+      </div>
+    </div>
+    <div style="opacity:0.12;font-size:120px;color:white;line-height:1;" class="about-header-icon">
+      <i class="fas fa-virus"></i>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT / MODEL ===== -->
+<section style="padding:56px 32px;background:var(--body-bg);">
+  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;" class="about-two-col">
+
+    <!-- Left: what this system is -->
+    <div>
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:16px;color:var(--text-primary);">
+        <i class="fas fa-project-diagram" style="color:var(--primary);margin-right:8px;"></i>
+        {{ t('public.about_stgnn_title') }}
+      </h2>
+      <p style="color:var(--text-muted);line-height:1.7;margin-bottom:16px;">{{ t('public.about_desc2') }}</p>
+      <p style="color:var(--text-muted);line-height:1.7;margin-bottom:24px;">
+        {{ t('public.about_stgnn_desc') | safe }}
+      </p>
+
+      <!-- Model pipeline -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% set steps = [
+          ('fa-database',    '#0ea5e9', t('public.how_step1_title'), t('public.how_step1_desc')),
+          ('fa-sitemap',     '#8b5cf6', t('public.how_step2_title'), t('public.how_step2_desc')),
+          ('fa-clock',       '#f59e0b', t('public.how_step3_title'), t('public.how_step3_desc')),
+          ('fa-bullseye',    '#10b981', t('public.how_step4_title'), t('public.how_step4_desc')),
+          ('fa-lightbulb',   '#ef4444', t('public.how_step5_title'), t('public.how_step5_desc'))
+        ] %}
+        {% for icon, color, title, desc in steps %}
+        <div style="display:flex;gap:12px;align-items:flex-start;background:var(--card-bg);border:1px solid var(--border-color);border-radius:10px;padding:12px 14px;">
+          <div style="width:32px;height:32px;border-radius:8px;background:{{ color }}18;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">
+            <i class="fas {{ icon }}" style="color:{{ color }};font-size:13px;"></i>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:2px;">{{ title }}</div>
+            <div style="font-size:12px;color:var(--text-muted);line-height:1.5;">{{ desc }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right: key model facts -->
+    <div style="display:flex;flex-direction:column;gap:16px;">
+
+      <div class="card" style="margin:0;">
+        <div class="card-header">
+          <h5 class="card-header-title"><i class="fas fa-brain" style="color:var(--primary);margin-right:8px;"></i>{{ t('public.about_model_arch_title') }}</h5>
+        </div>
+        <div class="card-body" style="padding:16px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            {% set facts = [
+              (t('public.about_arch_gcn'),       t('public.about_arch_gcn_desc'),       '#0ea5e9'),
+              (t('public.about_arch_lstm'),       t('public.about_arch_lstm_desc'),       '#8b5cf6'),
+              (t('public.about_arch_attention'),  t('public.about_arch_attention_desc'),  '#f59e0b'),
+              (t('public.about_arch_zinb'),       t('public.about_arch_zinb_desc'),       '#10b981'),
+            ] %}
+            {% for label, desc, color in facts %}
+            <div style="background:{{ color }}0d;border:1px solid {{ color }}30;border-radius:8px;padding:10px 12px;">
+              <div style="font-size:12px;font-weight:700;color:{{ color }};margin-bottom:3px;">{{ label }}</div>
+              <div style="font-size:11px;color:var(--text-muted);">{{ desc }}</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0;">
+        <div class="card-header">
+          <h5 class="card-header-title"><i class="fas fa-shield-alt" style="color:#f59e0b;margin-right:8px;"></i>{{ t('public.about_risk_class_title') }}</h5>
+        </div>
+        <div class="card-body" style="padding:16px;">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">{{ t('risk.threshold_method') }}</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:10px 12px;">
+              <span class="risk-dot alert" style="flex-shrink:0;"></span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:#ef4444;">{{ t('risk.alert') }}</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ t('public.about_alert_desc') }}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.25);border-radius:8px;padding:10px 12px;">
+              <span class="risk-dot no_alert" style="flex-shrink:0;"></span>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:#10b981;">{{ t('risk.no_alert') }}</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ t('public.about_no_alert_desc') }}</div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--text-muted);margin-top:10px;margin-bottom:0;">
+            <i class="fas fa-info-circle" style="margin-right:4px;color:#f59e0b;"></i>
+            {{ t('public.about_threshold_note') }}
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== DATA SOURCES ===== -->
+<section style="padding:56px 32px;background:white;">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:36px;">
+      <h2 class="section-heading">{{ t('public.data_sources_title') }}</h2>
+      <p class="section-subheading" style="margin-bottom:0;">{{ t('public.about_data_sources_subtitle') }}</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;" class="data-sources-grid">
+
+      <div class="card" style="margin:0;border-top:3px solid #ef4444;">
+        <div class="card-body" style="padding:24px 20px;">
+          <div style="width:48px;height:48px;background:rgba(239,68,68,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <i class="fas fa-hospital" style="color:#ef4444;font-size:20px;"></i>
+          </div>
+          <h5 style="font-weight:700;margin-bottom:8px;font-size:15px;">{{ t('public.dengue_cases_title') }}</h5>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">{{ t('public.dengue_cases_desc') }}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="pill" style="font-size:11px;background:rgba(239,68,68,0.1);color:#ef4444;">{{ t('public.about_pill_monthly') }}</span>
+            <span class="pill" style="font-size:11px;">{{ t('public.about_pill_regencies') }}</span>
+            <span class="pill" style="font-size:11px;">{{ t('public.about_pill_from_2021') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0;border-top:3px solid #0ea5e9;">
+        <div class="card-body" style="padding:24px 20px;">
+          <div style="width:48px;height:48px;background:rgba(14,165,233,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <i class="fas fa-cloud-sun-rain" style="color:#0ea5e9;font-size:20px;"></i>
+          </div>
+          <h5 style="font-weight:700;margin-bottom:8px;font-size:15px;">{{ t('nav.climate_data') }}</h5>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">{{ t('public.climate_data_desc') }}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="pill" style="font-size:11px;background:rgba(14,165,233,0.1);color:#0ea5e9;">NASA POWER</span>
+            <span class="pill" style="font-size:11px;">OpenWeather</span>
+            <span class="pill" style="font-size:11px;">{{ t('public.about_pill_monthly_avg') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin:0;border-top:3px solid #10b981;">
+        <div class="card-body" style="padding:24px 20px;">
+          <div style="width:48px;height:48px;background:rgba(16,185,129,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+            <i class="fas fa-satellite" style="color:#10b981;font-size:20px;"></i>
+          </div>
+          <h5 style="font-weight:700;margin-bottom:8px;font-size:15px;">{{ t('nav.ndvi_data') }}</h5>
+          <p style="font-size:13px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;">{{ t('public.ndvi_data_desc') }}</p>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <span class="pill" style="font-size:11px;background:rgba(16,185,129,0.1);color:#10b981;">MODIS</span>
+            <span class="pill" style="font-size:11px;">NASA NEO</span>
+            <span class="pill" style="font-size:11px;">{{ t('public.about_pill_resolution') }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== TECHNOLOGY STACK ===== -->
+<section style="padding:56px 32px;background:var(--body-bg);">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:36px;">
+      <h2 class="section-heading">{{ t('public.tech_stack') }}</h2>
+      <p class="section-subheading" style="margin-bottom:0;">{{ t('public.about_tech_subtitle') }}</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;" class="tech-grid">
+
+      <!-- Backend -->
+      <div class="card" style="margin:0;">
+        <div class="card-header" style="background:var(--sidebar-bg);">
+          <h5 class="card-header-title" style="color:white;">
+            <i class="fas fa-server" style="color:#0ea5e9;margin-right:8px;"></i>{{ t('public.backend') }}
+          </h5>
+        </div>
+        <div class="card-body" style="padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            {% set backend = [
+              ('fa-flask',          '#0ea5e9', 'Flask 3.0',      t('public.about_role_web_framework')),
+              ('fa-fire',           '#ef4444', 'PyTorch 2.1',    t('public.about_role_deep_learning')),
+              ('fa-database',       '#8b5cf6', 'SQLAlchemy',     t('public.about_role_db_orm')),
+              ('fa-table',          '#10b981', 'Pandas / NumPy', t('public.about_role_data_processing')),
+              ('fa-chart-bar',      '#f59e0b', 'Scikit-learn',   t('public.about_role_metrics')),
+              ('fa-project-diagram','#0ea5e9', 'NetworkX',       t('public.about_role_graph')),
+            ] %}
+            {% for icon, color, name, role in backend %}
+            <div style="display:flex;gap:10px;align-items:center;background:{{ color }}0a;border:1px solid {{ color }}20;border-radius:8px;padding:10px 12px;">
+              <i class="fas {{ icon }}" style="color:{{ color }};font-size:15px;flex-shrink:0;"></i>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text-primary);">{{ name }}</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ role }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Frontend -->
+      <div class="card" style="margin:0;">
+        <div class="card-header" style="background:var(--sidebar-bg);">
+          <h5 class="card-header-title" style="color:white;">
+            <i class="fas fa-desktop" style="color:#10b981;margin-right:8px;"></i>{{ t('public.frontend') }}
+          </h5>
+        </div>
+        <div class="card-body" style="padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            {% set frontend = [
+              ('fa-palette',    '#8b5cf6', 'Bootstrap 5',  t('public.about_role_ui_framework')),
+              ('fa-chart-line', '#10b981', 'Chart.js 3',   t('public.about_role_viz')),
+              ('fa-icons',      '#f59e0b', 'Font Awesome', t('public.about_role_icons')),
+              ('fa-mobile-alt', '#0ea5e9', 'Responsive',   t('public.about_role_responsive')),
+              ('fa-language',   '#ef4444', 'i18n',         t('public.about_role_i18n')),
+              ('fa-moon',       '#64748b', 'Dark mode',    t('public.about_role_dark_mode')),
+            ] %}
+            {% for icon, color, name, role in frontend %}
+            <div style="display:flex;gap:10px;align-items:center;background:{{ color }}0a;border:1px solid {{ color }}20;border-radius:8px;padding:10px 12px;">
+              <i class="fas {{ icon }}" style="color:{{ color }};font-size:15px;flex-shrink:0;"></i>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text-primary);">{{ name }}</div>
+                <div style="font-size:11px;color:var(--text-muted);">{{ role }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT / CTA ===== -->
+<section style="padding:56px 32px;background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 60%,#0369a1 100%);text-align:center;">
+  <div style="max-width:640px;margin:0 auto;">
+    <div style="width:64px;height:64px;background:rgba(14,165,233,0.15);border:1px solid rgba(14,165,233,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <i class="fas fa-envelope" style="color:#7dd3fc;font-size:24px;"></i>
+    </div>
+    <h2 style="color:white;font-size:26px;font-weight:800;margin-bottom:12px;">{{ t('public.contact_title') }}</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:15px;margin-bottom:32px;line-height:1.7;">{{ t('public.contact_desc') }}</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <a href="{{ url_for('public.dashboard') }}" class="btn-hero-primary">
+        <i class="fas fa-chart-bar"></i> {{ t('public.public_dashboard_btn') }}
+      </a>
+      <a href="{{ url_for('public.statistics') }}" class="btn-hero-outline">
+        <i class="fas fa-chart-pie"></i> {{ t('public.view_statistics') }}
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<style>
+@media (max-width: 768px) {
+  .about-header-grid  { grid-template-columns: 1fr !important; }
+  .about-header-icon  { display: none !important; }
+  .about-two-col      { grid-template-columns: 1fr !important; }
+  .data-sources-grid  { grid-template-columns: 1fr !important; }
+  .tech-grid          { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}
