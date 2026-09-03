@@ -107,6 +107,13 @@
 
       <div class="nav-section-label">{{ t('nav.system') }}</div>
       <div class="nav-item-wrapper">
+        <a class="nav-link-item {% if request.endpoint == 'admin.users_management' %}active{% endif %}"
+           href="{{ url_for('admin.users_management') }}">
+          <span class="nav-icon"><i class="fas fa-users-cog"></i></span>
+          <span class="nav-text">{{ t('nav.user_management') }}</span>
+        </a>
+      </div>
+      <div class="nav-item-wrapper">
         <a class="nav-link-item {% if request.endpoint == 'admin.view_logs' %}active{% endif %}"
            href="{{ url_for('admin.view_logs') }}">
           <span class="nav-icon"><i class="fas fa-file-alt"></i></span>

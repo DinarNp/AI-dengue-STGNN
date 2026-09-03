@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}User Management — Admin{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+<li class="breadcrumb-item active">{{ t('page.users.title') }}</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header d-flex" style="justify-content:space-between;align-items:center;">
+  <div>
+    <h1 class="page-title"><i class="fas fa-users-cog" style="color:var(--primary);margin-right:8px;"></i>{{ t('page.users.title') }}</h1>
+    <p class="page-subtitle">{{ t('page.users.subtitle') }}</p>
+  </div>
+  <button type="button" class="btn btn-primary" onclick="openAddUserModal()">
+    <i class="fas fa-user-plus"></i> {{ t('page.users.add_user') }}
+  </button>
+</div>
+
+<div class="card mb-20">
+  <div class="card-header">
+    <h5 class="card-header-title"><i class="fas fa-list" style="color:var(--text-muted);margin-right:8px;"></i>{{ t('page.users.accounts') }} ({{ users|length }})</h5>
+  </div>
+  <div class="card-body" style="padding:0;">
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ t('common.username') }}</th>
+            <th>{{ t('common.email') }}</th>
+            <th>{{ t('page.users.role') }}</th>
+            <th>{{ t('common.regency') }}</th>
+            <th>{{ t('common.status') }}</th>
+            <th>{{ t('page.users.last_login') }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td><strong>{{ u.username }}</strong>{% if u.id == current_user.id %} <span class="badge badge-secondary">{{ t('page.users.you') }}</span>{% endif %}</td>
+            <td>{{ u.email }}</td>
+            <td>
+              {% if u.role == 'admin' %}
+                <span class="badge badge-violet">{{ t('page.users.role_admin') }}</span>
+              {% elif u.role == 'health_district' %}
+                <span class="badge badge-primary">{{ t('page.users.role_health_district') }}</span>
+              {% elif u.role == 'guest' %}
+                <span class="badge badge-secondary">{{ t('page.users.role_guest') }}</span>
+              {% else %}
+                <span class="badge badge-secondary">{{ u.role }}</span>
+              {% endif %}
+            </td>
+            <td>{{ u.regency or '—' }}</td>
+            <td>
+              <div class="data-status-indicator">
+                {% if u.is_active %}
+                  <span class="status-dot green"></span>{{ t('common.active') }}
+                {% else %}
+                  <span class="status-dot red"></span>{{ t('common.inactive') }}
+                {% endif %}
+              </div>
+            </td>
+            <td>{{ u.last_login.strftime('%Y-%m-%d %H:%M') if u.last_login else '—' }}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-sm btn-outline-secondary" title="{{ t('common.edit') }}"
+                      onclick='openEditUserModal({{ {"id": u.id, "email": u.email, "role": u.role, "regency": u.regency, "is_active": u.is_active, "username": u.username} | tojson }})'>
+                <i class="fas fa-pen"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" title="{{ t('page.users.reset_password') }}"
+                      onclick="openResetPasswordModal({{ u.id }}, '{{ u.username }}')">
+                <i class="fas fa-key"></i>
+              </button>
+              {% if u.id != current_user.id %}
+              <button class="btn btn-sm btn-outline-danger" title="{{ t('common.delete') }}"
+                      onclick="deleteUser({{ u.id }}, '{{ u.username }}')">
+                <i class="fas fa-trash"></i>
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7" class="table-empty"><i class="fas fa-users"></i>{{ t('common.no_data_available') }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD USER MODAL ===== -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title"><i class="fas fa-user-plus" style="color:var(--success);margin-right:8px;"></i>{{ t('page.users.add_user') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">{{ t('common.username') }}</label>
+          <input type="text" id="addUserUsername" class="form-control" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.email') }}</label>
+          <input type="email" id="addUserEmail" class="form-control" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.password') }}</label>
+          <input type="password" id="addUserPassword" class="form-control" autocomplete="new-password" placeholder="{{ t('page.users.min_chars') }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('page.users.role') }}</label>
+          <select id="addUserRole" class="form-select" onchange="toggleRegencyField('addUser')">
+            <option value="admin">{{ t('page.users.role_admin') }}</option>
+            <option value="health_district">{{ t('page.users.role_health_district') }}</option>
+            <option value="guest">{{ t('page.users.role_guest') }}</option>
+          </select>
+        </div>
+        <div class="form-group" id="addUserRegencyGroup" style="display:none;">
+          <label class="form-label">{{ t('common.regency') }}</label>
+          <select id="addUserRegency" class="form-select">
+            {% for r in regencies %}
+            <option value="{{ r.name }}">{{ r.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div id="addUserResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+        <button type="button" class="btn btn-success" onclick="submitAddUser()" id="addUserSubmitBtn">
+          <i class="fas fa-save"></i> {{ t('common.save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EDIT USER MODAL ===== -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title"><i class="fas fa-user-edit" style="color:var(--primary);margin-right:8px;"></i>{{ t('common.edit') }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="editUserId">
+        <div class="form-group">
+          <label class="form-label">{{ t('common.username') }}</label>
+          <input type="text" id="editUserUsername" class="form-control" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.email') }}</label>
+          <input type="email" id="editUserEmail" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('page.users.role') }}</label>
+          <select id="editUserRole" class="form-select" onchange="toggleRegencyField('editUser')">
+            <option value="admin">{{ t('page.users.role_admin') }}</option>
+            <option value="health_district">{{ t('page.users.role_health_district') }}</option>
+            <option value="guest">{{ t('page.users.role_guest') }}</option>
+          </select>
+        </div>
+        <div class="form-group" id="editUserRegencyGroup" style="display:none;">
+          <label class="form-label">{{ t('common.regency') }}</label>
+          <select id="editUserRegency" class="form-select">
+            {% for r in regencies %}
+            <option value="{{ r.name }}">{{ r.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ t('common.status') }}</label>
+          <select id="editUserActive" class="form-select">
+            <option value="true">{{ t('common.active') }}</option>
+            <option value="false">{{ t('common.inactive') }}</option>
+          </select>
+        </div>
+        <div id="editUserResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+        <button type="button" class="btn btn-primary" onclick="submitEditUser()" id="editUserSubmitBtn">
+          <i class="fas fa-save"></i> {{ t('common.save') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RESET PASSWORD MODAL ===== -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:var(--radius-lg);border:none;">
+      <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+        <h5 class="modal-title"><i class="fas fa-key" style="color:var(--warning);margin-right:8px;"></i><span id="resetPasswordTitle"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="resetPasswordUserId">
+        <div class="form-group">
+          <label class="form-label">{{ t('page.users.new_password') }}</label>
+          <input type="password" id="resetPasswordValue" class="form-control" autocomplete="new-password" placeholder="{{ t('page.users.min_chars') }}">
+        </div>
+        <div id="resetPasswordResult"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
+        <button type="button" class="btn btn-warning" onclick="submitResetPassword()" id="resetPasswordSubmitBtn">
+          <i class="fas fa-key"></i> {{ t('page.users.reset_password') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleRegencyField(prefix) {
+  const role = document.getElementById(prefix + 'Role').value;
+  document.getElementById(prefix + 'RegencyGroup').style.display = (role === 'health_district') ? 'block' : 'none';
+}
+
+function openAddUserModal() {
+  document.getElementById('addUserUsername').value = '';
+  document.getElementById('addUserEmail').value = '';
+  document.getElementById('addUserPassword').value = '';
+  document.getElementById('addUserRole').value = 'admin';
+  document.getElementById('addUserRegencyGroup').style.display = 'none';
+  document.getElementById('addUserResult').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('addUserModal')).show();
+}
+
+function submitAddUser() {
+  const username = document.getElementById('addUserUsername').value.trim();
+  const email    = document.getElementById('addUserEmail').value.trim();
+  const password = document.getElementById('addUserPassword').value;
+  const role     = document.getElementById('addUserRole').value;
+  const regency  = document.getElementById('addUserRegency').value;
+  const result   = document.getElementById('addUserResult');
+
+  if (!username || !email || !password || !role) {
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Please fill in all required fields.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('addUserSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/admin/users/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username, email: email, password: password, role: role, regency: regency })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      showToast(data.message, 'success', 'User Created');
+      bootstrap.Modal.getInstance(document.getElementById('addUserModal')).hide();
+      setTimeout(function() { location.reload(); }, 800);
+    } else {
+      result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(function(err) {
+    setButtonLoading(btn, false);
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+
+function openEditUserModal(u) {
+  document.getElementById('editUserId').value = u.id;
+  document.getElementById('editUserUsername').value = u.username;
+  document.getElementById('editUserEmail').value = u.email;
+  document.getElementById('editUserRole').value = u.role;
+  document.getElementById('editUserActive').value = u.is_active ? 'true' : 'false';
+  toggleRegencyField('editUser');
+  if (u.regency) { document.getElementById('editUserRegency').value = u.regency; }
+  document.getElementById('editUserResult').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('editUserModal')).show();
+}
+
+function submitEditUser() {
+  const id       = document.getElementById('editUserId').value;
+  const username = document.getElementById('editUserUsername').value.trim();
+  const email    = document.getElementById('editUserEmail').value.trim();
+  const role     = document.getElementById('editUserRole').value;
+  const regency  = document.getElementById('editUserRegency').value;
+  const isActive = document.getElementById('editUserActive').value === 'true';
+  const result   = document.getElementById('editUserResult');
+
+  if (!username) {
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Username cannot be empty.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('editUserSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/admin/users/' + id + '/edit', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: username, email: email, role: role, regency: regency, is_active: isActive })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      showToast(data.message, 'success', 'User Updated');
+      bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+      setTimeout(function() { location.reload(); }, 800);
+    } else {
+      result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(function(err) {
+    setButtonLoading(btn, false);
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+
+function openResetPasswordModal(id, username) {
+  document.getElementById('resetPasswordTitle').textContent = 'Reset Password: ' + username;
+  document.getElementById('resetPasswordUserId').value = id;
+  document.getElementById('resetPasswordValue').value = '';
+  document.getElementById('resetPasswordResult').innerHTML = '';
+  new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
+}
+
+function submitResetPassword() {
+  const id       = document.getElementById('resetPasswordUserId').value;
+  const password = document.getElementById('resetPasswordValue').value;
+  const result   = document.getElementById('resetPasswordResult');
+
+  if (!password) {
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Please enter a new password.</div></div>';
+    return;
+  }
+
+  const btn = document.getElementById('resetPasswordSubmitBtn');
+  setButtonLoading(btn, true, 'Saving...');
+
+  fetch('/admin/users/' + id + '/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: password })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    setButtonLoading(btn, false);
+    if (data.success) {
+      showToast(data.message, 'success', 'Password Reset');
+      bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+    } else {
+      result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">' + data.message + '</div></div>';
+    }
+  })
+  .catch(function(err) {
+    setButtonLoading(btn, false);
+    result.innerHTML = '<div class="alert-box danger mt-12"><i class="fas fa-exclamation-circle alert-icon"></i><div class="alert-text">Request failed: ' + err + '</div></div>';
+  });
+}
+
+function deleteUser(id, username) {
+  if (!confirm('Delete user "' + username + '"? This cannot be undone.')) return;
+
+  fetch('/admin/users/' + id, { method: 'DELETE' })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showToast(data.message, 'success', 'User Deleted');
+      setTimeout(function() { location.reload(); }, 800);
+    } else {
+      showToast(data.message, 'danger', 'Error');
+    }
+  })
+  .catch(function(err) {
+    showToast('Request failed: ' + err, 'danger', 'Error');
+  });
+}
+</script>
+{% endblock %}

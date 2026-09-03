@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from werkzeug.utils import secure_filename
 
-from ..models import db, Regency, DengueCase, ClimateData, NDVIData, ModelVersion, DataProcessingLog, Prediction
+from ..models import db, Regency, DengueCase, ClimateData, NDVIData, ModelVersion, DataProcessingLog, Prediction, User
 from ..services.auth import admin_required
 from ..i18n import get_lang, make_t
 from ..services.data_pipeline import DataPipelineService
@@ -1248,6 +1248,166 @@ def risk_monitor_detail(regency_id):
     return render_template('admin/risk_monitor_detail.html',
                            rf=rf,
                            month_names=[_t_rmd('month.' + k) for k in _MONTH_KEYS])
+
+
+# ============================================================
+# USER MANAGEMENT
+# ============================================================
+
+VALID_ROLES = ('admin', 'health_district', 'guest')
+
+
+@admin.route('/users')
+@admin_required
+def users_management():
+    """User management interface: list, add, edit, deactivate accounts"""
+    users = User.query.order_by(User.created_at.desc()).all()
+    regencies = Regency.query.filter_by(is_active=True).order_by(Regency.name).all()
+    return render_template('admin/users.html',
+                           users=users,
+                           regencies=regencies,
+                           valid_roles=VALID_ROLES)
+
+
+@admin.route('/users/add', methods=['POST'])
+@admin_required
+def add_user():
+    """Create a new login account"""
+    try:
+        data = request.get_json()
+        username = (data.get('username') or '').strip()
+        email    = (data.get('email') or '').strip()
+        password = data.get('password') or ''
+        role     = data.get('role') or ''
+        regency  = (data.get('regency') or '').strip() or None
+
+        if not username or not email or not password or not role:
+            return jsonify({'success': False, 'message': 'Username, email, password, and role are required'}), 400
+
+        if role not in VALID_ROLES:
+            return jsonify({'success': False, 'message': f'Invalid role: {role}'}), 400
+
+        if len(password) < 6:
+            return jsonify({'success': False, 'message': 'Password must be at least 6 characters'}), 400
+
+        if role == 'health_district' and not regency:
+            return jsonify({'success': False, 'message': 'Regency is required for health district accounts'}), 400
+
+        if User.query.filter_by(username=username).first():
+            return jsonify({'success': False, 'message': 'Username already exists'}), 400
+
+        if User.query.filter_by(email=email).first():
+            return jsonify({'success': False, 'message': 'Email already registered'}), 400
+
+        user = User(
+            username=username,
+            email=email,
+            role=role,
+            regency=regency if role == 'health_district' else None,
+            is_active=True
+        )
+        user.set_password(password)
+        db.session.add(user)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': f'User "{username}" created successfully', 'user_id': user.id})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@admin.route('/users/<int:user_id>/edit', methods=['PATCH'])
+@admin_required
+def edit_user(user_id):
+    """Edit an existing account's username, email, role, regency, or active status"""
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+
+        if 'username' in data:
+            username = data['username'].strip()
+            if not username:
+                return jsonify({'success': False, 'message': 'Username cannot be empty'}), 400
+            existing = User.query.filter(User.username == username, User.id != user_id).first()
+            if existing:
+                return jsonify({'success': False, 'message': 'Username already taken by another account'}), 400
+            user.username = username
+
+        if 'email' in data:
+            email = data['email'].strip()
+            existing = User.query.filter(User.email == email, User.id != user_id).first()
+            if existing:
+                return jsonify({'success': False, 'message': 'Email already registered to another account'}), 400
+            user.email = email
+
+        if 'role' in data:
+            role = data['role']
+            if role not in VALID_ROLES:
+                return jsonify({'success': False, 'message': f'Invalid role: {role}'}), 400
+            if role == 'health_district' and not (data.get('regency') or user.regency):
+                return jsonify({'success': False, 'message': 'Regency is required for health district accounts'}), 400
+            if user.id == current_user.id and user.role == 'admin' and role != 'admin' \
+                    and User.query.filter_by(role='admin', is_active=True).count() <= 1:
+                return jsonify({'success': False, 'message': 'Cannot change role: you are the last active admin'}), 400
+            user.role = role
+            user.regency = (data.get('regency') or user.regency) if role == 'health_district' else None
+
+        if 'is_active' in data:
+            if user.id == current_user.id and not data['is_active']:
+                return jsonify({'success': False, 'message': 'You cannot deactivate your own account'}), 400
+            user.is_active = bool(data['is_active'])
+
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'User "{user.username}" updated successfully'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@admin.route('/users/<int:user_id>/reset-password', methods=['POST'])
+@admin_required
+def reset_user_password(user_id):
+    """Set a new password for an account"""
+    try:
+        user = User.query.get_or_404(user_id)
+        data = request.get_json()
+        password = data.get('password') or ''
+
+        if len(password) < 6:
+            return jsonify({'success': False, 'message': 'Password must be at least 6 characters'}), 400
+
+        user.set_password(password)
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'Password reset for "{user.username}"'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
+
+
+@admin.route('/users/<int:user_id>', methods=['DELETE'])
+@admin_required
+def delete_user(user_id):
+    """Permanently delete an account"""
+    try:
+        user = User.query.get_or_404(user_id)
+
+        if user.id == current_user.id:
+            return jsonify({'success': False, 'message': 'You cannot delete your own account'}), 400
+
+        if user.role == 'admin' and User.query.filter_by(role='admin', is_active=True).count() <= 1:
+            return jsonify({'success': False, 'message': 'Cannot delete the last active admin account'}), 400
+
+        username = user.username
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({'success': True, 'message': f'User "{username}" deleted'})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)}), 400
 
 
 def _risk_explanation_admin(predicted_cases, last_year_case, climate, ndvi, lang='id'):
